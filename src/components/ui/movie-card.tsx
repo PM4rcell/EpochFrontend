@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Star, Clock, Play } from "lucide-react";
-import { Button } from "./ui/button";
-import { ImageWithFallback } from "./ImageWithFallback/ImageWithFallback";
+import { Button } from "./button";
+import { ImageWithFallback } from "../ImageWithFallback/ImageWithFallback";
 
 interface MovieCardProps {
   title: string;
