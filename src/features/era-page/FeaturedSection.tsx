@@ -1,8 +1,8 @@
 import { motion, useInView } from "motion/react";
 import { useRef } from "react";
 import { ArrowRight, Calendar, Trophy, Newspaper } from "lucide-react";
-import { Button } from "./ui/button";
-import { ImageWithFallback } from "./ImageWithFallback/ImageWithFallback";
+import { Button } from "../../components/ui/button";
+import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 
 interface FeaturedCard {
     id: string;
