@@ -25,6 +25,7 @@ export function Navbar({
   const { era, setEra } = useEra(); // csak egyszer
   const navigate = useNavigate();
   const hasSelectedEra = !!era;      // true, ha van kiválasztott era
+  const isLanding = typeof window !== "undefined" && window.location.pathname === "/";
   const [showSearchBar, setShowSearchBar] = useState(false);
 
   const colors = (() => {
@@ -47,7 +48,7 @@ export function Navbar({
     { label: "News", path: "/news" },
   ];
 
-  const visibleNavItems = navItems.filter(item => !item.requiresEra || hasSelectedEra);
+  const visibleNavItems = navItems.filter(item => !item.requiresEra || (hasSelectedEra && !isLanding));
 
   // NAVIGATION HANDLER
   const handleNavClick = (path: string) => {

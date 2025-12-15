@@ -77,6 +77,9 @@ const eraData = {
   },
 };
 
+// Export an array of era keys so components that expect an array can safely map over it
+export const eras = Object.keys(eraData);
+
 export function EraPage() {
   const { era, setEra } = useEra();
 
@@ -98,7 +101,7 @@ export function EraPage() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className={`min-h-screen bg-gradient-to-b ${data.bgGradient} relative`}
+      className={`min-h-screen bg-linear-to-b ${data.bgGradient} relative`}
     >
       {/* Film grain overlay for 90s */}
       {era === "90s" && (
@@ -159,7 +162,7 @@ export function EraPage() {
             <motion.div whileHover={{ scale: 1.02 }} className="relative rounded-lg overflow-hidden group cursor-pointer">
               <div className="relative h-96">
                 <ImageWithFallback src={data.featured.poster} alt={data.featured.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
               </div>
 
               <div className="absolute bottom-0 left-0 right-0 p-6">

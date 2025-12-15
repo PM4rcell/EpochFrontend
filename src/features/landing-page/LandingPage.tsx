@@ -19,7 +19,7 @@ export default function LandingPage() {
   const handleEraSelect = (eraId: string) => {
     const era = eraId as Era;
     setEra(era);                 // app state
-    navigate(`/era/${era}`);     // URL-based routing
+    navigate(`/${era}`);     // URL-based routing — endpoints are /modern, /2000s, /90s
   };
 
   return (
@@ -28,7 +28,7 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative min-h-screen flex flex-col">
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-slate-900 to-black">
+        <div className="absolute inset-0 bg-linear-to-b from-black via-slate-900 to-black">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(245,158,11,0.1),transparent_50%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(226,232,240,0.05),transparent_50%)]" />
         </div>
@@ -40,7 +40,8 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="container mx-auto px-6 text-center mb-16"
           >
-            <motion.h1 className="mb-6 bg-gradient-to-r from-amber-500 via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            <motion.h1 className="mb-6 bg-gra
+            dient-to-r from-amber-500 via-slate-200 to-slate-400 bg-clip-text text-transparent">
               Explore Cinema Through Time
             </motion.h1>
 
@@ -53,7 +54,7 @@ export default function LandingPage() {
           <EraSelector onSelectEra={handleEraSelect} />
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-black to-transparent pointer-events-none" />
       </section>
 
       <FeaturedSection />

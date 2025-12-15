@@ -129,7 +129,7 @@ export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: Scr
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-black">
+    <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
       <Navbar 
         theme={theme} 
         activePage="screenings"
