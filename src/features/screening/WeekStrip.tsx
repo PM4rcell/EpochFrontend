@@ -147,7 +147,7 @@ export function WeekStrip({
             ease: "linear",
           }}
         >
-          <div className="h-full w-32 bg-gradient-to-r from-transparent via-blue-400/10 to-transparent" />
+          <div className="h-full w-32 bg-linear-to-r from-transparent via-blue-400/10 to-transparent" />
         </motion.div>
       )}
 

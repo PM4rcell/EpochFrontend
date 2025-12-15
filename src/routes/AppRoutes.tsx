@@ -3,6 +3,7 @@ import { useEra, type Era } from "../context/EraContext.tsx";
 import LandingPage from "../features/landing-page/LandingPage.tsx";
 import { EraPage } from "../features/era-page/EraPage.tsx";
 import { ScreeningsPage } from "../features/screening/ScreeningsPage.tsx";
+import { NewsPage } from "../features/news/NewsPage";
 
 // Wrapper, ami a URL paraméter alapján állítja be az erát
 function EraRouteWrapper() {
@@ -35,6 +36,9 @@ export function AppRoutes() {
 
     {/* Screenings oldal (csak akkor működik, ha van kiválasztott era) */}
       <Route path="/screenings" element={<ScreeningsPage />} />
+
+      {/* News page */}
+      <Route path="/news" element={<NewsPage />} />
 
       {/* Ha később lesz más oldal, ide jöhet */}
       {/* <Route path="/profile" element={<ProfilePage />} /> */}

@@ -25,7 +25,6 @@ export function Navbar({
   const { era, setEra } = useEra(); // csak egyszer
   const navigate = useNavigate();
   const hasSelectedEra = !!era;      // true, ha van kiválasztott era
-  const isLanding = typeof window !== "undefined" && window.location.pathname === "/";
   const [showSearchBar, setShowSearchBar] = useState(false);
 
   const colors = (() => {
@@ -48,7 +47,8 @@ export function Navbar({
     { label: "News", path: "/news" },
   ];
 
-  const visibleNavItems = navItems.filter(item => !item.requiresEra || (hasSelectedEra && !isLanding));
+  // Only show items that require an era when an era is selected in context.
+  const visibleNavItems = navItems.filter(item => !item.requiresEra || hasSelectedEra);
 
   // NAVIGATION HANDLER
   const handleNavClick = (path: string) => {
@@ -73,8 +73,10 @@ export function Navbar({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => {
-            setEra(null);       // context törlése
-            navigate("/");       // vissza landing page-re
+            // Clear the selected era first, then navigate on next tick so the
+            // landing-page Navbar mounts with era already cleared.
+            setEra(null);
+            setTimeout(() => navigate("/"), 0);
           }}
           className="flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400/50 rounded"
         >

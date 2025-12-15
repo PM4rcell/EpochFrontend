@@ -1,7 +1,7 @@
 import { motion, useInView } from "motion/react";
 import { useRef, useState } from "react";
 import { Star } from "lucide-react";
-import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
+import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback.tsx";
 import { FormatTag } from "./FormatTag.tsx";
 import { TimePill } from "./TimePill.tsx";
 
@@ -103,12 +103,12 @@ export function FilmRow({
     >
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left: Poster and Info */}
-        <div className="flex gap-4 lg:w-[400px]">
+        <div className="flex gap-4 lg:w-100">
           {/* Poster */}
           <motion.div
             whileHover={{ y: -4, scale: 1.02 }}
             transition={{ duration: 0.2 }}
-            className={`flex-shrink-0 w-[120px] h-[180px] rounded-lg overflow-hidden border ${colors.border} ${colors.shadow} ${colors.glow} transition-all duration-200`}
+            className={`shrink-0 w-30 h-45 rounded-lg overflow-hidden border ${colors.border} ${colors.shadow} ${colors.glow} transition-all duration-200`}
           >
             <ImageWithFallback
               src={poster}

@@ -6,6 +6,7 @@ import { ArrowLeft, TrendingUp } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { useEra } from "../../context/EraContext";
+import { useNavigate } from "react-router-dom";
 
 const eraData = {
   "90s": {
@@ -92,8 +93,14 @@ export function EraPage() {
   }
 
   const data = eraData[era];
+  const navigate = useNavigate();
 
-  const handleBack = () => setEra(null);
+  // Clear the era in context and navigate back to the landing page.
+  // Navigate on the next tick so the landing Navbar mounts with era cleared.
+  const handleBack = () => {
+    setEra(null);
+    setTimeout(() => navigate("/"), 0);
+  };
 
   return (
     <motion.div
