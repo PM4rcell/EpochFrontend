@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SearchBar } from "../search/SearchBar";
 import { useEra } from "../../context/EraContext";
 import { useNavigate } from "react-router-dom";
+import { flushSync } from "react-dom";
 
 type PageType = "home" | "screenings" | "movies" | "news" | "profile" | "era";
 
@@ -27,8 +28,27 @@ export function Navbar({
   const hasSelectedEra = !!era;      // true, ha van kiválasztott era
   const [showSearchBar, setShowSearchBar] = useState(false);
 
+  // Synchronously detect whether we're currently on the landing page.
+  // Using `window.location.pathname` lets us hide era-dependent items
+  // immediately when navigation to "/" occurs.
+  const isLanding = typeof window !== "undefined" && window.location.pathname === "/";
+
+  // Determine which theme to use for styling.
+  // Prefer the era from context when present (this ensures clearing the era
+  // in context immediately updates the Navbar even if a parent passed the
+  // same era down as a `theme` prop). If no era is selected, fall back to
+  // the explicit `theme` prop (or "default").
+  // Choose appliedTheme according to context and location:
+  // - If an era is selected in context, always use it.
+  // - Otherwise, if we're on the landing page prefer "default" so era-specific
+  //   styling does not persist while navigating away from an era page.
+  // - If no era and not on landing, fall back to the explicit `theme` prop.
+  const appliedTheme = era ?? (isLanding ? "default" : (theme === "default" ? "default" : theme));
+
   const colors = (() => {
-    switch (theme) {
+    // use the computed `appliedTheme` for color decisions so the
+    // Navbar reflects the current era from context by default
+    switch (appliedTheme) {
       case "90s":
         return { accent: "text-amber-500", hover: "hover:text-amber-400", glow: "hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]", active: "text-amber-500", underline: "from-amber-600 to-amber-400" };
       case "2000s":
@@ -48,7 +68,11 @@ export function Navbar({
   ];
 
   // Only show items that require an era when an era is selected in context.
-  const visibleNavItems = navItems.filter(item => !item.requiresEra || hasSelectedEra);
+  // Additionally hide era-dependent items if we're on the landing page.
+  let visibleNavItems = navItems.filter(item => !item.requiresEra || hasSelectedEra);
+  if (isLanding) {
+    visibleNavItems = visibleNavItems.filter(item => !item.requiresEra);
+  }
 
   // NAVIGATION HANDLER
   const handleNavClick = (path: string) => {
@@ -73,10 +97,10 @@ export function Navbar({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => {
-            // Clear the selected era first, then navigate on next tick so the
-            // landing-page Navbar mounts with era already cleared.
-            setEra(null);
-            setTimeout(() => navigate("/"), 0);
+            // Ensure era is cleared synchronously so any newly-mounted Navbar
+            // sees the cleared state immediately (prevents needing a second click).
+            flushSync(() => setEra(null));
+            navigate("/", { replace: true });
           }}
           className="flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400/50 rounded"
         >
@@ -84,6 +108,8 @@ export function Navbar({
             EPOCH
           </span>
         </motion.button>
+
+        {/* Debug: show current era from context for testing (moved to right side) */}
 
         {/* NAV ITEMS */}
         <motion.div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-8">
@@ -101,7 +127,7 @@ export function Navbar({
                 {item.label}
                 {isActive && (
                   <motion.div
-                    layoutId={`activeTab-${theme}`}
+                    layoutId={`activeTab-${appliedTheme}`}
                     className={`absolute -bottom-1 left-0 right-0 h-0.5 bg-linear-to-r ${colors.underline}`}
                     transition={{ duration: 0.25, ease: [0.65, 0, 0.35, 1] }}
                   />
@@ -113,6 +139,7 @@ export function Navbar({
 
         {/* Search + Profile */}
         <div className="flex items-center gap-3">
+          {/* debug-era removed */}
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -144,7 +171,8 @@ export function Navbar({
         >
           <div className="container mx-auto px-6 py-4">
             <SearchBar
-              theme={theme}
+              // Pass the computed theme (context-aware) into child components
+              theme={appliedTheme}
               onMovieClick={(movieId) => { onMovieClick?.(movieId); setShowSearchBar(false); }}
               onSearchSubmit={(query) => { onSearchSubmit?.(query); setShowSearchBar(false); }}
               placeholder="Search movies..."

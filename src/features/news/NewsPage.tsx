@@ -4,6 +4,7 @@ import { Navbar } from "../../components/layout/Navbar";
 import { NewsHero } from "./NewsHero.tsx";
 import { CategoryFilters } from "./CategoryFilters";
 import { ArticleGrid } from "./ArticleGrid.tsx";
+import { useNews } from "../../hooks/useNews";
 import { NewsSidebar } from "./NewsSidebar";
 
 interface NewsPageProps {
@@ -23,6 +24,7 @@ export function NewsPage({
   onSearchSubmit,
 }: NewsPageProps) {
   const [activeCategory, setActiveCategory] = useState<NewsCategory>("all");
+  const { articles, loading, error } = useNews();
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -60,6 +62,9 @@ export function NewsPage({
               <ArticleGrid
                 theme={theme}
                 category={activeCategory}
+                articles={articles}
+                loading={loading}
+                error={error}
                 onArticleClick={onArticleClick}
               />
             </div>

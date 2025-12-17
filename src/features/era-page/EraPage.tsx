@@ -6,7 +6,9 @@ import { ArrowLeft, TrendingUp } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { useEra } from "../../context/EraContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { flushSync } from "react-dom";
 
 const eraData = {
   "90s": {
@@ -54,7 +56,7 @@ const eraData = {
       poster: "https://images.unsplash.com/photo-1533408944756-4950754f3ebc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
     },
   },
-  modern: {
+  "modern": {
     title: "Modern Cinema",
     description: "Today's Masterpieces",
     bgGradient: "from-slate-950 via-slate-900 to-slate-950",
@@ -83,8 +85,35 @@ export const eras = Object.keys(eraData);
 
 export function EraPage() {
   const { era, setEra } = useEra();
+  const navigate = useNavigate();
+  const { eraId } = useParams<{ eraId?: string }>();
 
-  if (!era) {
+  const validEras = ["90s", "2000s", "modern"] as const;
+
+  // Sync the era from the URL param into context when this page mounts.
+  // We deliberately run this effect only when the URL param changes so that
+  // clearing `era` in context (e.g. when navigating back to `/`) does not
+  // cause this effect to immediately re-set the era from the old URL.
+  useEffect(() => {
+    // If the URL param is missing or invalid, redirect to the landing page.
+    if (!eraId || !validEras.includes(eraId as any)) {
+      navigate("/", { replace: true });
+      return;
+    }
+
+    // Only set the era if it differs from the current context value.
+    if (era !== eraId) {
+      setEra(eraId as any);
+    }
+    // Intentionally omit `era` from deps to avoid re-running when `era` is
+    // cleared elsewhere (the URL param is the source of truth for this page).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eraId, setEra, navigate]);
+
+  // Use the context era when available, otherwise fall back to the URL param
+  // (this keeps the UI stable during the first render before the effect runs).
+  const currentEra = (era as string) ?? eraId;
+  if (!currentEra) {
     return (
       <div className="flex items-center justify-center min-h-screen text-white">
         No era selected.
@@ -92,14 +121,15 @@ export function EraPage() {
     );
   }
 
-  const data = eraData[era];
-  const navigate = useNavigate();
+  const data = eraData[currentEra as keyof typeof eraData];
 
   // Clear the era in context and navigate back to the landing page.
   // Navigate on the next tick so the landing Navbar mounts with era cleared.
   const handleBack = () => {
-    setEra(null);
-    setTimeout(() => navigate("/"), 0);
+    // Synchronously clear era so Navbar on the landing page doesn't briefly
+    // render with the old era selected.
+    flushSync(() => setEra(null));
+    navigate("/", { replace: true });
   };
 
   return (
@@ -111,7 +141,7 @@ export function EraPage() {
       className={`min-h-screen bg-linear-to-b ${data.bgGradient} relative`}
     >
       {/* Film grain overlay for 90s */}
-      {era === "90s" && (
+      {currentEra === "90s" && (
         <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[url('data:image/svg+xml;base64,...')]" />
       )}
 
@@ -130,7 +160,7 @@ export function EraPage() {
         </div>
       )}
 
-      <Navbar theme={era}/>
+      <Navbar theme={currentEra as "90s" | "2000s" | "modern"} />
 
       <div className="pt-24 pb-12">
         {/* Back button */}
@@ -154,14 +184,14 @@ export function EraPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {data.movies.map((movie, index) => (
                 <motion.div key={movie.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}>
-                  <MovieCard {...movie} theme={era} />
+                  <MovieCard {...movie} theme={currentEra as "90s" | "2000s" | "modern"} />
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className="space-y-6">
-            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-4">
               <TrendingUp className={`w-5 h-5 text-${data.accentColor}`} />
               <h2 className="text-white">Highlight of the Week</h2>
             </div>
@@ -184,7 +214,7 @@ export function EraPage() {
         </div>
       </div>
 
-      <Footer theme={era} />
+      <Footer theme={currentEra as "90s" | "2000s" | "modern" | "default"} />
     </motion.div>
   );
 }

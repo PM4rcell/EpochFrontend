@@ -5,6 +5,7 @@ import { FeaturedSection } from "./FeaturedSection";
 import { Footer } from "../..//components/layout/Footer";
 import { useNavigate } from "react-router-dom";
 import { useEra } from "../../context/EraContext";
+import { useEras } from "../../hooks/useEras";
 
 export type Era = "90s" | "2000s" | "modern";
 
@@ -15,6 +16,7 @@ export type LandingPageProps = {
 export default function LandingPage() {
   const navigate = useNavigate();
   const { setEra } = useEra();
+  const { eras, loading, error } = useEras();
 
   const handleEraSelect = (eraId: string) => {
     const era = eraId as Era;
@@ -50,8 +52,10 @@ export default function LandingPage() {
             </motion.p>
           </motion.div>
 
-          {/* Era selector */}
-          <EraSelector onSelectEra={handleEraSelect} />
+            {/* Era selector */}
+            {/* Lifted fetch: LandingPage owns the eras list so multiple
+              landing subcomponents can reuse the same data. */}
+            <EraSelector onSelectEra={handleEraSelect} eras={eras} loading={loading} error={error} />
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-black to-transparent pointer-events-none" />

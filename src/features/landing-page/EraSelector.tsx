@@ -1,7 +1,6 @@
-// React hooks used for lifecycle and local state
-import { useEffect, useState } from "react";
-// API helper and type for fetched eras
-import { fetchEras, type Era } from "../../api/eras";
+// Hook that encapsulates fetching logic for eras
+// API era type for resolving keys
+import type { Era as ApiEra } from "../../api/eras";
 // Motion library for simple entrance/hover animations
 import { motion } from "motion/react";
 // Local image assets used for the era cards' backgrounds
@@ -12,28 +11,19 @@ import imgModern from "../../assets/img/modern_era.jpg";
 // Props: parent provides a callback to be called with the chosen era key
 interface EraSelectorProps {
   onSelectEra: (eraId: string) => void;
+  eras?: ApiEra[]; // optional: allow parent to provide fetched eras
+  loading?: boolean;
+  error?: Error | null;
 }
 
 // EraSelector: fetches era records from the API and renders animated cards.
 // Visual presentation (images, glow, title) comes from a local `meta` map,
 // while the server controls which eras are available and their identifiers.
-export function EraSelector({ onSelectEra }: EraSelectorProps) {
-  // Local state to hold the array of era objects we get from the backend
-  const [eras, setEras] = useState<Era[]>([]);
-  // Loading indicator while the API request is pending
-  const [loading, setLoading] = useState(true);
-
-  // On mount: fetch eras and store them in state. We only care about the
-  // server-provided identifiers; presentation is applied via `meta` below.
-  useEffect(() => {
-    fetchEras().then((data) => {
-      setEras(data);
-      setLoading(false);
-    });
-  }, []);
-
-  // Show a simple fallback while data loads
+export function EraSelector({ onSelectEra, eras = [], loading = false, error = null }: EraSelectorProps) {
+  // Presentation logic only; data may be provided by parent (LandingPage)
+  // or omitted for standalone usage.
   if (loading) return <p>Loading eras...</p>;
+  if (error) return <p>Failed to load eras.</p>;
 
   // Presentation metadata for each canonical era key.
   // This maps the frontend key ("90s"/"2000s"/"modern") to images,
@@ -65,7 +55,7 @@ export function EraSelector({ onSelectEra }: EraSelectorProps) {
   // Converts a fetched Era object into one of the canonical frontend keys
   // ("90s", "2000s", "modern"). This function is intentionally
   // permissive to tolerate API naming variations (e.g. "00s", "nowdays").
-  const resolveEraKey = (era: Era) => {
+  const resolveEraKey = (era: ApiEra) => {
     // prefer `id` if it's a known string, otherwise infer from `name`
     const candidates = [era.id, era.name].filter(Boolean) as string[];
     for (const c of candidates) {
