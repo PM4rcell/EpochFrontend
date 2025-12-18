@@ -6,9 +6,8 @@ import { ArrowLeft, TrendingUp } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { useEra } from "../../context/EraContext";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { flushSync } from "react-dom";
 
 const eraData = {
   "90s": {
@@ -84,9 +83,10 @@ const eraData = {
 export const eras = Object.keys(eraData);
 
 export function EraPage() {
-  const { era, setEra } = useEra();
+  const { era, setEra, lastClearedAt } = useEra();
   const navigate = useNavigate();
   const { eraId } = useParams<{ eraId?: string }>();
+  const location = useLocation();
 
   const validEras = ["90s", "2000s", "modern"] as const;
 
@@ -101,8 +101,17 @@ export function EraPage() {
       return;
     }
 
-    // Only set the era if it differs from the current context value.
-    if (era !== eraId) {
+    // Only set the era if it differs from the current context value and
+    // the current location still points to this era (prevents races
+    // where navigation away briefly leaves this effect able to re-set).
+    //
+    // Additionally, if the user just cleared the era (e.g. via the logo)
+    // we want to ignore URL-driven re-sets for a short window so the
+    // clear feels immediate and doesn't require a second click.
+    const RECENT_CLEAR_MS = 800; // tolerate 800ms after a manual clear
+    const wasRecentlyCleared = lastClearedAt && Date.now() - lastClearedAt < RECENT_CLEAR_MS;
+
+    if (!wasRecentlyCleared && era !== eraId && location.pathname === `/${eraId}`) {
       setEra(eraId as any);
     }
     // Intentionally omit `era` from deps to avoid re-running when `era` is
@@ -126,10 +135,10 @@ export function EraPage() {
   // Clear the era in context and navigate back to the landing page.
   // Navigate on the next tick so the landing Navbar mounts with era cleared.
   const handleBack = () => {
-    // Synchronously clear era so Navbar on the landing page doesn't briefly
-    // render with the old era selected.
-    flushSync(() => setEra(null));
+    // Navigate first, then clear era to avoid render-order races where
+    // the page's URL-derived effect might re-set the era.
     navigate("/", { replace: true });
+    setEra(null);
   };
 
   return (

@@ -134,23 +134,6 @@ export function WeekStrip({
         </div>
       </div>
 
-      {/* Chrome reflection sweep for 2000s era */}
-      {theme === "2000s" && (
-        <motion.div
-          className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl"
-          initial={{ x: "-100%" }}
-          animate={{ x: "200%" }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            repeatDelay: 2,
-            ease: "linear",
-          }}
-        >
-          <div className="h-full w-32 bg-linear-to-r from-transparent via-blue-400/10 to-transparent" />
-        </motion.div>
-      )}
-
       {/* Scanline overlay for 90s era */}
       {theme === "90s" && (
         <div

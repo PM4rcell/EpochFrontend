@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import type { NewsCategory } from "./NewsPage";
+import { useEra } from "../../context/EraContext";
 
 interface CategoryFiltersProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -12,8 +13,14 @@ export function CategoryFilters({
   activeCategory,
   onCategoryChange,
 }: CategoryFiltersProps) {
-  const getThemeColors = () => {
-    switch (theme) {
+  // Prefer the era from context when available so the news UI matches the
+  // rest of the app. Fall back to the explicit `theme` prop when context
+  // isn't provided (useful for storybooks or isolated usage).
+  const { era } = useEra();
+  const appliedTheme = (era as typeof theme) ?? theme;
+
+  const getThemeColors = (appliedTheme: typeof theme) => {
+    switch (appliedTheme) {
       case "90s":
         return {
           active: "bg-amber-500 text-black border-amber-500",
@@ -40,8 +47,8 @@ export function CategoryFilters({
         };
     }
   };
-
-  const colors = getThemeColors();
+  // Compute colors using the applied theme (context-aware)
+  const colors = getThemeColors(appliedTheme);
 
   const categories: Array<{ id: NewsCategory; label: string }> = [
     { id: "all", label: "All" },

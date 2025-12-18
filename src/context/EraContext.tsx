@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import React from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 /*
   Era type
@@ -20,6 +21,10 @@ export type Era = "90s" | "2000s" | "modern" | null;
 interface EraContextType {
   era: Era;
   setEra: (era: Era) => void;
+  // Timestamp (ms since epoch) when the era was last cleared via `setEra(null)`.
+  // Components can use this to ignore a URL-driven re-set that happens
+  // immediately after a user cleared the era (prevents the two-click UX).
+  lastClearedAt: number | null;
 }
 
 /*
@@ -38,10 +43,63 @@ const EraContext = createContext<EraContextType | null>(null);
     components can access it.
 */
 export function EraProvider({ children }: { children: React.ReactNode }) {
-  const [era, setEra] = useState<Era>(null);
+  const STORAGE_KEY = "epoch:era";
+
+  // Initialize from localStorage synchronously to avoid a flash on refresh.
+  const [era, setEraState] = useState<Era>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      if (raw === "90s" || raw === "2000s" || raw === "modern") return raw as Era;
+    } catch (e) {
+      // ignore storage read errors
+    }
+    return null;
+  });
+
+  // Wrapper around the internal setter that persists to localStorage.
+  const [lastClearedAt, setLastClearedAt] = useState<number | null>(null);
+
+  const setEra = (next: Era) => {
+    setEraState(next);
+    try {
+      if (next === null) {
+        localStorage.removeItem(STORAGE_KEY);
+        // record when we cleared so other components can temporarily
+        // ignore URL→context writes that happen immediately after.
+        setLastClearedAt(Date.now());
+      } else {
+        localStorage.setItem(STORAGE_KEY, next);
+        // clear the timestamp when a real era is selected
+        setLastClearedAt(null);
+      }
+    } catch (e) {
+      // ignore storage write errors
+    }
+  };
+
+  // Keep context in sync across tabs/windows (optional but helpful).
+  // If another tab changes the stored era, update this context accordingly.
+  useEffect(() => {
+    const onStorage = (ev: StorageEvent) => {
+      if (ev.key !== STORAGE_KEY) return;
+      try {
+        const raw = ev.newValue;
+        if (!raw) {
+          setEraState(null);
+        } else if (raw === "90s" || raw === "2000s" || raw === "modern") {
+          setEraState(raw as Era);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   return (
-    <EraContext.Provider value={{ era, setEra }}>
+    <EraContext.Provider value={{ era, setEra, lastClearedAt }}>
       {children}
     </EraContext.Provider>
   );

@@ -3,8 +3,7 @@ import { Search, User } from "lucide-react";
 import { useState } from "react";
 import { SearchBar } from "../search/SearchBar";
 import { useEra } from "../../context/EraContext";
-import { useNavigate } from "react-router-dom";
-import { flushSync } from "react-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type PageType = "home" | "screenings" | "movies" | "news" | "profile" | "era";
 
@@ -28,10 +27,10 @@ export function Navbar({
   const hasSelectedEra = !!era;      // true, ha van kiválasztott era
   const [showSearchBar, setShowSearchBar] = useState(false);
 
-  // Synchronously detect whether we're currently on the landing page.
-  // Using `window.location.pathname` lets us hide era-dependent items
-  // immediately when navigation to "/" occurs.
-  const isLanding = typeof window !== "undefined" && window.location.pathname === "/";
+  // Use React Router's location so navigation updates are reflected in
+  // rendering immediately (more reliable than reading window.location).
+  const location = useLocation();
+  const isLanding = location.pathname === "/";
 
   // Determine which theme to use for styling.
   // Prefer the era from context when present (this ensures clearing the era
@@ -93,14 +92,14 @@ export function Navbar({
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         {/* LOGO */}
-        <motion.button
+          <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => {
-            // Ensure era is cleared synchronously so any newly-mounted Navbar
-            // sees the cleared state immediately (prevents needing a second click).
-            flushSync(() => setEra(null));
-            navigate("/", { replace: true });
+              // Navigate first, then clear era in context. Clearing after
+              // navigation avoids races where other page effects re-set the era.
+              navigate("/", { replace: true });
+              setEra(null);
           }}
           className="flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400/50 rounded"
         >
@@ -114,7 +113,16 @@ export function Navbar({
         {/* NAV ITEMS */}
         <motion.div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-8">
           {visibleNavItems.map(item => {
-            const isActive = activePage === item.label.toLowerCase();
+            // Determine active state from URL so the nav reflects the
+            // current route (works whether an era is selected or not).
+            const isActive = (() => {
+              try {
+                // Exact match or prefix (for nested routes)
+                return location.pathname === item.path || location.pathname.startsWith(item.path);
+              } catch (e) {
+                return false;
+              }
+            })();
             return (
               <motion.button
                 key={item.path}
@@ -139,7 +147,11 @@ export function Navbar({
 
         {/* Search + Profile */}
         <div className="flex items-center gap-3">
-          {/* debug-era removed */}
+          {/* Debug: show current era from context for testing */}
+          <div className="hidden md:flex items-center text-sm text-slate-300 mr-4">
+            <span className="opacity-60 mr-2">Era:</span>
+            <span className="font-medium">{era ?? "none"}</span>
+          </div>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
