@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { Badge } from "../../components/ui/badge";
+import { useEra } from "../../context/EraContext";
 
 interface EventItemProps {
   event: {
@@ -10,9 +11,12 @@ interface EventItemProps {
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
-export function EventItem({ event, theme = "default" }: EventItemProps) {
+export function EventItem({ event, theme }: EventItemProps) {
+  const { era } = useEra();
+  const appliedTheme = theme ?? (era ?? "default");
+
   const getThemeColors = () => {
-    switch (theme) {
+    switch (appliedTheme) {
       case "90s":
         return {
           badge: "border-amber-500/50 text-amber-400 bg-amber-500/10",

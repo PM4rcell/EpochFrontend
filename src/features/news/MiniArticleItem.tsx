@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { Clock } from "lucide-react";
+import { useEra } from "../../context/EraContext";
 
 interface MiniArticleItemProps {
   article: {
@@ -11,9 +12,12 @@ interface MiniArticleItemProps {
   onClick?: () => void;
 }
 
-export function MiniArticleItem({ article, theme = "default", onClick }: MiniArticleItemProps) {
+export function MiniArticleItem({ article, theme, onClick }: MiniArticleItemProps) {
+  const { era } = useEra();
+  const appliedTheme = theme ?? (era ?? "default");
+
   const getThemeColors = () => {
-    switch (theme) {
+    switch (appliedTheme) {
       case "90s":
         return {
           hover: "hover:text-amber-400",

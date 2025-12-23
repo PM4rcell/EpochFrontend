@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Clock, Calendar } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
+import { useEra } from "../../context/EraContext";
 
 interface ArticleCardProps {
   article: {
@@ -17,9 +18,12 @@ interface ArticleCardProps {
   onClick?: () => void;
 }
 
-export function ArticleCard({ article, theme = "default", onClick }: ArticleCardProps) {
+export function ArticleCard({ article, theme, onClick }: ArticleCardProps) {
+  const { era } = useEra();
+  const appliedTheme = theme ?? (era ?? "default");
+
   const getThemeColors = () => {
-    switch (theme) {
+    switch (appliedTheme) {
       case "90s":
         return {
           border: "border-slate-800/50",

@@ -117,12 +117,20 @@ export function Navbar({
             // current route (works whether an era is selected or not).
             const isActive = (() => {
               try {
-                // Exact match or prefix (for nested routes)
-                return location.pathname === item.path || location.pathname.startsWith(item.path);
+                // For the root path we must match exactly ("/" matches everything
+                // when using startsWith). For other paths allow exact match or
+                // nested routes (e.g. "/news" and "/news/123").
+                if (item.path === "/") {
+                  return location.pathname === "/";
+                }
+                return location.pathname === item.path || location.pathname.startsWith(item.path + "/");
               } catch (e) {
                 return false;
               }
             })();
+            // Show 'Home' when an era is selected; show 'Eras' when none is selected.
+            const displayLabel = item.label === "Home" ? (hasSelectedEra ? "Home" : "Eras") : item.label;
+
             return (
               <motion.button
                 key={item.path}
@@ -132,7 +140,7 @@ export function Navbar({
                 className={`relative px-2 py-1 rounded transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400/50 ${isActive ? colors.active : `text-slate-400 ${colors.hover} ${colors.glow}`
                   }`}
               >
-                {item.label}
+                {displayLabel}
                 {isActive && (
                   <motion.div
                     layoutId={`activeTab-${appliedTheme}`}

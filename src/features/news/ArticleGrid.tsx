@@ -24,7 +24,7 @@ interface ArticleGridProps {
   onArticleClick?: (articleId: string) => void;
 }
 
-export function ArticleGrid({ theme = "default", category, articles = [], loading = false, onArticleClick }: ArticleGridProps) {
+export function ArticleGrid({ category, articles = [], loading = false, onArticleClick }: ArticleGridProps) {
   const [visibleCount, setVisibleCount] = useState(6);
 
   if (loading) return <p>Loading articles...</p>;
@@ -55,7 +55,6 @@ export function ArticleGrid({ theme = "default", category, articles = [], loadin
           >
             <ArticleCard
               article={article}
-              theme={theme}
               onClick={() => onArticleClick?.(article.id)}
             />
           </motion.div>

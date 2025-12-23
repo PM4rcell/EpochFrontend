@@ -35,7 +35,7 @@ export function NewsPage({
       </div>
 
       {/* Navbar */}
-      <Navbar theme={theme} activePage="news" onMovieClick={onMovieClick} onSearchSubmit={onSearchSubmit} />
+      <Navbar activePage="news" onMovieClick={onMovieClick} onSearchSubmit={onSearchSubmit} />
 
       {/* Main content */}
       <div className="pt-20">
@@ -46,11 +46,10 @@ export function NewsPage({
           className="container mx-auto px-4 sm:px-6 max-w-7xl"
         >
           {/* News Hero */}
-          <NewsHero theme={theme} onArticleClick={onArticleClick} />
+          <NewsHero onArticleClick={onArticleClick} />
 
           {/* Category Filters */}
           <CategoryFilters
-            theme={theme}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
           />
@@ -60,7 +59,6 @@ export function NewsPage({
             {/* Article Grid - 9 columns on desktop */}
             <div className="lg:col-span-9">
               <ArticleGrid
-                theme={theme}
                 category={activeCategory}
                 articles={articles}
                 loading={loading}
@@ -71,7 +69,7 @@ export function NewsPage({
 
             {/* Sidebar - 3 columns on desktop, below grid on mobile */}
             <div className="lg:col-span-3 mt-8 lg:mt-0">
-              <NewsSidebar theme={theme} onArticleClick={onArticleClick} />
+              <NewsSidebar onArticleClick={onArticleClick} />
             </div>
           </div>
         </motion.div>

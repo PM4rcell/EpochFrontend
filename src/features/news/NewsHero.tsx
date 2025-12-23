@@ -3,15 +3,19 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
+import { useEra } from "../../context/EraContext";
 
 interface NewsHeroProps {
   theme?: "90s" | "2000s" | "modern" | "default";
   onArticleClick?: (articleId: string) => void;
 }
 
-export function NewsHero({ theme = "default", onArticleClick }: NewsHeroProps) {
+export function NewsHero({ theme, onArticleClick }: NewsHeroProps) {
+  const { era } = useEra();
+  const appliedTheme = theme ?? (era ?? "default");
+
   const getThemeColors = () => {
-    switch (theme) {
+    switch (appliedTheme) {
       case "90s":
         return {
           accent: "text-amber-400",

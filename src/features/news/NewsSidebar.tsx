@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { TrendingUp, Calendar } from "lucide-react";
 import { MiniArticleItem } from "./MiniArticleItem.tsx";
 import { EventItem } from "./EventItem.tsx";
+import { useEra } from "../../context/EraContext";
 
 interface NewsSidebarProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -44,9 +45,12 @@ const upcomingEvents = [
   },
 ];
 
-export function NewsSidebar({ theme = "default", onArticleClick }: NewsSidebarProps) {
+export function NewsSidebar({ theme, onArticleClick }: NewsSidebarProps) {
+  const { era } = useEra();
+  const appliedTheme = theme ?? (era ?? "default");
+
   const getThemeColors = () => {
-    switch (theme) {
+    switch (appliedTheme) {
       case "90s":
         return {
           accent: "text-amber-500",
