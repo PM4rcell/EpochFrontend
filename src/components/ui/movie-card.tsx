@@ -46,10 +46,10 @@ export function MovieCard({ title, year, rating, runtime, poster, theme, onClick
     <motion.div
       whileHover={{ y: -5 }}
       onClick={onClick}
-      className={`bg-black/40 backdrop-blur-sm rounded-lg overflow-hidden border ${colors.border} ${colors.glow} transition-all duration-300 ${onClick ? 'cursor-pointer' : ''}`}
+      className={`bg-black/40 backdrop-blur-sm rounded-lg overflow-hidden border ${colors.border} ${colors.glow} transition-all duration-300 ${onClick ? 'cursor-pointer' : ''} w-full`}
     >
       {/* Poster */}
-      <div className="relative h-64 overflow-hidden group">
+      <div className="relative h-56 overflow-hidden group">
         <ImageWithFallback
           src={poster}
           alt={title}
@@ -59,9 +59,9 @@ export function MovieCard({ title, year, rating, runtime, poster, theme, onClick
       </div>
 
       {/* Info */}
-      <div className="p-4">
-        <h3 className="text-white mb-1">{title}</h3>
-        <p className="text-slate-400 mb-3">{year}</p>
+      <div className="p-3">
+        <h3 className="text-white mb-1 text-sm">{title}</h3>
+        <p className="text-slate-400 mb-3 text-sm">{year}</p>
 
         {/* Rating */}
         <div className="flex items-center gap-1 mb-3">

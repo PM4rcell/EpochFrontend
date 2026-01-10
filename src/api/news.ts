@@ -1,7 +1,7 @@
 import { apiFetch } from "./fetch";
 
 export interface NewsItem {
-  id?: string | number;
+  id: number;
   title: string;
   body: string;
   category?: string;

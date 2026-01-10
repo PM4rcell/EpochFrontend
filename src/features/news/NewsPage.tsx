@@ -18,7 +18,6 @@ interface NewsPageProps {
 export type NewsCategory = "all" | "announcements" | "events" | "reviews" | "behind-the-scenes";
 
 export function NewsPage({
-  theme = "default",
   onArticleClick,
   onMovieClick,
   onSearchSubmit,

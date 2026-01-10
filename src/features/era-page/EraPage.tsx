@@ -8,79 +8,15 @@ import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithF
 import { useEra } from "../../context/EraContext";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useEras } from "../../hooks/useEras";
+import { useEraMovies } from "../../hooks/useEraMovies";
 
-const eraData = {
-  "90s": {
-    title: "Best of the 1990s",
-    description: "Golden Age of Cinema",
-    bgGradient: "from-slate-950 via-slate-900 to-slate-950",
-    accentColor: "amber-500",
-    movies: [
-      {
-        title: "Titanic",
-        year: 1997,
-        rating: 4.5,
-        runtime: "3h 14min",
-        poster: "https://images.unsplash.com/photo-1697205946449-089739881fed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-      },
-      // további filmek...
-    ],
-    featured: {
-      title: "Titanic",
-      year: 1997,
-      description: "Experience the epic romance and tragedy that captivated audiences worldwide.",
-      poster: "https://images.unsplash.com/photo-1697205946449-089739881fed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    },
-  },
-  "2000s": {
-    title: "Best of the 2000s",
-    description: "The Digital Revolution",
-    bgGradient: "from-slate-950 via-slate-900 to-slate-950",
-    accentColor: "blue-400",
-    movies: [
-      {
-        title: "Avatar",
-        year: 2009,
-        rating: 4.6,
-        runtime: "2h 42min",
-        poster: "https://images.unsplash.com/photo-1533408944756-4950754f3ebc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-      },
-
-      // további filmek...
-    ],
-    featured: {
-      title: "Avatar",
-      year: 2009,
-      description: "Journey to Pandora in James Cameron's groundbreaking visual spectacle.",
-      poster: "https://images.unsplash.com/photo-1533408944756-4950754f3ebc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    },
-  },
-  "modern": {
-    title: "Modern Cinema",
-    description: "Today's Masterpieces",
-    bgGradient: "from-slate-950 via-slate-900 to-slate-950",
-    accentColor: "slate-300",
-    movies: [
-      {
-        title: "F1",
-        year: 2025,
-        rating: 4.7,
-        runtime: "2h 20min",
-        poster: "https://images.unsplash.com/photo-1721490645563-8e87725bbfa4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-      },
-      // további filmek...
-    ],
-    featured: {
-      title: "F1",
-      year: 2025,
-      description: "Experience the adrenaline and drama of Formula 1 racing in this thrilling cinematic journey.",
-      poster: "https://images.unsplash.com/photo-1721490645563-8e87725bbfa4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    },
-  },
+// Lightweight presentation metadata only (no movie lists)
+const eraMeta: Record<string, any> = {
+  "90s": { title: "Best of the 1990s", description: "Golden Age of Cinema", bgGradient: "from-slate-950 via-slate-900 to-slate-950", accentColor: "amber-500" },
+  "2000s": { title: "Best of the 2000s", description: "The Digital Revolution", bgGradient: "from-slate-950 via-slate-900 to-slate-950", accentColor: "blue-400" },
+  modern: { title: "Modern Cinema", description: "Today's Masterpieces", bgGradient: "from-slate-950 via-slate-900 to-slate-950", accentColor: "slate-300" },
 };
-
-// Export an array of era keys so components that expect an array can safely map over it
-export const eras = Object.keys(eraData);
 
 export function EraPage() {
   const { era, setEra, lastClearedAt } = useEra();
@@ -90,53 +26,66 @@ export function EraPage() {
 
   const validEras = ["90s", "2000s", "modern"] as const;
 
-  // Sync the era from the URL param into context when this page mounts.
-  // We deliberately run this effect only when the URL param changes so that
-  // clearing `era` in context (e.g. when navigating back to `/`) does not
-  // cause this effect to immediately re-set the era from the old URL.
+  // Sync URL param into context (same logic as before)
   useEffect(() => {
-    // If the URL param is missing or invalid, redirect to the landing page.
     if (!eraId || !validEras.includes(eraId as any)) {
       navigate("/", { replace: true });
       return;
     }
 
-    // Only set the era if it differs from the current context value and
-    // the current location still points to this era (prevents races
-    // where navigation away briefly leaves this effect able to re-set).
-    //
-    // Additionally, if the user just cleared the era (e.g. via the logo)
-    // we want to ignore URL-driven re-sets for a short window so the
-    // clear feels immediate and doesn't require a second click.
-    const RECENT_CLEAR_MS = 800; // tolerate 800ms after a manual clear
+    const RECENT_CLEAR_MS = 800;
     const wasRecentlyCleared = lastClearedAt && Date.now() - lastClearedAt < RECENT_CLEAR_MS;
 
     if (!wasRecentlyCleared && era !== eraId && location.pathname === `/${eraId}`) {
       setEra(eraId as any);
     }
-    // Intentionally omit `era` from deps to avoid re-running when `era` is
-    // cleared elsewhere (the URL param is the source of truth for this page).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eraId, setEra, navigate]);
 
-  // Use the context era when available, otherwise fall back to the URL param
-  // (this keeps the UI stable during the first render before the effect runs).
   const currentEra = (era as string) ?? eraId;
   if (!currentEra) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-white">
-        No era selected.
-      </div>
+      <div className="flex items-center justify-center min-h-screen text-white">No era selected.</div>
     );
   }
 
-  const data = eraData[currentEra as keyof typeof eraData];
+  // fetch eras from API so we can resolve the numeric era id
+  const { eras: apiEras, loading: erasLoading } = useEras();
 
-  // Clear the era in context and navigate back to the landing page.
-  // Navigate on the next tick so the landing Navbar mounts with era cleared.
+  const resolveEraKey = (eraRec: any) => {
+    const candidates = [eraRec.id, eraRec.name].filter(Boolean) as string[];
+    for (const c of candidates) {
+      const s = String(c).toLowerCase();
+      if (s.includes("90")) return "90s";
+      if (s.includes("2000") || s === "00s" || s.includes("00s") || s === "00") return "2000s";
+      if (s.includes("now") || s.includes("nowday") || s.includes("nowdays") || s.includes("modern") || s.includes("202")) return "modern";
+      if (s === "90s" || s === "2000s" || s === "modern") return s;
+    }
+    return "modern";
+  };
+
+  const matchedApiEra = apiEras.find((e) => resolveEraKey(e) === currentEra);
+  const eraApiId = matchedApiEra?.id;
+
+  // Fetch movies for the resolved era id (hook handles empty/undefined ids)
+  const { movies, loading: moviesLoading } = useEraMovies(eraApiId);
+
+  // Map API movie shape to MovieCard props
+  const moviesForDisplay = (movies || []).slice(0, 9).map((m: any) => ({
+    id: m.id,
+    title: m.title || "Untitled",
+    year: m.release_date ? new Date(m.release_date).getFullYear() : NaN,
+    rating: typeof m.vote_avg === "number" ? m.vote_avg : 0,
+    runtime: m.runtime_min ? `${m.runtime_min} min` : "",
+    poster: (m as any).poster || (m as any).poster_path || "",
+  }));
+
+  // Prefer an explicitly featured movie; fall back to first returned movie.
+  const featured = (movies || []).find((m: any) => m.is_featured === 1 || m.is_featured === true) || (movies && movies.length > 0 ? movies[0] : null);
+
+  const meta = eraMeta[currentEra] ?? eraMeta.modern;
+
   const handleBack = () => {
-    // Navigate first, then clear era to avoid render-order races where
-    // the page's URL-derived effect might re-set the era.
     navigate("/", { replace: true });
     setEra(null);
   };
@@ -147,75 +96,76 @@ export function EraPage() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className={`min-h-screen bg-linear-to-b ${data.bgGradient} relative`}
+      className={`min-h-screen bg-linear-to-b ${meta.bgGradient} relative`}
     >
-      {/* Film grain overlay for 90s */}
       {currentEra === "90s" && (
         <div className="fixed inset-0 pointer-events-none opacity-[0.03] bg-[url('data:image/svg+xml;base64,...')]" />
       )}
 
-      {/* Particle effect */}
-      {(
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-blue-400/20 rounded-full"
-              initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
-              animate={{ x: [null, Math.random() * window.innerWidth], y: [null, Math.random() * window.innerHeight] }}
-              transition={{ duration: 10 + Math.random() * 20, repeat: Infinity, ease: "linear" }}
-            />
-          ))}
-        </div>
-      )}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-blue-400/20 rounded-full"
+            initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
+            animate={{ x: [null, Math.random() * window.innerWidth], y: [null, Math.random() * window.innerHeight] }}
+            transition={{ duration: 10 + Math.random() * 20, repeat: Infinity, ease: "linear" }}
+          />
+        ))}
+      </div>
 
       <Navbar theme={currentEra as "90s" | "2000s" | "modern"} />
 
       <div className="pt-24 pb-12">
-        {/* Back button */}
         <div className="container mx-auto px-6 mb-8">
           <Button onClick={handleBack} variant="ghost" className="text-slate-400 hover:text-white">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Eras
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Eras
           </Button>
         </div>
 
-        {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="container mx-auto px-6 mb-12">
-          <h1 className={`text-${data.accentColor} mb-2`}>{data.title}</h1>
-          <p className="text-slate-400">{data.description}</p>
+          <h1 className={`text-${meta.accentColor} mb-2`}>{meta.title}</h1>
+          <p className="text-slate-400">{meta.description}</p>
         </motion.div>
 
-        {/* Two column layout */}
         <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.1 }} className="lg:col-span-2 space-y-6">
             <h2 className="text-white mb-6">Featured Films</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {data.movies.map((movie, index) => (
-                <motion.div key={movie.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}>
-                  <MovieCard {...movie} theme={currentEra as "90s" | "2000s" | "modern"} />
-                </motion.div>
-              ))}
-            </div>
+
+            {(erasLoading || moviesLoading) ? (
+              <p className="text-white">Loading movies...</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {moviesForDisplay.length === 0 ? (
+                  <p className="text-slate-400">No movies found.</p>
+                ) : (
+                  moviesForDisplay.map((movie: any, index: number) => (
+                    <motion.div key={movie.id ?? index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}>
+                      <MovieCard {...movie} theme={currentEra as "90s" | "2000s" | "modern"} />
+                    </motion.div>
+                  ))
+                )}
+              </div>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className="space-y-6">
-              <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className={`w-5 h-5 text-${data.accentColor}`} />
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className={`w-5 h-5 text-${meta.accentColor}`} />
               <h2 className="text-white">Highlight of the Week</h2>
             </div>
 
             <motion.div whileHover={{ scale: 1.02 }} className="relative rounded-lg overflow-hidden group cursor-pointer">
               <div className="relative h-96">
-                <ImageWithFallback src={data.featured.poster} alt={data.featured.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <ImageWithFallback src={(featured && ((featured as any).poster || (featured as any).poster_path)) || ""} alt={(featured && (featured.title || "")) || ""} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
               </div>
 
               <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h3 className="text-white mb-2">{data.featured.title}</h3>
-                <p className="text-slate-400 mb-2">{data.featured.year}</p>
+                <h3 className="text-white mb-2">{(featured && featured.title) ?? meta.title}</h3>
+                <p className="text-slate-400 mb-2">{featured && featured.release_date ? new Date(featured.release_date).getFullYear() : ""}</p>
                 <motion.p initial={{ opacity: 0, y: 10 }} whileHover={{ opacity: 1, y: 0 }} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {data.featured.description}
+                  {(featured && featured.description) || meta.description}
                 </motion.p>
               </div>
             </motion.div>

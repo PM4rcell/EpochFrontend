@@ -1,7 +1,7 @@
 import { apiFetch } from "./fetch";
 
 export interface Era {
-  id: string;
+  id: number;
   name: string;
   image: string;
 }
