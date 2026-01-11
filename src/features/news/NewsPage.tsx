@@ -8,7 +8,6 @@ import { useNews } from "../../hooks/useNews";
 import { NewsSidebar } from "./NewsSidebar";
 
 interface NewsPageProps {
-  theme?: "90s" | "2000s" | "modern" | "default";
   onNavigate?: (page: any) => void;
   onArticleClick?: (articleId: string) => void;
   onMovieClick?: (movieId: string) => void;

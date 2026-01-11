@@ -8,8 +8,8 @@ import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithF
 import { useEra } from "../../context/EraContext";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { useEras } from "../../hooks/useEras";
 import { useEraMovies } from "../../hooks/useEraMovies";
+
 
 // Lightweight presentation metadata only (no movie lists)
 const eraMeta: Record<string, any> = {
@@ -39,7 +39,6 @@ export function EraPage() {
     if (!wasRecentlyCleared && era !== eraId && location.pathname === `/${eraId}`) {
       setEra(eraId as any);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eraId, setEra, navigate]);
 
   const currentEra = (era as string) ?? eraId;
@@ -49,26 +48,11 @@ export function EraPage() {
     );
   }
 
-  // fetch eras from API so we can resolve the numeric era id
-  const { eras: apiEras, loading: erasLoading } = useEras();
-
-  const resolveEraKey = (eraRec: any) => {
-    const candidates = [eraRec.id, eraRec.name].filter(Boolean) as string[];
-    for (const c of candidates) {
-      const s = String(c).toLowerCase();
-      if (s.includes("90")) return "90s";
-      if (s.includes("2000") || s === "00s" || s.includes("00s") || s === "00") return "2000s";
-      if (s.includes("now") || s.includes("nowday") || s.includes("nowdays") || s.includes("modern") || s.includes("202")) return "modern";
-      if (s === "90s" || s === "2000s" || s === "modern") return s;
-    }
-    return "modern";
-  };
-
-  const matchedApiEra = apiEras.find((e) => resolveEraKey(e) === currentEra);
-  const eraApiId = matchedApiEra?.id;
+  
+  const eraNumericId = era === "90s" ? "1" : era === "2000s" ? "2" : era === "modern" ? "3" : undefined;
 
   // Fetch movies for the resolved era id (hook handles empty/undefined ids)
-  const { movies, loading: moviesLoading } = useEraMovies(eraApiId);
+  const { movies, loading: moviesLoading } = useEraMovies(eraNumericId);
 
   // Map API movie shape to MovieCard props
   const moviesForDisplay = (movies || []).slice(0, 9).map((m: any) => ({
@@ -132,12 +116,12 @@ export function EraPage() {
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.1 }} className="lg:col-span-2 space-y-6">
             <h2 className="text-white mb-6">Featured Films</h2>
 
-            {(erasLoading || moviesLoading) ? (
+            {(moviesLoading || moviesLoading) ? (
               <p className="text-white">Loading movies...</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {moviesForDisplay.length === 0 ? (
-                  <p className="text-slate-400">No movies found.</p>
+                  <p className="text-slate-400">Failed to load movies.</p>
                 ) : (
                   moviesForDisplay.map((movie: any, index: number) => (
                     <motion.div key={movie.id ?? index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}>

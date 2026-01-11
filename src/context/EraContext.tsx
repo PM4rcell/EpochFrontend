@@ -1,5 +1,5 @@
 import React from "react";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, } from "react";
 
 /*
   Era type
@@ -77,26 +77,6 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
       // ignore storage write errors
     }
   };
-
-  // Keep context in sync across tabs/windows (optional but helpful).
-  // If another tab changes the stored era, update this context accordingly.
-  useEffect(() => {
-    const onStorage = (ev: StorageEvent) => {
-      if (ev.key !== STORAGE_KEY) return;
-      try {
-        const raw = ev.newValue;
-        if (!raw) {
-          setEraState(null);
-        } else if (raw === "90s" || raw === "2000s" || raw === "modern") {
-          setEraState(raw as Era);
-        }
-      } catch (e) {
-        // ignore
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
 
   return (
     <EraContext.Provider value={{ era, setEra, lastClearedAt }}>

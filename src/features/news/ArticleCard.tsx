@@ -14,13 +14,12 @@ interface ArticleCardProps {
     date: string;
     readTime: string;
   };
-  theme?: "90s" | "2000s" | "modern" | "default";
   onClick?: () => void;
 }
 
-export function ArticleCard({ article, theme, onClick }: ArticleCardProps) {
+export function ArticleCard({ article, onClick }: ArticleCardProps) {
   const { era } = useEra();
-  const appliedTheme = theme ?? (era ?? "default");
+  const appliedTheme = era ?? "default";
 
   const getThemeColors = () => {
     switch (appliedTheme) {
