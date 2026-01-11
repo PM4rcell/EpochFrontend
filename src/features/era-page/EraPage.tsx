@@ -8,7 +8,10 @@ import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithF
 import { useEra } from "../../context/EraContext";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { useEraMovies } from "../../hooks/useEraMovies";
+import { Skeleton } from "../../components/ui/skeleton";
+import { Spinner } from "../../components/ui/spinner";
+import { usePagination } from "../../hooks/usePagination";
+import { Pagination } from "../../components/ui/pagination";
 
 
 // Lightweight presentation metadata only (no movie lists)
@@ -49,13 +52,13 @@ export function EraPage() {
   }
 
   
-  const eraNumericId = era === "90s" ? "1" : era === "2000s" ? "2" : era === "modern" ? "3" : undefined;
+  const eraNumericId = currentEra === "90s" ? 1 : currentEra === "2000s" ? 2 : currentEra === "modern" ? 3 : undefined;
 
-  // Fetch movies for the resolved era id (hook handles empty/undefined ids)
-  const { movies, loading: moviesLoading } = useEraMovies(eraNumericId);
+  // Server-driven pagination: fetch pages from the API (6 per page)
+  const { items: pageItems, currentPage, totalPages, loading: paginationLoading, hasFetched, error, setPage } = usePagination(eraNumericId, 6);
 
-  // Map API movie shape to MovieCard props
-  const moviesForDisplay = (movies || []).slice(0, 9).map((m: any) => ({
+  // Map API movie shape to MovieCard props for the current page
+  const moviesForDisplay = (pageItems || []).map((m: any) => ({
     id: m.id,
     title: m.title || "Untitled",
     year: m.release_date ? new Date(m.release_date).getFullYear() : NaN,
@@ -64,8 +67,8 @@ export function EraPage() {
     poster: (m as any).poster || (m as any).poster_path || "",
   }));
 
-  // Prefer an explicitly featured movie; fall back to first returned movie.
-  const featured = (movies || []).find((m: any) => m.is_featured === 1 || m.is_featured === true) || (movies && movies.length > 0 ? movies[0] : null);
+  // Prefer an explicitly featured movie on the current page; fall back to first item
+  const featured = (pageItems || []).find((m: any) => m.is_featured === 1 || m.is_featured === true) || (pageItems && pageItems.length > 0 ? pageItems[0] : null);
 
   const meta = eraMeta[currentEra] ?? eraMeta.modern;
 
@@ -115,19 +118,44 @@ export function EraPage() {
         <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.1 }} className="lg:col-span-2 space-y-6">
             <h2 className="text-white mb-6">Featured Films</h2>
+            {(!hasFetched || paginationLoading) ? (
+              <div className="space-y-6">
+                <div className="flex flex-col items-center justify-center text-center py-6">
+                  <Spinner theme={currentEra as "90s" | "2000s" | "modern"} size="sm" />
+                  <h3 className="mt-3 italic text-slate-400">Loading movies...</h3>
+                </div>
 
-            {(moviesLoading || moviesLoading) ? (
-              <p className="text-white">Loading movies...</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="space-y-3">
+                      <Skeleton className="h-44 w-full rounded-lg" />
+                      <div className="flex gap-2 items-center">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-4 w-1/4" />
+                      </div>
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {moviesForDisplay.length === 0 ? (
-                  <p className="text-slate-400">Failed to load movies.</p>
-                ) : (
-                  moviesForDisplay.map((movie: any, index: number) => (
-                    <motion.div key={movie.id ?? index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}>
-                      <MovieCard {...movie} theme={currentEra as "90s" | "2000s" | "modern"} />
-                    </motion.div>
-                  ))
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {error ? (
+                    <p className="text-slate-400">Failed to load movies.</p>
+                  ) : moviesForDisplay.length === 0 ? (
+                    <p className="text-slate-400">No movies found.</p>
+                  ) : (
+                    moviesForDisplay.map((movie: any, index: number) => (
+                      <motion.div key={movie.id ?? index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}>
+                        <MovieCard {...movie} theme={currentEra as "90s" | "2000s" | "modern"} />
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+                {/* Pagination controls (6 items per page) - render immediately on load or while loading */}
+                {(paginationLoading || totalPages > 1) && (
+                  <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
                 )}
               </div>
             )}

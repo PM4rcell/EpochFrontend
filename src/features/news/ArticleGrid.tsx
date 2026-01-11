@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { motion } from "motion/react";
+import { Spinner } from "../../components/ui/spinner";
 import { ArticleCard } from "./ArticleCard.tsx";
 import { Button } from "../../components/ui/button";
 import type { NewsCategory } from "./NewsPage";
+import { useEra } from "../../context/EraContext";
 
 interface Article {
   id: string;
@@ -24,10 +26,18 @@ interface ArticleGridProps {
   onArticleClick?: (articleId: string) => void;
 }
 
-export function ArticleGrid({ category, articles = [], loading = false, onArticleClick }: ArticleGridProps) {
+export function ArticleGrid({ theme = "default", category, articles = [], loading = false, onArticleClick }: ArticleGridProps) {
   const [visibleCount, setVisibleCount] = useState(6);
+  const { era: currentEra } = useEra();
+  const spinnerTheme = ((currentEra as "90s" | "2000s" | "modern") ?? (theme === "default" ? "modern" : (theme as "90s" | "2000s" | "modern"))) as "90s" | "2000s" | "modern";
 
-  if (loading) return <p>Loading articles...</p>;
+  if (loading)
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <Spinner theme={spinnerTheme} />
+        <p className="mt-3 italic text-slate-400 text-center">Loading articles...</p>
+      </div>
+    );
   if ((arguments[0] as ArticleGridProps).error) return <p>Failed to load articles.</p>;
 
   const filteredArticles =

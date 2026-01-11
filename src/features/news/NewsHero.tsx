@@ -71,9 +71,7 @@ export function NewsHero({ theme, onArticleClick }: NewsHeroProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.35, delay: 0.1 }}
           >
-            <h1 className={`mb-4 bg-linear-to-r from-amber-500 via-slate-200 to-slate-400 bg-clip-text text-transparent`}>
-              News & Events
-            </h1>
+            <h1 className={`${colors.accent} mb-4`}>News & Events</h1>
             <p className="text-slate-400 mb-6">
               Stay updated with the latest announcements, upcoming events, behind-the-scenes stories, and reviews from the world of Epoch cinema.
             </p>

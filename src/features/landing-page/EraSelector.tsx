@@ -3,6 +3,7 @@
 import type { Era as ApiEra } from "../../api/eras";
 // Motion library for simple entrance/hover animations
 import { motion } from "motion/react";
+import { Spinner } from "../../components/ui/spinner";
 // Local image assets used for the era cards' backgrounds
 import img90s from "../../assets/img/90s_era.jpg";
 import img2000s from "../../assets/img/2000s_era.jpg";
@@ -22,7 +23,13 @@ interface EraSelectorProps {
 export function EraSelector({ onSelectEra, eras = [], loading = false, error = null }: EraSelectorProps) {
   // Presentation logic only; data may be provided by parent (LandingPage)
   // or omitted for standalone usage.
-  if (loading) return <p>Loading eras...</p>;
+  if (loading)
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <Spinner />
+        <p className="mt-3 italic text-slate-400 text-center">Loading eras...</p>
+      </div>
+    );
   if (error) return <p>Failed to load eras.</p>;
 
   // Presentation metadata for each canonical era key.
