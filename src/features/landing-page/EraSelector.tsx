@@ -26,7 +26,7 @@ export function EraSelector({ onSelectEra, eras = [], loading = false, error = n
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <Spinner />
+        <Spinner size="sm" />
         <p className="mt-3 italic text-slate-400 text-center">Loading eras...</p>
       </div>
     );

@@ -34,7 +34,7 @@ export function ArticleGrid({ theme = "default", category, articles = [], loadin
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <Spinner theme={spinnerTheme} />
+        <Spinner theme={spinnerTheme} size="sm" />
         <p className="mt-3 italic text-slate-400 text-center">Loading articles...</p>
       </div>
     );
