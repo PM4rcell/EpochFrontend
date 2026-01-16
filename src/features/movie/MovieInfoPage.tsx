@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Play, X, Star } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
@@ -14,148 +14,23 @@ import { ReviewItem } from "./ReviewItem.tsx";
 import { AddReviewCard } from "./AddReviewCard";
 import { CTAButton } from "./CTAButton";
 import { Button } from "../../components/ui/button";
+import { useMovie } from "../../hooks/useMovie";
+import { useParams } from "react-router-dom";
+import { Spinner } from "../../components/ui/spinner";
+import { useSimilarMovies } from "../../hooks/useSimilarMovies";
+import { useMovieNavigationId } from "../../hooks/useMovieNavigationId";
 
-interface MovieInfoPageProps {
-  theme?: "90s" | "2000s" | "modern" | "default";
-  onBack?: () => void;
-  onNavigate?: (page: "home" | "screenings" | "movies" | "news" | "era") => void;
-}
 
-// Mock data
-const movieData = {
-  title: "The Eternal Voyage",
-  year: 2024,
-  runtime: "2h 28min",
-  director: "Sofia Mendez",
-  genres: ["Sci-Fi", "Drama", "Adventure"],
-  rating: 8.4,
-  quality: "4K UHD",
-  backdrop: "https://images.unsplash.com/photo-1574923930958-9b653a0e5148?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
-  synopsis: "In a distant future where humanity has scattered across the stars, a lone astronaut discovers an ancient signal that could reunite the fragmented colonies or tear them apart forever. A breathtaking journey through space and time that questions what it means to be human.",
-  cast: [
-    {
-      name: "Elena Torres",
-      character: "Captain Aurora",
-      image: "https://images.unsplash.com/photo-1530983822321-fcac2d3c0f06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      name: "Marcus Chen",
-      character: "Dr. Kai",
-      image: "https://images.unsplash.com/photo-1530983822321-fcac2d3c0f06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      name: "Amara Johnson",
-      character: "Navigator Zara",
-      image: "https://images.unsplash.com/photo-1530983822321-fcac2d3c0f06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      name: "Kai Nakamura",
-      character: "Engineer Ryo",
-      image: "https://images.unsplash.com/photo-1530983822321-fcac2d3c0f06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      name: "Lena Volkov",
-      character: "Commander Irina",
-      image: "https://images.unsplash.com/photo-1530983822321-fcac2d3c0f06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-  ],
-  gallery: [
-    {
-      url: "https://images.unsplash.com/photo-1695114584354-13e1910d491b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-      alt: "Scene 1",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1706701490905-7ceb096b5058?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-      alt: "Scene 2",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1574923930958-9b653a0e5148?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-      alt: "Scene 3",
-    },
-  ],
-  userReviews: [
-    {
-      username: "Sarah Mitchell",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=100",
-      rating: 5,
-      date: "2 days ago",
-      text: "A mesmerizing visual spectacle that redefines space cinema. The performances are stellar and the cinematography is breathtaking. Every frame feels like a work of art.",
-    },
-    {
-      username: "James Carter",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=100",
-      rating: 4,
-      date: "5 days ago",
-      text: "Thought-provoking and beautifully crafted. A must-see for sci-fi enthusiasts. The story takes some unexpected turns that kept me engaged throughout.",
-    },
-    {
-      username: "Maria Rodriguez",
-      rating: 5,
-      date: "1 week ago",
-      text: "Absolutely stunning! The world-building is incredible and the emotional depth caught me completely off guard. This is what sci-fi should be.",
-    },
-    {
-      username: "Alex Kim",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=100",
-      rating: 4,
-      date: "1 week ago",
-      text: "Great visual effects and a compelling narrative. Some pacing issues in the middle act, but overall a fantastic experience that I'd recommend.",
-    },
-  ],
-  reviewStats: {
-    average: 4.5,
-    total: 128,
-  },
-  similarMovies: [
-    {
-      title: "Interstellar",
-      year: 2014,
-      rating: 8.6,
-      era: "2010s",
-      image: "https://images.unsplash.com/photo-1659835347242-97835d671db7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      title: "Arrival",
-      year: 2016,
-      rating: 7.9,
-      era: "2010s",
-      image: "https://images.unsplash.com/photo-1710429112585-68a9c850a8a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      title: "Gravity",
-      year: 2013,
-      rating: 7.7,
-      era: "2010s",
-      image: "https://images.unsplash.com/photo-1643677841226-d6427625f118?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      title: "The Martian",
-      year: 2015,
-      rating: 8.0,
-      era: "2010s",
-      image: "https://images.unsplash.com/photo-1745564371387-7707cc41e958?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      title: "Blade Runner 2049",
-      year: 2017,
-      rating: 8.0,
-      era: "2010s",
-      image: "https://images.unsplash.com/photo-1659835347242-97835d671db7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-    {
-      title: "Ad Astra",
-      year: 2019,
-      rating: 6.5,
-      era: "2010s",
-      image: "https://images.unsplash.com/photo-1710429112585-68a9c850a8a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    },
-  ],
-};
 
-export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieInfoPageProps) {
+export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onNavigate?: (route: string) => void }) {
+  const { movieId } = useParams<{ movieId?: string }>();
+
+  const { movie: movieData, loading, error } = useMovie<any>(movieId ?? null);
+
   const [showTrailer, setShowTrailer] = useState(false);
   const [isLoggedIn] = useState(true); // Simulate logged-in state
-  const [reviews, setReviews] = useState(movieData.userReviews);
+  const [reviews, setReviews] = useState<any[]>([]);
+
 
   const handleReviewSubmit = (rating: number, text: string) => {
     const newReview = {
@@ -166,6 +41,26 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
     };
     setReviews([newReview, ...reviews]);
   };
+
+  // Resolve the visual era/theme key from the API-provided era record
+  const resolveEraKey = (era: any) => {
+    if (!era) return "modern";
+    const candidates = [era.id, era.name, era.slug].filter(Boolean) as string[];
+    for (const c of candidates) {
+      const s = String(c).toLowerCase();
+      if (s.includes("90")) return "90s";
+      if (s.includes("2000") || s === "00s" || s.includes("00s") || s === "00") return "2000s";
+      if (s.includes("now") || s.includes("nowday") || s.includes("modern")) return "modern";
+      if (s === "90s" || s === "00s" || s === "modern") return s as any;
+    }
+    return "modern";
+  };
+
+  // Normalize wrapper shapes: API returns data inside a `data` field or directly
+  const m: any = movieData ? (movieData.data ?? movieData.movie ?? movieData) : null;
+
+  // Derive theme from the movie's era; this will re-run when `m` updates
+  const theme = m ? resolveEraKey(m.era) : "modern";
 
   const getThemeColors = () => {
     switch (theme) {
@@ -180,20 +75,49 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
           playGlow: "hover:shadow-[0_0_40px_rgba(96,165,250,0.6)]",
         };
       case "modern":
+      default:
         return {
           playButton: "bg-slate-300 hover:bg-slate-200 border-slate-200",
           playGlow: "hover:shadow-[0_0_40px_rgba(226,232,240,0.6)]",
-        };
-      default:
-        return {
-          playButton: "bg-amber-600 hover:bg-amber-500 border-amber-500",
-          playGlow: "hover:shadow-[0_0_40px_rgba(245,158,11,0.6)]",
         };
     }
   };
 
   const colors = getThemeColors();
 
+  // (m is defined above)
+
+  useEffect(() => {
+    if (m && Array.isArray(m.comments)) setReviews(m.comments);
+    else setReviews([]);
+  }, [m]);
+
+  // Similar movies
+  const { items: similarItems, loading: similarLoading } = useSimilarMovies(m?.id ?? movieId ?? null);
+  const navigateToMovie = useMovieNavigationId();
+
+  if (loading)
+    return (
+      <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
+        <Navbar theme={theme} activePage="movies" />
+        <div className="container mx-auto px-6 py-32 flex flex-col items-center justify-center">
+          <Spinner size="sm" />
+          <p className="mt-4 text-slate-400">Loading movie...</p>
+        </div>
+        <Footer theme={theme} />
+      </div>
+    );
+
+  if (error || !movieData)
+    return (
+      <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
+        <Navbar theme={theme} activePage="movies" />
+        <div className="container mx-auto px-6 py-32">
+          <p className="text-center text-slate-400">Failed to load movie.</p>
+        </div>
+        <Footer theme={theme} />
+      </div>
+    );
   return (
     <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
       <Navbar theme={theme} activePage="movies"/>
@@ -205,8 +129,8 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
           <div className="absolute inset-0 bg-linear-to-b from-black/40 via-black/70 to-black z-10" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,black_100%)] z-10" />
           <img
-            src={movieData.backdrop}
-            alt={movieData.title}
+            src={m?.poster?.url || m?.poster?.src || m?.poster || ""}
+            alt={m?.title || ""}
             className="w-full h-full object-cover"
           />
         </div>
@@ -216,7 +140,7 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
           {/* Back button and quality badge */}
           <div className="flex items-start justify-between mb-8">
             <BackButton onBack={onBack || (() => {})} theme={theme} />
-            <MetaChip label={movieData.quality} variant="quality" theme={theme} />
+            <MetaChip label={m?.age_rating || m?.quality || ""} variant="quality" theme={theme} />
           </div>
 
           {/* Title and Play Button */}
@@ -227,7 +151,7 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-white mb-8"
             >
-              {movieData.title}
+              {m?.title}
             </motion.h1>
 
             <motion.div
@@ -257,13 +181,13 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
               transition={{ duration: 0.5, delay: 0.6 }}
               className="flex flex-wrap items-center gap-3 mb-6"
             >
-              <MetaChip label={movieData.year.toString()} theme={theme} />
-              <MetaChip label={movieData.runtime} theme={theme} />
-              <MetaChip label={`Dir: ${movieData.director}`} theme={theme} />
-              {movieData.genres.map((genre) => (
-                <MetaChip key={genre} label={genre} theme={theme} />
+              <MetaChip label={m?.release_date ? new Date(m.release_date).getFullYear().toString() : ""} theme={theme} />
+              <MetaChip label={m?.runtime_min ? `${m.runtime_min} min` : ""} theme={theme} />
+              <MetaChip label={`Dir: ${m?.director?.name || m?.director || ""}`} theme={theme} />
+              {(m?.genres || []).map((genre: any) => (
+                <MetaChip key={genre.id || genre} label={genre.name || genre} theme={theme} />
               ))}
-              <RatingBadge rating={movieData.rating} theme={theme} />
+              <RatingBadge rating={m?.vote_avg ?? 0} theme={theme} />
             </motion.div>
 
             {/* CTA Button */}
@@ -296,7 +220,7 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
               <h2 className="text-white mb-4">Synopsis</h2>
               <div className="bg-black/40 border border-slate-700/30 rounded-lg p-6">
                 <p className="text-slate-300 leading-relaxed">
-                  {movieData.synopsis}
+                  {m?.description}
                 </p>
               </div>
             </motion.section>
@@ -310,7 +234,7 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
             >
               <h2 className="text-white mb-6">Cast</h2>
               <div className="grid grid-cols-3 md:grid-cols-5 gap-6">
-                {movieData.cast.map((member, index) => (
+                {(m?.cast || []).map((member: any, index: number) => (
                   <CastItem
                     key={index}
                     {...member}
@@ -349,11 +273,11 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
                         ? "text-slate-200"
                         : "text-amber-400"
                     }>
-                      {movieData.reviewStats.average.toFixed(1)}
+                      {(m?.vote_avg ?? 0).toFixed(1)}
                     </span>
                   </div>
                   <span className="text-slate-500">•</span>
-                  <span className="text-slate-400">{movieData.reviewStats.total} reviews</span>
+                  <span className="text-slate-400">{(m?.comments || []).length} reviews</span>
                 </div>
               </div>
 
@@ -370,7 +294,10 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
                 {reviews.slice(0, 4).map((review, index) => (
                   <ReviewItem
                     key={index}
-                    {...review}
+                    username={review.user_name || review.username || review.name || "Guest"}
+                    rating={review.rating ?? review.score ?? 0}
+                    date={review.created_at || review.date || ""}
+                    text={review.text || review.body || ""}
                     theme={theme}
                   />
                 ))}
@@ -444,11 +371,11 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
             >
               <h2 className="text-white mb-6">Gallery</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {movieData.gallery.map((image, index) => (
+                {(m?.gallery || []).map((image: any, index: number) => (
                   <GalleryThumb
                     key={index}
-                    image={image.url}
-                    alt={image.alt}
+                    image={image.url || image.path || image}
+                    alt={image.alt || image.title || m?.title}
                     theme={theme}
                   />
                 ))}
@@ -469,28 +396,46 @@ export function MovieInfoPage({ theme = "default", onBack, onNavigate }: MovieIn
                 <h2 className="text-white">Similar movies</h2>
               </div>
               
-              {/* Desktop: Compact vertical stack */}
+              Desktop: Compact vertical stack
               <div className="hidden lg:flex flex-col gap-2 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-                {movieData.similarMovies.map((movie, index) => (
-                  <SimilarCardCompact
-                    key={index}
-                    {...movie}
-                    theme={theme}
-                    onClick={() => console.log("Navigate to movie:", movie.title)}
-                  />
-                ))}
+                {similarLoading ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Spinner size="sm" theme={theme} />
+                  </div>
+                ) : (
+                  (similarItems || []).map((movie, index) => (
+                    <SimilarCardCompact
+                      key={movie.id ?? index}
+                      title={movie.title || "Untitled"}
+                      year={movie.release_date ? new Date(movie.release_date).getFullYear() : NaN}
+                      image={(movie as any).poster?.url || (movie as any).poster || (movie as any).poster_path || ""}
+                      rating={typeof movie.vote_avg === "number" ? movie.vote_avg : undefined}
+                      era={String(movie.era_id ??  "")}
+                      theme={theme}
+                      onClick={() => navigateToMovie(movie.id)}
+                    />
+                  ))
+                )}
               </div>
 
               {/* Mobile: 2-column grid */}
               <div className="grid grid-cols-2 gap-3 lg:hidden">
-                {movieData.similarMovies.map((movie, index) => (
-                  <SimilarCard
-                    key={index}
-                    {...movie}
-                    theme={theme}
-                    onClick={() => console.log("Navigate to movie:", movie.title)}
-                  />
-                ))}
+                {similarLoading ? (
+                  <div className="col-span-2 flex items-center justify-center p-4">
+                    <Spinner size="sm" theme={theme} />
+                  </div>
+                ) : (
+                  (similarItems || []).map((movie, index) => (
+                    <SimilarCard
+                      key={movie.id ?? index}
+                      title={movie.title || "Untitled"}
+                      year={movie.release_date ? new Date(movie.release_date).getFullYear() : NaN}
+                      image={(movie as any).poster?.url || (movie as any).poster || (movie as any).poster_path || ""}
+                      theme={theme}
+                      onClick={() => navigateToMovie(movie.id)}
+                    />
+                  ))
+                )}
               </div>
             </div>
           </motion.aside>

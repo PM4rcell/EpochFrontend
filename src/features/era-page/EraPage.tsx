@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { Skeleton } from "../../components/ui/skeleton";
 import { Spinner } from "../../components/ui/spinner";
 import { usePagination } from "../../hooks/usePagination";
+import { useMovieNavigationId } from "../../hooks/useMovieNavigationId";
 import { Pagination } from "../../components/ui/pagination";
 
 
@@ -56,6 +57,8 @@ export function EraPage() {
 
   // Server-driven pagination: fetch pages from the API (6 per page)
   const { items: pageItems, currentPage, totalPages, loading: paginationLoading, hasFetched, error, setPage } = usePagination(eraNumericId, 6);
+
+  const navigateToMovie = useMovieNavigationId();
 
   // Map API movie shape to MovieCard props for the current page
   const moviesForDisplay = (pageItems || []).map((m: any) => ({
@@ -148,7 +151,7 @@ export function EraPage() {
                   ) : (
                     moviesForDisplay.map((movie: any, index: number) => (
                       <motion.div key={movie.id ?? index} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}>
-                        <MovieCard {...movie} theme={currentEra as "90s" | "2000s" | "modern"} />
+                        <MovieCard {...movie} theme={currentEra as "90s" | "2000s" | "modern"} onClick={() => navigateToMovie(movie.id)} />
                       </motion.div>
                     ))
                   )}
