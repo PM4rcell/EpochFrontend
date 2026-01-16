@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { Spinner } from "../../components/ui/spinner";
+import { Skeleton } from "../../components/ui/skeleton";
 import { ArticleCard } from "./ArticleCard.tsx";
 import { Button } from "../../components/ui/button";
 import type { NewsCategory } from "./NewsPage";
@@ -33,9 +34,25 @@ export function ArticleGrid({ theme = "default", category, articles = [], loadin
 
   if (loading)
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <Spinner theme={spinnerTheme} size="sm" />
-        <p className="mt-3 italic text-slate-400 text-center">Loading articles...</p>
+      <div className="py-8 relative">
+        <div className="flex flex-col items-center justify-center mb-6">
+          <Spinner theme={spinnerTheme} size="sm" />
+          <p className="mt-3 italic text-slate-400 text-center">Loading articles...</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-44 w-full rounded-lg" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-full" />
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-3 w-1/4" />
+                <Skeleton className="h-3 w-1/6" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   if ((arguments[0] as ArticleGridProps).error) return <p>Failed to load articles.</p>;

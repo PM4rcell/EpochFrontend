@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Play, X, Star } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
@@ -17,6 +18,7 @@ import { Button } from "../../components/ui/button";
 import { useMovie } from "../../hooks/useMovie";
 import { useParams } from "react-router-dom";
 import { Spinner } from "../../components/ui/spinner";
+import MovieInfoPageSkeleton from "./MovieInfoPageSkeleton";
 import { useSimilarMovies } from "../../hooks/useSimilarMovies";
 import { useMovieNavigationId } from "../../hooks/useMovieNavigationId";
 
@@ -31,6 +33,8 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const [isLoggedIn] = useState(true); // Simulate logged-in state
   const [reviews, setReviews] = useState<any[]>([]);
 
+
+  const navigate = useNavigate();
 
   const handleReviewSubmit = (rating: number, text: string) => {
     const newReview = {
@@ -96,17 +100,15 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const { items: similarItems, loading: similarLoading } = useSimilarMovies(m?.id ?? movieId ?? null);
   const navigateToMovie = useMovieNavigationId();
 
-  if (loading)
-    return (
-      <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
-        <Navbar theme={theme} activePage="movies" />
-        <div className="container mx-auto px-6 py-32 flex flex-col items-center justify-center">
-          <Spinner size="sm" />
-          <p className="mt-4 text-slate-400">Loading movie...</p>
-        </div>
-        <Footer theme={theme} />
-      </div>
-    );
+  const handleBack = () => {
+    const eraKey = m ? resolveEraKey(m.era) : "modern";
+    navigate(`/${eraKey}`);
+    try {
+      onBack?.();
+    } catch {}
+  };
+
+  if (loading) return <MovieInfoPageSkeleton theme={theme} />;
 
   if (error || !movieData)
     return (
@@ -138,8 +140,8 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
         {/* Content */}
         <div className="relative z-20 container mx-auto px-6 min-h-[75vh] flex flex-col justify-between pt-24 pb-12">
           {/* Back button and quality badge */}
-          <div className="flex items-start justify-between mb-8">
-            <BackButton onBack={onBack || (() => {})} theme={theme} />
+            <div className="flex items-start justify-between mb-8">
+            <BackButton onBack={handleBack} theme={theme} />
             <MetaChip label={m?.age_rating || m?.quality || ""} variant="quality" theme={theme} />
           </div>
 
