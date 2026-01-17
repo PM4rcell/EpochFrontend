@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Play, X, Star } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
@@ -36,7 +35,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const [reviews, setReviews] = useState<any[]>([]);
 
 
-  const navigate = useNavigate();
+  
 
   const handleReviewSubmit = (rating: number, text: string) => {
     const newReview = {
