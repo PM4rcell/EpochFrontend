@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { ImageWithFallback } from "../ImageWithFallback/ImageWithFallback";
+import { useMovieNavigationId } from "../../hooks/useMovieNavigationId";
 
 interface SuggestionItemProps {
   id: string;
@@ -20,6 +21,8 @@ export function SuggestionItem({
   theme = "default",
   onClick,
 }: SuggestionItemProps) {
+  const navigateToMovie = useMovieNavigationId();
+  
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
@@ -57,7 +60,10 @@ export function SuggestionItem({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -5 }}
       transition={{ duration: 0.2 }}
-      onClick={() => onClick(id)}
+      onClick={() => {
+        navigateToMovie(id);
+        onClick?.(id);
+      }}
       className={`w-full flex items-center gap-3 p-2 rounded-lg ${colors.hover} transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400/50 text-left group`}
     >
       {/* Poster Thumbnail */}

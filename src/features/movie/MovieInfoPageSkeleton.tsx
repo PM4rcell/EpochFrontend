@@ -46,12 +46,12 @@ export function MovieInfoPageSkeleton({ theme = "modern" }: { theme?: "90s" | "2
       </div>
 
       {/* Content skeletons */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="flex flex-col items-center pointer-events-none">
-          <div className="pointer-events-auto">
+      <div className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none" style={{ paddingTop: '80px' }}>
+        <div className="flex flex-col items-center">
+          <div className="pointer-events-none">
             <Spinner size="sm" />
           </div>
-          <p className="mt-4 text-slate-400 pointer-events-none">Loading movie...</p>
+          <p className="mt-4 text-slate-400">Loading movie...</p>
         </div>
       </div>
 

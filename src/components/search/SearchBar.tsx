@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, X } from "lucide-react";
 import { SuggestionList } from "./SuggestionList.tsx";
+import { useSearchMovies } from "../../hooks/useSearchMovies";
 
 interface SearchBarProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -23,6 +24,9 @@ export function SearchBar({
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  
+  // Use the search hook to fetch movies as the user types
+  const { movies, loading, error } = useSearchMovies(query);
 
   const getThemeColors = () => {
     switch (theme) {
@@ -81,7 +85,8 @@ export function SearchBar({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
-    if (value.trim() && showDropdown) {
+    // Only show dropdown if query has at least 2 characters (matching hook requirement)
+    if (value.trim().length >= 2 && showDropdown) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
@@ -132,7 +137,7 @@ export function SearchBar({
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => query.trim() && showDropdown && setIsOpen(true)}
+            onFocus={() => query.trim().length >= 2 && showDropdown && setIsOpen(true)}
             placeholder={placeholder}
             className="flex-1 bg-transparent text-white placeholder:text-slate-500 px-2 py-2 focus:outline-none"
           />
@@ -159,9 +164,12 @@ export function SearchBar({
 
       {/* Suggestion Dropdown */}
       <AnimatePresence>
-        {isOpen && query.trim() && (
+        {isOpen && query.trim().length >= 2 && (
           <SuggestionList
             query={query}
+            movies={movies}
+            loading={loading}
+            error={error}
             theme={theme}
             onMovieClick={(movieId: string) => {
               onMovieClick?.(movieId);

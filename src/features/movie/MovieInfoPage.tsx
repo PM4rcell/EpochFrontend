@@ -21,6 +21,7 @@ import { Spinner } from "../../components/ui/spinner";
 import MovieInfoPageSkeleton from "./MovieInfoPageSkeleton";
 import { useSimilarMovies } from "../../hooks/useSimilarMovies";
 import { useMovieNavigationId } from "../../hooks/useMovieNavigationId";
+import { useEra } from "../../context/EraContext";
 
 
 
@@ -28,6 +29,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const { movieId } = useParams<{ movieId?: string }>();
 
   const { movie: movieData, loading, error } = useMovie<any>(movieId ?? null);
+  const { setEra } = useEra();
 
   const [showTrailer, setShowTrailer] = useState(false);
   const [isLoggedIn] = useState(true); // Simulate logged-in state
@@ -91,6 +93,25 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
   // (m is defined above)
 
+  // Map era_id to era string: 1 = "90s", 2 = "2000s", 3 = "modern"
+  const mapEraIdToEra = (eraId: number | undefined | null): "90s" | "2000s" | "modern" | null => {
+    if (eraId === 1) return "90s";
+    if (eraId === 2) return "2000s";
+    if (eraId === 3) return "modern";
+    return null;
+  };
+
+  // Set era context when movie loads
+  useEffect(() => {
+    if (m) {
+      const eraId = m.era_id ?? m.era?.id;
+      const era = mapEraIdToEra(eraId);
+      if (era) {
+        setEra(era);
+      }
+    }
+  }, [m, setEra]);
+
   useEffect(() => {
     if (m && Array.isArray(m.comments)) setReviews(m.comments);
     else setReviews([]);
@@ -100,15 +121,10 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const { items: similarItems, loading: similarLoading } = useSimilarMovies(m?.id ?? movieId ?? null);
   const navigateToMovie = useMovieNavigationId();
 
-  const handleBack = () => {
-    const eraKey = m ? resolveEraKey(m.era) : "modern";
-    navigate(`/${eraKey}`);
-    try {
-      onBack?.();
-    } catch {}
-  };
-
-  if (loading) return <MovieInfoPageSkeleton theme={theme} />;
+  // Show loading skeleton if loading OR if we have a movieId but no data yet (initial state)
+  if (loading || (movieId && !movieData && !error)) {
+    return <MovieInfoPageSkeleton theme={theme} />;
+  }
 
   if (error || !movieData)
     return (
@@ -141,7 +157,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
         <div className="relative z-20 container mx-auto px-6 min-h-[75vh] flex flex-col justify-between pt-24 pb-12">
           {/* Back button and quality badge */}
             <div className="flex items-start justify-between mb-8">
-            <BackButton onBack={handleBack} theme={theme} />
+            <BackButton onBack={onBack} theme={theme} />
             <MetaChip label={m?.age_rating || m?.quality || ""} variant="quality" theme={theme} />
           </div>
 
@@ -398,7 +414,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                 <h2 className="text-white">Similar movies</h2>
               </div>
               
-              Desktop: Compact vertical stack
+              {/*Desktop: Compact vertical stack*/}
               <div className="hidden lg:flex flex-col gap-2 max-h-[calc(100vh-16rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
                 {similarLoading ? (
                   <div className="flex items-center justify-center p-4">

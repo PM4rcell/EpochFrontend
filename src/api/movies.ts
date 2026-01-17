@@ -58,3 +58,15 @@ export async function fetchSimilarMovies(movieId: number, signal?: AbortSignal):
     console.warn("fetchSimilarMovies: unexpected response shape", data);
     return [];
 }
+
+export async function fetchMoviesByTitle(title: string, signal?: AbortSignal): Promise<Movie[]> {
+    const data = await apiFetch<any>(`/api/movies?q=${encodeURIComponent(title)}`, { signal });
+
+    if (Array.isArray(data)) return data as Movie[];
+    if (data && Array.isArray((data as any).movies)) return (data as any).movies as Movie[];
+    if (data && Array.isArray((data as any).data)) return (data as any).data as Movie[];
+    if (data && Array.isArray((data as any).items)) return (data as any).items as Movie[];
+
+    console.warn("fetchSimilarMovies: unexpected response shape", data);
+    return [];
+}

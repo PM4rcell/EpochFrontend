@@ -1,13 +1,28 @@
 import { motion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
+import { useBackNavigation } from "../../hooks/useBackNavigation";
 
 interface BackButtonProps {
-  onBack: () => void;
+  onBack?: () => void;
   theme?: "90s" | "2000s" | "modern" | "default";
   label?: string;
+  fallbackPath?: string;
 }
 
-export function BackButton({ onBack, theme = "default", label = "Back" }: BackButtonProps) {
+export function BackButton({ onBack, theme = "default", label = "Back", fallbackPath }: BackButtonProps) {
+  const handleBackNavigation = useBackNavigation(fallbackPath);
+  
+  const handleClick = () => {
+    handleBackNavigation();
+    // Call optional onBack callback
+    if (onBack) {
+      try {
+        onBack();
+      } catch (error) {
+        console.error('Error in onBack callback:', error);
+      }
+    }
+  };
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
@@ -45,7 +60,7 @@ export function BackButton({ onBack, theme = "default", label = "Back" }: BackBu
 
   return (
     <motion.button
-      onClick={onBack}
+      onClick={handleClick}
       whileHover={{ scale: 1.05, x: -2 }}
       whileTap={{ scale: 0.98 }}
       className={`

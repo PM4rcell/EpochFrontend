@@ -25,6 +25,10 @@ interface EraContextType {
   // Components can use this to ignore a URL-driven re-set that happens
   // immediately after a user cleared the era (prevents the two-click UX).
   lastClearedAt: number | null;
+  // Previous era before the current one was set
+  previousEra: Era;
+  // Restore the previous era
+  restorePreviousEra: () => void;
 }
 
 /*
@@ -59,8 +63,13 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
 
   // Wrapper around the internal setter that persists to localStorage.
   const [lastClearedAt, setLastClearedAt] = useState<number | null>(null);
+  const [previousEra, setPreviousEra] = useState<Era>(null);
 
   const setEra = (next: Era) => {
+    // Save current era as previous before setting new one (only if it's actually changing)
+    if (next !== era) {
+      setPreviousEra(era);
+    }
     setEraState(next);
     try {
       if (next === null) {
@@ -78,8 +87,22 @@ export function EraProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const restorePreviousEra = () => {
+    setEraState(previousEra);
+    try {
+      if (previousEra === null) {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        localStorage.setItem(STORAGE_KEY, previousEra);
+      }
+      setLastClearedAt(null);
+    } catch (e) {
+      // ignore storage write errors
+    }
+  };
+
   return (
-    <EraContext.Provider value={{ era, setEra, lastClearedAt }}>
+    <EraContext.Provider value={{ era, setEra, lastClearedAt, previousEra, restorePreviousEra }}>
       {children}
     </EraContext.Provider>
   );

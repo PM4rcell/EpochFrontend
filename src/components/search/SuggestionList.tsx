@@ -1,133 +1,14 @@
 import { motion } from "motion/react";
 import { SuggestionItem } from "./SuggestionItem.tsx";
 import { ChevronRight } from "lucide-react";
-
-// Mock movie data for typeahead
-const MOVIES = [
-  {
-    id: "1",
-    title: "Avatar: The Way of Water",
-    year: 2022,
-    poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop",
-    genres: ["Sci-Fi", "Adventure"],
-    rating: 4.5,
-    runtime: "192 min",
-    inCinemas: true,
-  },
-  {
-    id: "2",
-    title: "Avatar",
-    year: 2009,
-    poster: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop",
-    genres: ["Sci-Fi", "Adventure"],
-    rating: 4.7,
-    runtime: "162 min",
-    inCinemas: false,
-  },
-  {
-    id: "3",
-    title: "The Matrix Resurrections",
-    year: 2021,
-    poster: "https://images.unsplash.com/photo-1574267432644-f294cd0b5e6e?w=400&h=600&fit=crop",
-    genres: ["Sci-Fi", "Action"],
-    rating: 4.0,
-    runtime: "148 min",
-    inCinemas: false,
-  },
-  {
-    id: "4",
-    title: "Blade Runner 2049",
-    year: 2017,
-    poster: "https://images.unsplash.com/photo-1616530940355-351fabd9524b?w=400&h=600&fit=crop",
-    genres: ["Sci-Fi", "Thriller"],
-    rating: 4.6,
-    runtime: "164 min",
-    inCinemas: false,
-  },
-  {
-    id: "5",
-    title: "Interstellar",
-    year: 2014,
-    poster: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400&h=600&fit=crop",
-    genres: ["Sci-Fi", "Drama"],
-    rating: 4.8,
-    runtime: "169 min",
-    inCinemas: false,
-  },
-  {
-    id: "6",
-    title: "Inception",
-    year: 2010,
-    poster: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop",
-    genres: ["Sci-Fi", "Thriller"],
-    rating: 4.8,
-    runtime: "148 min",
-    inCinemas: false,
-  },
-  {
-    id: "7",
-    title: "The Dark Knight",
-    year: 2008,
-    poster: "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=400&h=600&fit=crop",
-    genres: ["Action", "Crime"],
-    rating: 4.9,
-    runtime: "152 min",
-    inCinemas: false,
-  },
-  {
-    id: "8",
-    title: "Pulp Fiction",
-    year: 1994,
-    poster: "https://images.unsplash.com/photo-1485095329183-d0797cdc5676?w=400&h=600&fit=crop",
-    genres: ["Crime", "Drama"],
-    rating: 4.7,
-    runtime: "154 min",
-    inCinemas: false,
-  },
-  {
-    id: "9",
-    title: "The Shawshank Redemption",
-    year: 1994,
-    poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop",
-    genres: ["Drama"],
-    rating: 4.9,
-    runtime: "142 min",
-    inCinemas: false,
-  },
-  {
-    id: "10",
-    title: "Goodfellas",
-    year: 1990,
-    poster: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=400&h=600&fit=crop",
-    genres: ["Crime", "Drama"],
-    rating: 4.8,
-    runtime: "146 min",
-    inCinemas: false,
-  },
-  {
-    id: "11",
-    title: "Oppenheimer",
-    year: 2023,
-    poster: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&h=600&fit=crop",
-    genres: ["Biography", "Drama"],
-    rating: 4.7,
-    runtime: "180 min",
-    inCinemas: true,
-  },
-  {
-    id: "12",
-    title: "Dune: Part Two",
-    year: 2024,
-    poster: "https://images.unsplash.com/photo-1491677533189-49af044391ed?w=400&h=600&fit=crop",
-    genres: ["Sci-Fi", "Adventure"],
-    rating: 4.6,
-    runtime: "166 min",
-    inCinemas: true,
-  },
-];
+import { Skeleton } from "../ui/skeleton";
+import type { Movie } from "../../api/movies";
 
 interface SuggestionListProps {
   query: string;
+  movies: Movie[];
+  loading: boolean;
+  error: Error | null;
   theme?: "90s" | "2000s" | "modern" | "default";
   onMovieClick: (movieId: string) => void;
   onSeeAllResults: () => void;
@@ -135,6 +16,9 @@ interface SuggestionListProps {
 
 export function SuggestionList({
   query,
+  movies,
+  loading,
+  error,
   theme = "default",
   onMovieClick,
   onSeeAllResults,
@@ -166,12 +50,60 @@ export function SuggestionList({
 
   const colors = getThemeColors();
 
-  // Filter movies based on query (case-insensitive)
-  const filteredMovies = MOVIES.filter((movie) =>
-    movie.title.toLowerCase().includes(query.toLowerCase())
-  ).slice(0, 6); // Limit to 6 results
+  // Show loading state with skeleton items
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.25, ease: [0.65, 0, 0.35, 1] }}
+        className="absolute top-full left-0 right-0 mt-2 bg-black/95 backdrop-blur-md border border-slate-700/50 rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.5)] z-50"
+      >
+        {/* Skeleton Suggestions */}
+        <div className="p-2">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div
+              key={index}
+              className="w-full flex items-center gap-3 p-2 rounded-lg"
+            >
+              {/* Poster Thumbnail Skeleton */}
+              <div className="shrink-0 w-10 h-15 rounded overflow-hidden">
+                <Skeleton className="w-full h-full" />
+              </div>
 
-  if (filteredMovies.length === 0) {
+              {/* Info Skeleton */}
+              <div className="flex-1 min-w-0 space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.25, ease: [0.65, 0, 0.35, 1] }}
+        className="absolute top-full left-0 right-0 mt-2 bg-black/95 backdrop-blur-md border border-slate-700/50 rounded-lg shadow-[0_8px_30px_rgba(0,0,0,0.5)] p-4 z-50"
+      >
+        <p className="text-slate-400 text-center">Error searching movies</p>
+      </motion.div>
+    );
+  }
+
+  // Limit to 6 results for display (ensure movies is an array)
+  const displayedMovies = (movies || []).slice(0, 5);
+
+  // Show no results state
+  if (displayedMovies.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -195,18 +127,23 @@ export function SuggestionList({
     >
       {/* Suggestions */}
       <div className="p-2 max-h-100 overflow-y-auto overflow-x-visible">
-        {filteredMovies.map((movie) => (
-          <SuggestionItem
-            key={movie.id}
-            id={movie.id}
-            title={movie.title}
-            year={movie.year}
-            poster={movie.poster}
-            inCinemas={movie.inCinemas}
-            theme={theme}
-            onClick={onMovieClick}
-          />
-        ))}
+        {displayedMovies.map((movie) => {
+          const year = movie.release_date ? new Date(movie.release_date).getFullYear() : NaN;
+          const posterUrl = (movie as any).poster?.url || (movie as any).poster || (movie as any).poster_path || "";
+          
+          return (
+            <SuggestionItem
+              key={movie.id}
+              id={String(movie.id)}
+              title={movie.title}
+              year={year}
+              poster={posterUrl}
+              inCinemas={movie.is_featured || false}
+              theme={theme}
+              onClick={onMovieClick}
+            />
+          );
+        })}
       </div>
 
       {/* See All Results */}
@@ -223,5 +160,3 @@ export function SuggestionList({
     </motion.div>
   );
 }
-
-export { MOVIES };
