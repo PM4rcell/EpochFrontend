@@ -1,8 +1,8 @@
 import { motion } from "motion/react";
 import { SuggestionItem } from "./SuggestionItem.tsx";
 import { ChevronRight } from "lucide-react";
-import { Skeleton } from "../ui/skeleton";
-import type { Movie } from "../../api/movies";
+import { Skeleton } from "../../components/ui/skeleton.tsx";
+import type { Movie } from "../../api/movies.ts";
 
 interface SuggestionListProps {
   query: string;

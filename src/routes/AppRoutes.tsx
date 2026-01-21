@@ -4,6 +4,7 @@ import { EraPage } from "../features/era-page/EraPage.tsx";
 import { ScreeningsPage } from "../features/screening/ScreeningsPage.tsx";
 import { NewsPage } from "../features/news/NewsPage";
 import { MovieInfoPage } from "../features/movie/MovieInfoPage.tsx";
+import { SearchResultsPage } from "../features/search/SearchResultsPage.tsx";
 
 export function AppRoutes() {
   return (
@@ -23,8 +24,8 @@ export function AppRoutes() {
       {/* Movie info page */}
       <Route path="/movies/:movieId" element={<MovieInfoPage />} />
 
-      {/* Ha később lesz más oldal, ide jöhet */}
-      {/* <Route path="/profile" element={<ProfilePage />} /> */}
+      {/* Search Result page */}
+      <Route path="/search" element={<SearchResultsPage />} />
     </Routes>
   );
 }

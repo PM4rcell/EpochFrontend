@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { ImageWithFallback } from "../ImageWithFallback/ImageWithFallback";
+import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { useMovieNavigationId } from "../../hooks/useMovieNavigationId";
 
 interface SuggestionItemProps {

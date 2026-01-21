@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Search, User } from "lucide-react";
 import { useState } from "react";
-import { SearchBar } from "../search/SearchBar";
+import { SearchBar } from "../../features/search/SearchBar";
 import { useEra } from "../../context/EraContext";
 import { useNavigate, useLocation } from "react-router-dom";
 

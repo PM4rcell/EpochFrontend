@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, X } from "lucide-react";
 import { SuggestionList } from "./SuggestionList.tsx";
-import { useSearchMovies } from "../../hooks/useSearchMovies";
+import { useSearchMovies } from "../../hooks/useSearchMovies.ts";
 
 interface SearchBarProps {
   theme?: "90s" | "2000s" | "modern" | "default";
