@@ -26,3 +26,19 @@ export async function fetchNews(signal?: AbortSignal): Promise<NewsItem[]> {
   console.warn("fetchNews: unexpected response shape", data);
   return [];
 }
+
+/**
+ * Fetch single article by id and normalize response.
+ */
+export async function fetchArticle(id: string | number, signal?: AbortSignal): Promise<NewsItem | null> {
+  if (id === undefined || id === null) return null;
+
+  const data = await apiFetch<any>(`/api/news/${id}`, { signal });
+
+  // Common shapes: { data: { ... } } or direct object
+  if (!data) return null;
+  if ((data as any).data && typeof (data as any).data === "object") return (data as any).data as NewsItem;
+  if (typeof data === "object") return data as NewsItem;
+
+  return null;
+}

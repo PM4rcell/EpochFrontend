@@ -43,6 +43,15 @@ export async function apiFetch<T = any>(path: string, options: ApiFetchOptions =
 
   // If caller provided a signal, forward its aborts to our controller.
   if (userSignal) {
+    // If the provided signal is already aborted, abort immediately instead of
+    // registering a listener which some environments may trigger synchronously.
+    if (userSignal.aborted) {
+      clearTimeout(timeout);
+      const e = new Error("Request aborted by caller");
+      (e as any).name = "AbortError";
+      throw e;
+    }
+
     userSignal.addEventListener("abort", () => controller.abort(), { once: true });
   }
 
@@ -63,6 +72,11 @@ export async function apiFetch<T = any>(path: string, options: ApiFetchOptions =
   };
 
   try {
+    // Debug: log method + URL so we can inspect failing requests in console.
+    try {
+      // eslint-disable-next-line no-console
+      console.debug("apiFetch ->", init.method, url);
+    } catch {}
     const res = await fetch(url, init);
     clearTimeout(timeout);
 

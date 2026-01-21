@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useEra } from "../../context/EraContext";
 import { motion, AnimatePresence } from "motion/react";
 import { Skeleton } from "../../components/ui/skeleton";
@@ -9,6 +9,7 @@ import { Footer } from "../../components/layout/Footer";
 import { SearchBar } from "./SearchBar";
 import { MovieCard } from "../../components/ui/movie-card";
 import { useSearchMovies } from "../../hooks/useSearchMovies";
+import { useMovieNavigationId } from "../../hooks/useMovieNavigationId";
 import type { Movie as ApiMovie } from "../../api/movies";
 import { Filter, ChevronDown } from "lucide-react";
 
@@ -34,7 +35,7 @@ export function SearchResultsPage({
   const [showSortMenu, setShowSortMenu] = useState(false);
 
   const location = useLocation();
-  const navigate = useNavigate();
+  const navigateToMovie = useMovieNavigationId();
   const { era } = useEra();
 
   // Compute the applied theme (EraContext overrides the page `theme` prop).
@@ -295,7 +296,7 @@ export function SearchResultsPage({
                       delay: Math.min(index * 0.05, 0.3),
                     }}
                   >
-                    <MovieCard
+                      <MovieCard
                       title={movie.title}
                       year={movie.year}
                       rating={movie.rating}
@@ -304,7 +305,7 @@ export function SearchResultsPage({
                       theme={appliedTheme}
                       onClick={() => {
                         if (onMovieClick) onMovieClick(movie.id);
-                        else navigate(`/movies/${movie.id}`);
+                        else navigateToMovie(movie.id);
                       }}
                     />
                   </motion.div>

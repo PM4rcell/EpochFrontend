@@ -5,6 +5,7 @@ import { NewsHero } from "./NewsHero.tsx";
 import { CategoryFilters } from "./CategoryFilters";
 import { ArticleGrid } from "./ArticleGrid.tsx";
 import { useNews } from "../../hooks/useNews";
+import { useArticleNavigationId } from "../../hooks/useArticleNavigationId";
 import { NewsSidebar } from "./NewsSidebar";
 
 interface NewsPageProps {
@@ -23,6 +24,7 @@ export function NewsPage({
 }: NewsPageProps) {
   const [activeCategory, setActiveCategory] = useState<NewsCategory>("all");
   const { articles, loading, error } = useNews();
+  const navigateToArticle = useArticleNavigationId();
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -44,7 +46,7 @@ export function NewsPage({
           className="container mx-auto px-4 sm:px-6 max-w-7xl"
         >
           {/* News Hero */}
-          <NewsHero onArticleClick={onArticleClick} />
+          <NewsHero onArticleClick={onArticleClick ?? navigateToArticle} />
 
           {/* Category Filters */}
           <CategoryFilters
@@ -61,13 +63,13 @@ export function NewsPage({
                 articles={articles}
                 loading={loading}
                 error={error}
-                onArticleClick={onArticleClick}
+                onArticleClick={onArticleClick ?? navigateToArticle}
               />
             </div>
 
             {/* Sidebar - 3 columns on desktop, below grid on mobile */}
             <div className="lg:col-span-3 mt-8 lg:mt-0">
-              <NewsSidebar onArticleClick={onArticleClick} />
+              <NewsSidebar onArticleClick={onArticleClick ?? navigateToArticle} />
             </div>
           </div>
         </motion.div>
