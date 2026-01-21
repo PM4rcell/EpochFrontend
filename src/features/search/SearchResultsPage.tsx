@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEra } from "../../context/EraContext";
 import { motion, AnimatePresence } from "motion/react";
+import { Skeleton } from "../../components/ui/skeleton";
+import { Spinner } from "../../components/ui/spinner";
 import { Navbar } from "../../components/layout/Navbar";
 import { Footer } from "../../components/layout/Footer";
 import { SearchBar } from "./SearchBar";
@@ -20,7 +24,6 @@ type FilterType = "all" | "inCinemas" | "upcoming" | "byRating";
 type SortType = "relevant" | "newest" | "alphabetical";
 
 export function SearchResultsPage({
-  theme = "default",
   initialQuery = "",
   onMovieClick,
   onSearchSubmit,
@@ -30,12 +33,21 @@ export function SearchResultsPage({
   const [sortBy, setSortBy] = useState<SortType>("relevant");
   const [showSortMenu, setShowSortMenu] = useState(false);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { era } = useEra();
+
+  // Compute the applied theme (EraContext overrides the page `theme` prop).
+  // When no era is selected (null) use the 90s theme by default.
+  const appliedTheme = (era ?? "90s") as "90s" | "2000s" | "modern";
+
   useEffect(() => {
-    setQuery(initialQuery);
-  }, [initialQuery]);
+    const q = new URLSearchParams(location.search).get("q") ?? initialQuery;
+    setQuery(q);
+  }, [location.search, initialQuery]);
 
   const getThemeColors = () => {
-    switch (theme) {
+    switch (appliedTheme) {
       case "90s":
         return {
           accent: "text-amber-500",
@@ -78,7 +90,7 @@ export function SearchResultsPage({
   const colors = getThemeColors();
 
   // Use search hook to fetch matching movies when a query exists
-  const { movies: apiMovies } = useSearchMovies(query);
+  const { movies: apiMovies, loading } = useSearchMovies(query);
 
   // Map API movie shape to the simplified model used by this page
   const sourceMovies = (apiMovies || []).map((m: ApiMovie) => ({
@@ -145,7 +157,7 @@ export function SearchResultsPage({
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <Navbar theme={theme} activePage="movies" />
+      <Navbar theme={appliedTheme} activePage="movies" />
 
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
@@ -177,7 +189,7 @@ export function SearchResultsPage({
             className="mb-6"
           >
             <SearchBar
-              theme={theme}
+              theme={appliedTheme}
               onMovieClick={onMovieClick}
               onSearchSubmit={(newQuery) => {
                 setQuery(newQuery);
@@ -289,8 +301,11 @@ export function SearchResultsPage({
                       rating={movie.rating}
                       runtime={movie.runtime}
                       poster={movie.poster}
-                      theme={theme === "default" ? "modern" : theme}
-                      onClick={() => onMovieClick?.(movie.id)}
+                      theme={appliedTheme}
+                      onClick={() => {
+                        if (onMovieClick) onMovieClick(movie.id);
+                        else navigate(`/movies/${movie.id}`);
+                      }}
                     />
                   </motion.div>
                 ))}
@@ -304,37 +319,52 @@ export function SearchResultsPage({
                 transition={{ duration: 0.3 }}
                 className="text-center py-20"
               >
-                <motion.div
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  className={`w-20 h-20 mx-auto mb-6 rounded-full bg-linear-to-br ${colors.gradientFrom} ${colors.gradientTo} opacity-20 flex items-center justify-center`}
-                >
-                  <Filter className="w-10 h-10 text-white" />
-                </motion.div>
-                <h2 className="mb-3 text-white">
-                  No movies found
-                  {hasQuery && ` for "${query}"`}
-                </h2>
-                <p className="text-slate-400 mb-6">
-                  Try a different search term or adjust your filters
-                </p>
-                <button
-                  onClick={() => {
-                    setQuery("");
-                    setActiveFilter("all");
-                  }}
-                  className={`px-6 py-3 bg-linear-to-r ${colors.gradientFrom} ${colors.gradientTo} text-white rounded-lg transition-all duration-200 hover:shadow-[0_8px_30px_rgba(245,158,11,0.3)] focus:outline-none focus:ring-2 focus:ring-slate-400/50`}
-                >
-                  Browse all movies
-                </button>
+                {loading && hasQuery ? (
+                  <div className="space-y-6">
+                    <div className="flex flex-col items-center justify-center text-center py-6">
+                      <Spinner theme={appliedTheme} size="sm" />
+                      <h3 className="mt-3 italic text-slate-400">Loading movies...</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="space-y-3">
+                          <Skeleton className="h-56 w-full rounded-lg" />
+                          <div className="flex gap-2 items-center">
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-4 w-1/4" />
+                          </div>
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <motion.div
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      className={`w-20 h-20 mx-auto mb-6 rounded-full bg-linear-to-br ${colors.gradientFrom} ${colors.gradientTo} opacity-20 flex items-center justify-center`}
+                    >
+                      <Filter className="w-10 h-10 text-white" />
+                    </motion.div>
+                    <h2 className="mb-3 text-white">
+                      No movies found
+                      {hasQuery && ` for "${query}"`}
+                    </h2>
+                    <p className="text-slate-400 mb-6">
+                      Try a different search term or adjust your filters
+                    </p>
+                  </>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </main>
 
-      <Footer />
+      <Footer theme={appliedTheme} />
 
       {/* Ambient lighting */}
       <div className="fixed top-20 left-10 w-96 h-96 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />

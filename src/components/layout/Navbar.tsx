@@ -62,6 +62,7 @@ export function Navbar({
   // NAV ITEMS
   const navItems = [
     { label: "Home", path: hasSelectedEra ? `/${era}` : "/" }, // Home a context alapján
+    { label: "Explore", path: "/search"},
     { label: "Schedule", path: "/screenings", requiresEra: true },
     { label: "News", path: "/news" },
   ];
@@ -92,14 +93,14 @@ export function Navbar({
     >
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         {/* LOGO */}
-          <motion.button
+        <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => {
-              // Navigate first, then clear era in context. Clearing after
-              // navigation avoids races where other page effects re-set the era.
-              navigate("/", { replace: true });
-              setEra(null);
+            // Navigate first, then clear era in context. Clearing after
+            // navigation avoids races where other page effects re-set the era.
+            navigate("/", { replace: true });
+            setEra(null);
           }}
           className="flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400/50 rounded"
         >
@@ -194,7 +195,14 @@ export function Navbar({
               // Pass the computed theme (context-aware) into child components
               theme={appliedTheme}
               onMovieClick={(movieId) => { onMovieClick?.(movieId); setShowSearchBar(false); }}
-              onSearchSubmit={(query) => { onSearchSubmit?.(query); setShowSearchBar(false); }}
+              onSearchSubmit={(query) => {
+                if (onSearchSubmit) {
+                  onSearchSubmit(query);
+                } else {
+                  navigate(`/search?q=${encodeURIComponent(query)}`);
+                }
+                setShowSearchBar(false);
+              }}
               placeholder="Search movies..."
               showDropdown={true}
             />
