@@ -5,6 +5,7 @@ import { ScreeningsPage } from "../features/screening/ScreeningsPage.tsx";
 import { NewsPage } from "../features/news/NewsPage";
 import { MovieInfoPage } from "../features/movie/MovieInfoPage.tsx";
 import { SearchResultsPage } from "../features/search/SearchResultsPage.tsx";
+import { ArticleDetailPage } from "../features/news/ArticleDetailPage.tsx";
 
 export function AppRoutes() {
   return (
@@ -26,6 +27,8 @@ export function AppRoutes() {
 
       {/* Search Result page */}
       <Route path="/search" element={<SearchResultsPage />} />
+
+      <Route path="/article/:articleId" element={<ArticleDetailPage />} />
     </Routes>
   );
 }

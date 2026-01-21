@@ -4,11 +4,11 @@ import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
+import { useParams } from "react-router-dom";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { ArticleCard } from "./ArticleCard";
 
 interface ArticleDetailPageProps {
-  articleId: string;
   theme?: "90s" | "2000s" | "modern" | "default";
   onNavigate?: (page: any) => void;
   onBack?: () => void;
@@ -65,14 +65,16 @@ const relatedArticles = [
 ];
 
 export function ArticleDetailPage({
-  articleId,
   theme,
   onBack,
   onArticleClick,
 }: ArticleDetailPageProps) {
+  const { articleId } = useParams<{ articleId: string }>();
+  if (!articleId) {
+    return <div>Article not found</div>;
+  }
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const article = articleData[articleId] || articleData["featured-1"];
-
   useEffect(() => {
     const handleScroll = () => {
       setShowStickyHeader(window.scrollY > 400);
