@@ -57,7 +57,6 @@ export function useArticle(articleId?: string | null) {
   }, [articleId]);
 
   useEffect(() => {
-    let mounted = true;
     (async () => {
       try {
         await fetch();
@@ -65,7 +64,6 @@ export function useArticle(articleId?: string | null) {
     })();
 
     return () => {
-      mounted = false;
     };
   }, [fetch]);
 

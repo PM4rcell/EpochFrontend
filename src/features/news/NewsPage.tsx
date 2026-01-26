@@ -4,7 +4,7 @@ import { Navbar } from "../../components/layout/Navbar";
 import { NewsHero } from "./NewsHero.tsx";
 import { CategoryFilters } from "./CategoryFilters";
 import { ArticleGrid } from "./ArticleGrid.tsx";
-import { useNews } from "../../hooks/useNews";
+import { useNews } from "../../hooks/useArticles.ts";
 import { useArticleNavigationId } from "../../hooks/useArticleNavigationId";
 import { NewsSidebar } from "./NewsSidebar";
 

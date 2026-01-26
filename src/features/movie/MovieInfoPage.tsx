@@ -526,20 +526,6 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Sticky CTA - Desktop only */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1 }}
-        className="hidden lg:block fixed bottom-8 right-8 z-40"
-      >
-        <CTAButton 
-          onClick={() => onNavigate?.("screenings")} 
-          theme={theme}
-          label="View schedules"
-        />
-      </motion.div>
     </div>
   );
 }

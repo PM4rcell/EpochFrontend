@@ -9,6 +9,8 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { Button } from "../../components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
 import { useArticle } from "../../hooks/useArticle";
+import { useNews } from "../../hooks/useArticles";
+import type { Article } from "../../hooks/useArticles";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { ArticleCard } from "./ArticleCard";
 
@@ -20,44 +22,14 @@ interface ArticleDetailPageProps {
 }
 
 
-const relatedArticles = [
-  {
-    id: "related-1",
-    title: "The Future of Cinema Technology",
-    excerpt: "Exploring the cutting-edge innovations shaping tomorrow's movie experience.",
-    image: "https://images.unsplash.com/photo-1594908900066-3f47337549d8?w=800&h=600&fit=crop",
-    tag: "Behind the Scenes",
-    date: "Nov 28, 2024",
-    readTime: "6 min",
-  },
-  {
-    id: "related-2",
-    title: "A Guide to Our Enhanced Sound Systems",
-    excerpt: "Discover how our Dolby Atmos installation delivers unparalleled audio immersion.",
-    image: "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800&h=600&fit=crop",
-    tag: "Announcements",
-    date: "Nov 26, 2024",
-    readTime: "4 min",
-  },
-  {
-    id: "related-3",
-    title: "Member Exclusive: Early Access Benefits",
-    excerpt: "Learn about the perks that come with your Silver and Gold tier memberships.",
-    image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&h=600&fit=crop",
-    tag: "Announcements",
-    date: "Nov 24, 2024",
-    readTime: "5 min",
-  },
-];
-
 export function ArticleDetailPage({
   onBack,
   onArticleClick,
 }: ArticleDetailPageProps) {
   const { articleId } = useParams<{ articleId: string }>();
-  if (!articleId) return <div>Article not found</div>;
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const { article, loading, error } = useArticle(articleId);
+  const { articles: allArticles } = useNews();
   const navigate = useNavigate();
   const handleBack = onBack ?? (() => navigate(-1));
   const { era } = useEra();
@@ -101,6 +73,16 @@ export function ArticleDetailPage({
   };
 
   const colors = getThemeColors();
+  const [randomArticles, setRandomArticles] = useState<Article[]>([]);
+
+  // Set random articles only once when articles are loaded
+  useEffect(() => {
+    if (allArticles && allArticles.length > 0) {
+      const otherArticles = allArticles.filter(a => String(a.id) !== String(articleId));
+      const shuffled = [...otherArticles].sort(() => 0.5 - Math.random());
+      setRandomArticles(shuffled.slice(0, 3));
+    }
+  }, [allArticles, articleId]);
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white">
@@ -195,6 +177,7 @@ export function ArticleDetailPage({
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -300,20 +283,14 @@ export function ArticleDetailPage({
             transition={{ duration: 0.35, delay: 0.3 }}
             className="border-t border-slate-800/50 pt-12 pb-16"
           >
-            <h2 className="text-slate-300 mb-6">More Like This</h2>
+            <h2 className="text-slate-300 mb-6">More Articles</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {relatedArticles.map((related, index) => (
-                <motion.div
-                  key={related.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.35 + index * 0.05 }}
-                >
-                  <ArticleCard
-                    article={related}
-                    onClick={() => onArticleClick?.(related.id)}
-                  />
-                </motion.div>
+              {randomArticles.map((randomArticle) => (
+                <ArticleCard
+                  key={randomArticle.id}
+                  article={randomArticle}
+                  onClick={() => onArticleClick ? onArticleClick(randomArticle.id) : navigate(`/article/${randomArticle.id}`)}
+                />
               ))}
             </div>
           </motion.section>

@@ -6,6 +6,7 @@ import { NewsPage } from "../features/news/NewsPage";
 import { MovieInfoPage } from "../features/movie/MovieInfoPage.tsx";
 import { SearchResultsPage } from "../features/search/SearchResultsPage.tsx";
 import { ArticleDetailPage } from "../features/news/ArticleDetailPage.tsx";
+import { ProfilePage } from "../features/profile/ProfilePage.tsx";
 
 export function AppRoutes() {
   return (
@@ -29,6 +30,8 @@ export function AppRoutes() {
       <Route path="/search" element={<SearchResultsPage />} />
 
       <Route path="/article/:articleId" element={<ArticleDetailPage />} />
+
+      <Route path="/profile" element={<ProfilePage/>}/>
     </Routes>
   );
 }
