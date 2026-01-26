@@ -1,7 +1,9 @@
 import { motion, useInView } from "motion/react";
-import { useRef } from "react";
-import { ArrowRight, Calendar, Trophy, Newspaper } from "lucide-react";
+import { useRef, useEffect, useState } from "react";
+import { ArrowRight, Newspaper } from "lucide-react";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
+import { useNavigate } from "react-router-dom";
+import { useNews, type Article } from "../../hooks/useArticles";
 
 interface FeaturedCard {
   id: string;
@@ -12,36 +14,23 @@ interface FeaturedCard {
   icon: typeof Newspaper;
 }
 
-const featuredCards: FeaturedCard[] = [
-  {
-    id: "1",
-    type: "news",
-    title: "New Era Film Festival Announced",
-    description: "Join us for a celebration of cinema across decades. Featuring restored classics and modern masterpieces.",
-    image: "https://images.unsplash.com/photo-1702890764798-eda71e941da1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    icon: Newspaper,
-  },
-  {
-    id: "2",
-    type: "prize",
-    title: "Win Premiere Tickets to F1 (2025)",
-    description: "Enter for a chance to experience the adrenaline of opening night with exclusive VIP access.",
-    image: "https://images.unsplash.com/photo-1568876694728-451bbf694b83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    icon: Trophy,
-  },
-  {
-    id: "3",
-    type: "event",
-    title: "Avatar Anniversary Screening",
-    description: "Relive the magic on the big screen with a special 15th anniversary presentation in IMAX.",
-    image: "https://images.unsplash.com/photo-1760420940953-3958ad9f6287?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600",
-    icon: Calendar,
-  },
-];
-
 export function FeaturedSection() {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const { articles: allArticles } = useNews();
+  const [randomArticles, setRandomArticles] = useState<Article[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (allArticles && allArticles.length > 0) {
+      const shuffled = [...allArticles].sort(() => 0.5 - Math.random());
+      setRandomArticles(shuffled.slice(0, 3));
+    }
+  }, [allArticles]);
+
+  const cardsToShow: FeaturedCard[] = randomArticles.length > 0
+    ? randomArticles.map((a) => ({ id: a.id, type: "news", title: a.title, description: a.excerpt, image: a.image, icon: Newspaper }))
+    : [];
 
   return (
     <section
@@ -64,7 +53,7 @@ export function FeaturedSection() {
             className="bg-linear-to-r from-amber-600 via-amber-400 to-slate-400 bg-clip-text text-transparent mb-4 relative inline-block"
             whileHover={{ filter: "drop-shadow(0 0 12px rgba(245,158,11,0.5))" }}
           >
-            FEATURED NEWS & EVENTS
+            FEATURED NEWS
           </motion.h2>
           
           {/* Animated underline */}
@@ -78,7 +67,7 @@ export function FeaturedSection() {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {featuredCards.map((card, index) => {
+          {cardsToShow.map((card, index) => {
             const Icon = card.icon;
             return (
               <motion.div
@@ -91,6 +80,7 @@ export function FeaturedSection() {
                   ease: [0.65, 0, 0.35, 1],
                 }}
                 whileHover={{ scale: 1.03, y: -5 }}
+                onClick={() => navigate(`/article/${card.id}`)}
                 className="group bg-[#101010] rounded-[20px] overflow-hidden border border-amber-500/20 shadow-[0_8px_20px_rgba(255,255,255,0.08)] hover:border-amber-500/40 hover:shadow-[0_12px_30px_rgba(245,158,11,0.15)] transition-all duration-150 cursor-pointer"
               >
                 {/* Image */}
