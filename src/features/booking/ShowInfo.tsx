@@ -1,0 +1,87 @@
+import { motion } from "motion/react";
+import { Calendar, Clock, Film } from "lucide-react";
+
+interface ShowInfoProps {
+  date: string;
+  time: string;
+  format: string;
+  venue?: string;
+  theme?: "90s" | "2000s" | "modern" | "default";
+}
+
+export function ShowInfo({ date, time, format, venue, theme = "default" }: ShowInfoProps) {
+  const getThemeColors = () => {
+    switch (theme) {
+      case "90s":
+        return {
+          accent: "text-amber-500",
+          border: "border-amber-600/20",
+        };
+      case "2000s":
+        return {
+          accent: "text-blue-400",
+          border: "border-blue-500/20",
+        };
+      case "modern":
+        return {
+          accent: "text-slate-300",
+          border: "border-slate-400/20",
+        };
+      default:
+        return {
+          accent: "text-amber-500",
+          border: "border-amber-600/20",
+        };
+    }
+  };
+
+  const colors = getThemeColors();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-black/40 border border-slate-700/50 rounded-lg p-6 space-y-4 h-fit lg:sticky lg:top-28 overflow-hidden"
+    >
+      <h3 className="text-white mb-6">Show Information</h3>
+
+      {/* Date */}
+      <div className="flex items-start gap-3">
+        <Calendar className={`w-5 h-5 ${colors.accent} mt-0.5`} />
+        <div>
+          <p className="text-slate-500 text-sm mb-1">Date</p>
+          <p className="text-slate-200">{date}</p>
+        </div>
+      </div>
+
+      {/* Time */}
+      <div className="flex items-start gap-3">
+        <Clock className={`w-5 h-5 ${colors.accent} mt-0.5`} />
+        <div>
+          <p className="text-slate-500 text-sm mb-1">Time</p>
+          <p className="text-slate-200">{time}</p>
+        </div>
+      </div>
+
+      {/* Format */}
+      <div className="flex items-start gap-3">
+        <Film className={`w-5 h-5 ${colors.accent} mt-0.5`} />
+        <div>
+          <p className="text-slate-500 text-sm mb-1">Format</p>
+          <div className={`inline-flex items-center px-3 py-1.5 rounded-md border ${colors.border} bg-black/40`}>
+            <span className={colors.accent}>{format}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Venue (if provided) */}
+      {venue && (
+        <div className="pt-4 border-t border-slate-700/50">
+          <p className="text-slate-500 text-sm mb-1">Venue</p>
+          <p className="text-slate-200">{venue}</p>
+        </div>
+      )}
+    </motion.div>
+  );
+}
