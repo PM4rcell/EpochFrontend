@@ -15,7 +15,7 @@ import { AddReviewCard } from "./AddReviewCard";
 import { CTAButton } from "./CTAButton";
 import { Button } from "../../components/ui/button";
 import { useMovie } from "../../hooks/useMovie";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Spinner } from "../../components/ui/spinner";
 import MovieInfoPageSkeleton from "./MovieInfoPageSkeleton";
 import { useSimilarMovies } from "../../hooks/useSimilarMovies";
@@ -26,6 +26,7 @@ import { useEra } from "../../context/EraContext";
 
 export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onNavigate?: (route: string) => void }) {
   const { movieId } = useParams<{ movieId?: string }>();
+  const navigate = useNavigate();
 
   const { movie: movieData, loading, error } = useMovie<any>(movieId ?? null);
   const { setEra } = useEra();
@@ -213,8 +214,12 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.8 }}
             >
-              <CTAButton 
-                onClick={() => onNavigate?.("screenings")} 
+              <CTAButton
+                onClick={() => {
+                  // prefer parent handler, otherwise use router navigate
+                  if (onNavigate) return onNavigate("/screenings");
+                  navigate("/screenings");
+                }}
                 theme={theme}
               />
             </motion.div>
@@ -457,21 +462,6 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
             </div>
           </motion.aside>
         </div>
-
-        {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mt-16 flex justify-center"
-        >
-          <CTAButton 
-            onClick={() => onNavigate?.("screenings")} 
-            theme={theme}
-            label="Book tickets now"
-          />
-        </motion.div>
       </div>
 
       <Footer theme={theme} />

@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Search, User } from "lucide-react";
+import { Search, User, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { SearchBar } from "../../features/search/SearchBar";
 import { useEra } from "../../context/EraContext";
@@ -24,6 +24,7 @@ export function Navbar({
 }: NavbarProps) {
   const { era, setEra } = useEra(); // csak egyszer
   const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const hasSelectedEra = !!era;      // true, ha van kiválasztott era
   const [showSearchBar, setShowSearchBar] = useState(false);
 
@@ -111,8 +112,8 @@ export function Navbar({
 
         {/* Debug: show current era from context for testing (moved to right side) */}
 
-        {/* NAV ITEMS */}
-        <motion.div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-8">
+        {/* NAV ITEMS (desktop) */}
+        <motion.div className="hidden md:flex flex-1 justify-center items-center gap-8">
           {visibleNavItems.map(item => {
             // Determine active state from URL so the nav reflects the
             // current route (works whether an era is selected or not).
@@ -154,10 +155,23 @@ export function Navbar({
           })}
         </motion.div>
 
+        {/* Mobile: hamburger menu */}
+        <div className="md:hidden flex items-center">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Toggle menu"
+            className={`p-2 rounded ${colors.hover} ${colors.glow} text-slate-300`}
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </motion.button>
+        </div>
+
         {/* Search + Profile */}
         <div className="flex items-center gap-3">
           {/* Debug: show current era from context for testing */}
-          <div className="hidden md:flex items-center text-sm text-slate-300 mr-4">
+          <div className="flex items-center text-sm text-slate-300 mr-4">
             <span className="opacity-60 mr-2">Era:</span>
             <span className="font-medium">{era ?? "none"}</span>
           </div>
@@ -206,6 +220,30 @@ export function Navbar({
               placeholder="Search movies..."
               showDropdown={true}
             />
+          </div>
+        </motion.div>
+      )}
+      {/* Mobile menu drawer */}
+      {mobileOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.18 }}
+          className="md:hidden fixed top-16 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-white/10"
+        >
+          <div className="px-6 py-4">
+            <div className="flex flex-col gap-3">
+              {visibleNavItems.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => { handleNavClick(item.path); setMobileOpen(false); }}
+                  className="w-full text-left py-3 px-4 rounded hover:bg-white/5 text-slate-200"
+                >
+                  {item.label === "Home" ? (hasSelectedEra ? "Home" : "Eras") : item.label}
+                </button>
+              ))}
+            </div>
           </div>
         </motion.div>
       )}
