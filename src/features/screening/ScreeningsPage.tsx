@@ -1,14 +1,13 @@
-import { useState, useEffect, useRef, type ChangeEvent } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion } from "motion/react";
-import { Search } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
 import { Footer } from "../../components/layout/Footer";
 import { FilterTabs } from "./FilterTabs";
 import { WeekStrip } from "./WeekStrip";
 import { FilmRow } from "./FilmRow";
-import { Input } from "../../components/ui/input";
 import { Separator } from "../../components/ui/separator";
 import { useEra } from "../../context/EraContext";
+import { useScreenings } from "../../hooks/useScreenings";
 
 interface ScreeningsPageProps {
   onBack?: () => void;
@@ -17,77 +16,27 @@ interface ScreeningsPageProps {
   onSearchSubmit?: (query: string) => void;
 }
 
-// Mock data
+// Tabs
 const filterTabs = ["All films", "2D", "3D", "IMAX", "IMAX 3D", "4DX"];
 
-const generateWeekDays = (weekOffset: number = 0) => {
-  const today = new Date();
-  const startDate = new Date(today);
-  startDate.setDate(today.getDate() + weekOffset * 7);
-
-  const days = [];
+const generateWeekDays = (weekOffset = 0) => {
+  const start = new Date();
+  start.setDate(start.getDate() + weekOffset * 7);
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(startDate);
-    date.setDate(startDate.getDate() + i);
-    
-    const isToday = 
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
-
-    days.push({
-      day: dayNames[date.getDay()],
-      date: date.getDate(),
-      month: monthNames[date.getMonth()],
-      isToday,
-    });
-  }
-
-  return days;
+  return Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return {
+      day: dayNames[d.getDay()],
+      date: d.getDate(),
+      month: monthNames[d.getMonth()],
+      isToday: new Date().toDateString() === d.toDateString(),
+      iso: d.toISOString().slice(0, 10),
+    };
+  });
 };
 
-// Mock films
-const films = [
-  {
-    title: "Mortal Engines",
-    ageRating: "16+",
-    runtime: "2h 8min",
-    genre: "Action, Adventure",
-    rating: 6.1,
-    poster: "https://images.unsplash.com/photo-1745564371387-7707cc41e958?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200",
-    formats: [
-      {
-        format: "2D",
-        times: [
-          { time: "11:30 am", available: true },
-          { time: "5:00 pm", available: true },
-          { time: "7:45 pm", available: true },
-          { time: "9:45 pm", available: false },
-        ],
-      },
-      {
-        format: "3D",
-        times: [
-          { time: "1:15 pm", available: true },
-          { time: "6:30 pm", available: true },
-          { time: "10:15 pm", available: true },
-        ],
-      },
-      {
-        format: "IMAX",
-        times: [
-          { time: "12:00 pm", available: true },
-          { time: "8:30 pm", available: true },
-        ],
-      },
-    ],
-    activeDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-  },
-  // ... további filmek ugyanígy
-];
 
 export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: ScreeningsPageProps) {
   const { era } = useEra();
@@ -95,18 +44,14 @@ export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: Scr
 
   const [activeTab, setActiveTab] = useState("All films");
   const [weekOffset, setWeekOffset] = useState(0);
-  const initialDays = generateWeekDays(0);
-  const [days, setDays] = useState(initialDays);
-  const [selectedDate, setSelectedDate] = useState(`${initialDays[0].month}-${initialDays[0].date}`);
+  const days = useMemo(() => generateWeekDays(weekOffset), [weekOffset]);
+  const [selectedDate, setSelectedDate] = useState(days[0].iso);
   const [isSticky, setIsSticky] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  
+
   const weekStripRef = useRef<HTMLDivElement>(null);
   const stickyTriggerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setDays(generateWeekDays(weekOffset));
-  }, [weekOffset]);
+  // days are memoized above
 
   useEffect(() => {
     const handleScroll = () => {
@@ -119,19 +64,23 @@ export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: Scr
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const filteredFilms = films.filter((film) => {
-    if (searchQuery && !film.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !film.genre.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    if (activeTab === "All films") return true;
-    return film.formats.some((f) => f.format === activeTab);
-  });
+  const { data: screenings = [], loading } = useScreenings(selectedDate);
+  const visible = screenings; // hook already returns date-filtered items
+
+  const [isSelectingDate, setIsSelectingDate] = useState(false);
+  // ignore clicks on the already-selected day to avoid re-triggering load
+  const handleSelectDate = (d: string) => {
+    if (d === selectedDate) return;
+    setSelectedDate(d);
+    setIsSelectingDate(true);
+  };
+  useEffect(() => { if (!loading) setIsSelectingDate(false); }, [loading]);
+  const effectiveLoading = loading || isSelectingDate;
 
   return (
     <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
-      <Navbar 
-        theme={theme} 
+      <Navbar
+        theme={theme}
         activePage="screenings"
         onMovieClick={onMovieClick}
         onSearchSubmit={onSearchSubmit}
@@ -144,18 +93,6 @@ export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: Scr
             <div>
               <h1 className="text-white mb-2">Screenings</h1>
               <p className="text-slate-400">Book your cinematic experience</p>
-            </div>
-
-            {/* Search */}
-            <div className="relative w-80 hidden md:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <Input
-                type="text"
-                placeholder="Search films, genres, formats…"
-                value={searchQuery}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-black/40 border-slate-700/50 text-slate-300 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20"
-              />
             </div>
           </div>
 
@@ -178,44 +115,46 @@ export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: Scr
           ref={weekStripRef}
           className={`${isSticky ? "fixed top-20 left-0 right-0 z-40" : "relative"}`}
         >
-          <WeekStrip
-            days={days}
-            selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
-            onPrevWeek={() => setWeekOffset((prev) => prev - 1)}
-            onNextWeek={() => setWeekOffset((prev) => prev + 1)}
-            isSticky={isSticky}
-            theme={theme}
-          />
+          <WeekStrip days={days} selectedDate={selectedDate} onSelectDate={handleSelectDate}
+            onPrevWeek={() => setWeekOffset((p) => p - 1)} onNextWeek={() => setWeekOffset((p) => p + 1)}
+            isSticky={isSticky} theme={theme} />
         </div>
 
         {/* Films List */}
         <div className={`container mx-auto px-6 ${isSticky ? "mt-24" : "mt-8"}`}>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.1 }}>
-            {filteredFilms.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-slate-400">No films found matching your criteria.</p>
-              </div>
-            ) : (
-              filteredFilms.map((film, index) => (
-                <div key={film.title}>
-                  <FilmRow
-                    {...film}
-                    theme={theme}
-                    delay={index * 0.08}
-                    onTimeSelect={(format, time) => {
-                      console.log(`Selected: ${film.title} - ${format} - ${time}`);
-                      if (onNavigate) {
-                        onNavigate("booking-seats" as any);
-                      }
-                    }}
-                  />
-                  {index < filteredFilms.length - 1 && (
-                    <Separator className="my-12 bg-slate-700/10" />
-                  )}
-                </div>
-              ))
-            )}
+            {effectiveLoading ? (
+              <div className="text-center py-20"><p className="text-slate-400">Loading…</p></div>
+            ) : (() => {
+
+              // base: only keep items with a movie + start time
+              const list = visible.filter((s: any) => s?.movie && s?.start_time);
+
+              // map UI era -> movie.era.name variants, then filter
+              const eraMap: Record<string, string> = { "90s": "90s", "2000s": "00s", modern: "nowdays" };
+              const eraFiltered = era
+                ? list.filter((s: any) => {
+                    const movieEra = s.movie?.era?.name ?? s.movie?.era;
+                    return movieEra === (eraMap[era] ?? era);
+                  })
+                : list;
+
+              if (!eraFiltered.length) return <div className="text-center py-20"><p className="text-slate-400">No movies found for this day.</p></div>;
+
+              return eraFiltered.map((s: any, i: number) => {
+                const m = s.movie;
+                const time = new Date(s.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+                return (
+                  <div key={`${m.id}-${i}`}>
+                    <FilmRow title={m.title} ageRating="" runtime={`${m.runtime_min} min`} genre="" rating={m.vote_avg || 0}
+                      poster={m.poster || ""} formats={[{ format: s.language?.name || "Original", times: [{ time, available: true }] }]} activeDays={[(s.start_day || "").slice(0, 3)]}
+                      theme={theme} delay={i * 0.08} onTimeSelect={() => onNavigate?.("booking-seats" as any)} />
+                    {i < eraFiltered.length - 1 && <Separator className="my-12 bg-slate-700/10" />}
+                  </div>
+                );
+              });
+            })()}
           </motion.div>
         </div>
       </div>

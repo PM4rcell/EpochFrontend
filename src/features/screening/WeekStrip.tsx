@@ -6,6 +6,7 @@ interface DayData {
   date: number;
   month: string;
   isToday?: boolean;
+  iso?: string;
 }
 
 interface WeekStripProps {
@@ -88,7 +89,7 @@ export function WeekStrip({
           {/* Days */}
           <div className="flex-1 grid grid-cols-7 gap-2">
             {days.map((day) => {
-              const dateKey = `${day.month}-${day.date}`;
+              const dateKey = day.iso || `${day.month}-${day.date}`;
               const isSelected = selectedDate === dateKey;
 
               return (

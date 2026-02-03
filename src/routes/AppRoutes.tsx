@@ -7,7 +7,6 @@ import { MovieInfoPage } from "../features/movie/MovieInfoPage.tsx";
 import { SearchResultsPage } from "../features/search/SearchResultsPage.tsx";
 import { ArticleDetailPage } from "../features/news/ArticleDetailPage.tsx";
 import { ProfilePage } from "../features/profile/ProfilePage.tsx";
-import { Seat } from "../features/booking/Seat.tsx";
 import { SeatsPage } from "../features/booking/SeatsPage.tsx";
 
 export function AppRoutes() {
