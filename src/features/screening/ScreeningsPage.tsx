@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { motion } from "motion/react";
 import { Navbar } from "../../components/layout/Navbar";
 import { Footer } from "../../components/layout/Footer";
-import { FilterTabs } from "./FilterTabs";
 import { WeekStrip } from "./WeekStrip";
 import { FilmRow } from "./FilmRow";
 import { Separator } from "../../components/ui/separator";
@@ -15,9 +14,6 @@ interface ScreeningsPageProps {
   onMovieClick?: (movieId: string) => void;
   onSearchSubmit?: (query: string) => void;
 }
-
-// Tabs
-const filterTabs = ["All films", "2D", "3D", "IMAX", "IMAX 3D", "4DX"];
 
 const generateWeekDays = (weekOffset = 0) => {
   const start = new Date();
@@ -41,8 +37,6 @@ const generateWeekDays = (weekOffset = 0) => {
 export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: ScreeningsPageProps) {
   const { era } = useEra();
   const theme = era || "default"; // a context alapján
-
-  const [activeTab, setActiveTab] = useState("All films");
   const [weekOffset, setWeekOffset] = useState(0);
   const days = useMemo(() => generateWeekDays(weekOffset), [weekOffset]);
   const [selectedDate, setSelectedDate] = useState(days[0].iso);
@@ -94,16 +88,6 @@ export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: Scr
               <h1 className="text-white mb-2">Screenings</h1>
               <p className="text-slate-400">Book your cinematic experience</p>
             </div>
-          </div>
-
-          {/* Filter Tabs */}
-          <div className="mb-6">
-            <FilterTabs
-              tabs={filterTabs}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              theme={theme}
-            />
           </div>
 
           {/* Sticky trigger */}

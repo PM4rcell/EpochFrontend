@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import LandingPage from "../features/landing-page/LandingPage.tsx";
 import { EraPage } from "../features/era-page/EraPage.tsx";
 import { ScreeningsPage } from "../features/screening/ScreeningsPage.tsx";
@@ -8,8 +8,13 @@ import { SearchResultsPage } from "../features/search/SearchResultsPage.tsx";
 import { ArticleDetailPage } from "../features/news/ArticleDetailPage.tsx";
 import { ProfilePage } from "../features/profile/ProfilePage.tsx";
 import { SeatsPage } from "../features/booking/SeatsPage.tsx";
+import { LoginPage } from "../features/auth/LoginPage.tsx";
+import { RegisterPage } from "../features/auth/RegisterPage.tsx";
 
 export function AppRoutes() {
+  const navigate = useNavigate();
+  const handleNavigate = (page: string) => navigate(page);
+
   return (
     <Routes>
       {/* Főoldal */}
@@ -21,7 +26,7 @@ export function AppRoutes() {
     {/* Screenings oldal (csak akkor működik, ha van kiválasztott era) */}
       <Route path="/screenings" element={<ScreeningsPage />} />
 
-      {/* News page */}
+      {/* News Page */}
       <Route path="/news" element={<NewsPage />} />
 
       {/* Movie info page */}
@@ -30,11 +35,21 @@ export function AppRoutes() {
       {/* Search Result page */}
       <Route path="/search" element={<SearchResultsPage />} />
 
+      {/* Article Detail page  */}
       <Route path="/article/:articleId" element={<ArticleDetailPage />} />
 
+      {/* Profile page */}
       <Route path="/profile" element={<ProfilePage/>}/>
       
+      {/* Seats Page, azaz a booking oldal első lépése
+       (1. Choose your place -> 2. Payment -> 3. Done) */}
       <Route path="/booking" element={<SeatsPage/>}/>
+      
+      {/*Login page */}
+      <Route path="/login" element={<LoginPage onNavigate={handleNavigate} />}/>
+
+      {/*Register Page */}
+      <Route path="/register" element={<RegisterPage onNavigate={handleNavigate} />}/>
     </Routes>
   );
 }

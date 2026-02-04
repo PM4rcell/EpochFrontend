@@ -187,7 +187,7 @@ export function Navbar({
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => handleNavClick("/profile")}
+            onClick={() => handleNavClick("/login")}
             className={`relative ${activePage === "profile" ? colors.active : "text-slate-300"} ${colors.hover} ${colors.glow} transition-all duration-200 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-400/50`}
           >
             <User className="w-5 h-5" />
