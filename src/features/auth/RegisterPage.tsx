@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Mail, Lock, User, UserPlus, ChevronLeft } from "lucide-react";
+import { useRegister } from "../../hooks/useRegister";
 
 interface RegisterPageProps {
   onNavigate: (page: string) => void;
@@ -30,7 +31,9 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
 
   const colors = THEME;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { register, loading, error: registerError } = useRegister();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Basic validation
@@ -68,9 +71,17 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      // Handle successful registration - for now just navigate to profile
-      console.log("Registration successful", { username, email, password });
-      onNavigate("profile");
+      try {
+        await register({ username, email, password, confirmPassword });
+        // clear fields on success
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+      } catch (err) {
+        // registration error is handled by hook; leave errors state as-is
+        console.error("Registration failed", err);
+      }
     }
   };
 
@@ -117,6 +128,15 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {registerError && (
+              <motion.p
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 text-sm mb-2"
+              >
+                {((registerError as any)?.data && ((registerError as any).data.message || JSON.stringify((registerError as any).data))) || (registerError as any).message || "Registration failed"}
+              </motion.p>
+            )}
             {/* Username field */}
             <div>
               <label htmlFor="username" className="block text-slate-300 text-sm font-light mb-2">
@@ -250,9 +270,10 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`w-full ${colors.button} ${colors.buttonGlow} text-black font-medium py-3.5 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 ${colors.focus} ring-offset-2 ring-offset-black mt-6`}
+              disabled={loading}
+              className={`w-full ${colors.button} ${colors.buttonGlow} text-black font-medium py-3.5 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 ${colors.focus} ring-offset-2 ring-offset-black mt-6 ${loading ? 'opacity-60 pointer-events-none' : ''}`}
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </motion.button>
           </form>
 
