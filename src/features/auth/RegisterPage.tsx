@@ -18,6 +18,7 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
     password?: string;
     confirmPassword?: string;
   }>({});
+  const [success, setSuccess] = useState(false);
   const THEME = {
     primary: "from-amber-600 to-amber-500",
     border: "border-amber-500/50",
@@ -58,8 +59,8 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
 
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     if (!confirmPassword) {
@@ -73,6 +74,7 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
     if (Object.keys(newErrors).length === 0) {
       try {
         await register({ username, email, password, confirmPassword });
+        setSuccess(true);
         // clear fields on success
         setUsername("");
         setEmail("");
@@ -128,6 +130,15 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {success && (
+              <motion.p
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-emerald-400 text-sm mb-2"
+              >
+                Registration successful. Please sign in.
+              </motion.p>
+            )}
             {registerError && (
               <motion.p
                 initial={{ opacity: 0, y: -6 }}
@@ -153,6 +164,7 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
                   onChange={(e) => {
                     setUsername(e.target.value);
                     if (errors.username) setErrors({ ...errors, username: undefined });
+                    if (success) setSuccess(false);
                   }}
                   placeholder="johndoe"
                   className={`w-full bg-slate-900/50 border ${errors.username ? 'border-red-500/50' : 'border-slate-700'} ${colors.focus} rounded-lg px-12 py-3 text-white placeholder:text-slate-600 transition-all duration-300 ${colors.hover} focus:outline-none focus:ring-2 ring-offset-0`}
@@ -185,6 +197,7 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (errors.email) setErrors({ ...errors, email: undefined });
+                    if (success) setSuccess(false);
                   }}
                   placeholder="you@example.com"
                   className={`w-full bg-slate-900/50 border ${errors.email ? 'border-red-500/50' : 'border-slate-700'} ${colors.focus} rounded-lg px-12 py-3 text-white placeholder:text-slate-600 transition-all duration-300 ${colors.hover} focus:outline-none focus:ring-2 ring-offset-0`}
@@ -217,6 +230,7 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (errors.password) setErrors({ ...errors, password: undefined });
+                    if (success) setSuccess(false);
                   }}
                   placeholder="••••••••"
                   className={`w-full bg-slate-900/50 border ${errors.password ? 'border-red-500/50' : 'border-slate-700'} ${colors.focus} rounded-lg px-12 py-3 text-white placeholder:text-slate-600 transition-all duration-300 ${colors.hover} focus:outline-none focus:ring-2 ring-offset-0`}
@@ -249,6 +263,7 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
                     if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: undefined });
+                    if (success) setSuccess(false);
                   }}
                   placeholder="••••••••"
                   className={`w-full bg-slate-900/50 border ${errors.confirmPassword ? 'border-red-500/50' : 'border-slate-700'} ${colors.focus} rounded-lg px-12 py-3 text-white placeholder:text-slate-600 transition-all duration-300 ${colors.hover} focus:outline-none focus:ring-2 ring-offset-0`}

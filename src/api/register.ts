@@ -8,12 +8,14 @@ export interface RegisterPayload {
 }
 
 // Sends a registration POST to the backend. Returns parsed response or throws on error.
-export async function registerUser(payload: RegisterPayload) {
-  return apiFetch<any>(`/api/register`, {
-    method: "POST",
+export async function registerUser(payload: { username: string; email: string; password: string; password_confirmation: string; }) {
+  return apiFetch('/api/register', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     },
     body: JSON.stringify(payload),
   });
 }
+
