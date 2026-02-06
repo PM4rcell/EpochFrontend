@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Search, User, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Spinner } from "../ui/spinner";
 import { SearchBar } from "../../features/search/SearchBar";
 import { useEra } from "../../context/EraContext";
 import { useToken } from "../../context/TokenContext";
@@ -63,6 +64,7 @@ export function Navbar({
 
   // Read token and user from context. Prefer explicit `user` (fetched from `/api/me`).
   const { token, user, logout } = useToken();
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const getUsernameFromToken = (t?: string | null) => {
     try {
       if (!t) return null;
@@ -230,6 +232,8 @@ export function Navbar({
                     // Prevent parent navigation when clicking logout
                     e.stopPropagation();
                     e.preventDefault();
+                    if (logoutLoading) return;
+                    setLogoutLoading(true);
                     try {
                       await logout();
                       navigate("/");
@@ -239,13 +243,16 @@ export function Navbar({
                       console.warn("Logout failed", err);
                       // eslint-disable-next-line no-alert
                       alert("Logout failed");
+                    } finally {
+                      setLogoutLoading(false);
                     }
                   }}
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="ml-2 px-3 py-1 rounded-md text-xs text-slate-200 bg-white/5 border border-white/6 hover:bg-white/10 transition-colors duration-150 hidden sm:inline"
+                  whileHover={logoutLoading ? undefined : { scale: 1.04 }}
+                  whileTap={logoutLoading ? undefined : { scale: 0.98 }}
+                  disabled={logoutLoading}
+                  className={`ml-2 px-3 py-1 rounded-md text-xs text-slate-200 bg-white/5 border border-white/6 transition-colors duration-150 hidden sm:inline ${logoutLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-white/10"}`}
                 >
-                  Log out
+                  {logoutLoading ? <span className="flex items-center gap-2"><Spinner size="sm" theme={appliedTheme as any} /> <span>Signing out</span></span> : "Log out"}
                 </motion.button>
               )}
             </div>

@@ -64,9 +64,9 @@ export function BookingStepper({
   };
 
   return (
-    <div className="sticky top-16 z-40 h-17 bg-black/90 backdrop-blur-md border-b border-white/10 shadow-lg overflow-hidden">
-      <div className="container mx-auto px-6 h-full">
-        <div className="flex items-center justify-center md:justify-start gap-8 py-4 overflow-x-auto h-full">
+    <div className="sticky top-16 z-40 h-auto bg-black/90 backdrop-blur-md border-b border-white/10 shadow-lg overflow-visible">
+      <div className="container mx-auto px-6">
+        <div className="flex items-center justify-center md:justify-start gap-4 md:gap-8 py-4 overflow-visible h-auto flex-wrap md:flex-nowrap">
           {steps.map((step, index) => {
             const state = getStepState(step.id);
             const isCompleted = state === "completed";
@@ -74,12 +74,12 @@ export function BookingStepper({
             const canClick = isCompleted || onStepClick;
 
             return (
-              <div key={step.id} className="flex items-center gap-8">
+              <div key={step.id} className="flex items-center gap-4 md:gap-8">
                 <motion.button
-                  onClick={() => canClick && onStepClick?.(step.id)}
+                  onClick={() => canClick && onStepClick?.(step.id)}  
                   whileHover={canClick ? { scale: 1.02 } : {}}
                   className={`
-                    flex items-center gap-3 relative
+                    flex items-center gap-3 relative shrink-0
                     ${canClick ? "cursor-pointer" : "cursor-default"}
                     focus:outline-none focus:ring-2 focus:ring-slate-400/50 rounded px-2 py-1
                   `}
@@ -129,7 +129,7 @@ export function BookingStepper({
                 {/* Connector line */}
                 {index < steps.length - 1 && (
                   <div
-                    className={`hidden md:block w-16 h-0.5 ${
+                    className={`hidden md:block w-8 md:w-16 h-0.5 ${
                       completedSteps.includes(step.id)
                         ? colors.underline
                         : "bg-slate-700"
