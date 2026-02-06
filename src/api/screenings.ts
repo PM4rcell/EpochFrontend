@@ -10,3 +10,10 @@ export async function fetchScreenings(start_date: string) {
   console.debug("fetchScreenings -> path:", path);
   return apiFetch(path);
 }
+
+export async function fetchScreening(screeningId: string | number) {
+  const path = `/api/screenings/${screeningId}`;
+  // eslint-disable-next-line no-console
+  console.debug("fetchScreening -> path:", path);
+  return apiFetch(path);
+}

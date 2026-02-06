@@ -44,6 +44,7 @@ export function AppRoutes() {
       {/* Seats Page, azaz a booking oldal első lépése
        (1. Choose your place -> 2. Payment -> 3. Done) */}
       <Route path="/booking" element={<SeatsPage/>}/>
+      <Route path="/booking/:screeningId" element={<SeatsPage/>} />
       
       {/*Login page */}
       <Route path="/login" element={<LoginPage onNavigate={handleNavigate} />}/>

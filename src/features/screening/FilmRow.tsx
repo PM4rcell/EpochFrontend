@@ -8,6 +8,7 @@ import { TimePill } from "./TimePill.tsx";
 interface Showtime {
   time: string;
   available: boolean;
+  screeningId?: string | number;
 }
 
 interface FormatShowtimes {
@@ -185,6 +186,7 @@ export function FilmRow({
                     isActive={selectedTime === timeKey}
                     isSoldOut={!showtime.available}
                     onClick={() => handleTimeClick(activeFormat, showtime.time)}
+                    screeningId={showtime.screeningId}
                     theme={theme}
                   />
                 );

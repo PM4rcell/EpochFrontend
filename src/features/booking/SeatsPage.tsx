@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Navbar } from "../../components/layout/Navbar";
 import { BookingStepper } from "./BookingStepper";
 import { PosterSummary } from "./PosterSummary";
 import { SeatMap } from "./SeatMap";
 import { ShowInfo } from "./ShowInfo";
+import { useParams } from "react-router-dom";
+import { useSeats } from "../../hooks/useSeats";
+import { useToken } from "../../context/TokenContext";
+import { Spinner } from "../../components/ui/spinner";
 
 interface SeatsPageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -21,53 +25,20 @@ interface Seat {
   status: SeatStatus;
 }
 
-// Generate initial seat data
-const generateSeats = (): Seat[] => {
-  const rows = ["A", "B", "C", "D", "E", "F", "G", "H"];
-  const seatsPerRow = 12;
-  const seats: Seat[] = [];
-
-  // Pre-defined reserved seats for consistency
-  const reservedSeats = new Set([
-    "A3",
-    "A10",
-    "B5",
-    "B6",
-    "C2",
-    "C11",
-    "E4",
-    "E9",
-    "F7",
-    "G3",
-    "G8",
-    "H5",
-  ]);
-
-  for (const row of rows) {
-    for (let i = 1; i <= seatsPerRow; i++) {
-      const seatId = `${row}${i}`;
-      seats.push({
-        row,
-        number: i,
-        status: reservedSeats.has(seatId)
-          ? "reserved"
-          : "available",
-      });
-    }
-  }
-
-  return seats;
-};
-
 export function SeatsPage({
   theme = "default",
   onNext,
   onCancel,
 }: SeatsPageProps) {
-  const [seats, setSeats] = useState(generateSeats());
+  const { screeningId } = useParams<{ screeningId: string }>();
+
+  const { seats: fetchedSeats, loading, error } = useSeats(screeningId ?? null);
+  const [seats, setSeats] = useState<Seat[]>(() => []);
   const [selectedSeats, setSelectedSeats] = useState<
     Array<{ row: string; number: number; price: number }>
   >([]);
+
+  const { token } = useToken();
 
   const movieData = {
     title: "The Eternal Voyage",
@@ -82,9 +53,7 @@ export function SeatsPage({
   };
 
   const handleSeatClick = (row: string, number: number) => {
-    const seatIndex = seats.findIndex(
-      (s) => s.row === row && s.number === number,
-    );
+    const seatIndex = seats.findIndex((s) => s.row === row && s.number === number);
     if (seatIndex === -1) return;
 
     const seat = seats[seatIndex];
@@ -94,17 +63,10 @@ export function SeatsPage({
 
     if (seat.status === "available") {
       newSeats[seatIndex] = { ...seat, status: "selected" };
-      setSelectedSeats([
-        ...selectedSeats,
-        { row, number, price: 15 },
-      ]);
+      setSelectedSeats([...selectedSeats, { row, number, price: 15 }]);
     } else {
       newSeats[seatIndex] = { ...seat, status: "available" };
-      setSelectedSeats(
-        selectedSeats.filter(
-          (s) => !(s.row === row && s.number === number),
-        ),
-      );
+      setSelectedSeats(selectedSeats.filter((s) => !(s.row === row && s.number === number)));
     }
 
     setSeats(newSeats);
@@ -114,12 +76,41 @@ export function SeatsPage({
     handleSeatClick(row, number);
   };
 
+  // Synchronize fetched seats into local state when available
+  // Keep local selection modifications separate from the fetched shape.
+  // Convert API seats to local `Seat` shape if necessary.
+  useEffect(() => {
+    if (!fetchedSeats) return;
+    // API may return either an array or a wrapped object { data: [...] }.
+    let array: any = fetchedSeats;
+    if (!Array.isArray(array) && array && Array.isArray(array.data)) {
+      array = array.data;
+    }
+    if (!Array.isArray(array)) {
+      // Unexpected shape: log and use empty list to avoid runtime errors.
+      // eslint-disable-next-line no-console
+      console.warn("SeatsPage: unexpected fetchedSeats shape", fetchedSeats);
+      setSeats([]);
+      return;
+    }
+    const normalized = array.map((s: any) => ({ row: s.row, number: s.number, status: s.status }));
+    setSeats(normalized);
+  }, [fetchedSeats]);
+
   return (
     <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
       <Navbar
         theme={theme}
         activePage="screenings"
       />
+
+      {!token && (
+        <div className="container mx-auto px-6 py-4">
+          <div className="bg-amber-600/10 border border-amber-600/20 text-amber-300 rounded-md px-4 py-2 text-sm">
+            Please log in to book a ticket
+          </div>
+        </div>
+      )}
 
       {/* Hero Header - Fixed height, clipped, no pointer blocking */}
       <div className="relative h-40 overflow-hidden pointer-events-none">
@@ -153,6 +144,7 @@ export function SeatsPage({
               onRemoveSeat={handleRemoveSeat}
               onCancel={onCancel || (() => {})}
               onNext={onNext || (() => {})}
+              canProceed={Boolean(token)}
               theme={theme}
             />
           </div>
@@ -165,11 +157,27 @@ export function SeatsPage({
               transition={{ duration: 0.3, delay: 0.1 }}
               className="bg-black/40 border border-slate-700/50 rounded-lg p-4 md:p-8 overflow-x-auto relative z-10"
             >
-              <SeatMap
-                seats={seats}
-                onSeatClick={handleSeatClick}
-                theme={theme}
-              />
+                {loading ? (
+                  <div className="w-full flex items-center justify-center py-12">
+                    <Spinner size="md" theme={theme === "default" ? "modern" : (theme as any)} />
+                  </div>
+                ) : error ? (
+                  <div className="w-full text-center py-8 text-slate-400">
+                    <p>Failed to load seats.</p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="mt-3 px-3 py-1 rounded bg-white/5"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : (
+                  <SeatMap
+                    seats={seats}
+                    onSeatClick={handleSeatClick}
+                    theme={theme}
+                  />
+                )}
             </motion.div>
           </div>
 
@@ -210,8 +218,8 @@ export function SeatsPage({
           </span>
         </div>
         <button
-          onClick={onNext}
-          disabled={selectedSeats.length === 0}
+          onClick={() => { if (!token) return; onNext?.(); }}
+          disabled={!token || selectedSeats.length === 0}
           className={`
             w-full py-3 rounded-lg transition-all duration-200
             ${

@@ -131,9 +131,19 @@ export function ScreeningsPage({ onNavigate, onMovieClick, onSearchSubmit }: Scr
 
                 return (
                   <div key={`${m.id}-${i}`}>
-                    <FilmRow title={m.title} ageRating="" runtime={`${m.runtime_min} min`} genre="" rating={m.vote_avg || 0}
-                      poster={m.poster || ""} formats={[{ format: s.language?.name || "Original", times: [{ time, available: true }] }]} activeDays={[(s.start_day || "").slice(0, 3)]}
-                      theme={theme} delay={i * 0.08} onTimeSelect={() => onNavigate?.("booking-seats" as any)} />
+                    <FilmRow
+                      title={m.title}
+                      ageRating=""
+                      runtime={`${m.runtime_min} min`}
+                      genre=""
+                      rating={m.vote_avg || 0}
+                      poster={m.poster || ""}
+                      formats={[{ format: s.language?.name || "Original", times: [{ time, available: true, screeningId: s.id }] }]}
+                      activeDays={[(s.start_day || "").slice(0, 3)]}
+                      theme={theme}
+                      delay={i * 0.08}
+                      onTimeSelect={() => onNavigate?.("booking-seats" as any)}
+                    />
                     {i < eraFiltered.length - 1 && <Separator className="my-12 bg-slate-700/10" />}
                   </div>
                 );

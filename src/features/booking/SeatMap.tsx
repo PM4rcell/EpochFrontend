@@ -32,6 +32,7 @@ export function SeatMap({ seats, onSeatClick, theme = "default" }: SeatMapProps)
           glow: "rgba(245, 158, 11, 0.3)",
           screen: "from-amber-500/20 via-amber-600/10 to-transparent",
           accent: "border-amber-500/50",
+          rowText: "text-amber-400",
         };
       case "2000s":
         return {
@@ -39,6 +40,7 @@ export function SeatMap({ seats, onSeatClick, theme = "default" }: SeatMapProps)
           glow: "rgba(59, 130, 246, 0.3)",
           screen: "from-blue-500/20 via-blue-600/10 to-transparent",
           accent: "border-blue-500/50",
+          rowText: "text-blue-300",
         };
       case "modern":
         return {
@@ -46,6 +48,7 @@ export function SeatMap({ seats, onSeatClick, theme = "default" }: SeatMapProps)
           glow: "rgba(203, 213, 225, 0.3)",
           screen: "from-slate-400/20 via-slate-500/10 to-transparent",
           accent: "border-slate-400/50",
+          rowText: "text-slate-300",
         };
       default:
         return {
@@ -53,6 +56,7 @@ export function SeatMap({ seats, onSeatClick, theme = "default" }: SeatMapProps)
           glow: "rgba(245, 158, 11, 0.3)",
           screen: "from-amber-500/20 via-amber-600/10 to-transparent",
           accent: "border-amber-500/50",
+          rowText: "text-amber-400",
         };
     }
   };
@@ -144,13 +148,13 @@ export function SeatMap({ seats, onSeatClick, theme = "default" }: SeatMapProps)
                 }}
               >
                 {/* Left row label */}
-                <motion.div
+                  <motion.div
                   className="w-8 flex items-center justify-center"
                   whileHover={{ scale: 1.1 }}
                   transition={{ duration: 0.2 }}
                 >
                   <span
-                    className={`text-sm font-light tracking-wider ${colors.accent} border rounded px-2 py-0.5 bg-black/30 backdrop-blur-sm`}
+                    className={`text-sm font-light tracking-wider ${colors.rowText} border rounded px-2 py-0.5 bg-black/30 backdrop-blur-sm`}
                   >
                     {row}
                   </span>
@@ -188,7 +192,7 @@ export function SeatMap({ seats, onSeatClick, theme = "default" }: SeatMapProps)
                   transition={{ duration: 0.2 }}
                 >
                   <span
-                    className={`text-sm font-light tracking-wider ${colors.accent} border rounded px-2 py-0.5 bg-black/30 backdrop-blur-sm`}
+                    className={`text-sm font-light tracking-wider ${colors.rowText} border rounded px-2 py-0.5 bg-black/30 backdrop-blur-sm`}
                   >
                     {row}
                   </span>

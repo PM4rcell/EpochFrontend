@@ -16,6 +16,7 @@ interface PosterSummaryProps {
   onRemoveSeat: (row: string, number: number) => void;
   onCancel: () => void;
   onNext: () => void;
+  canProceed?: boolean;
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
@@ -26,6 +27,7 @@ export function PosterSummary({
   onRemoveSeat,
   onCancel,
   onNext,
+  canProceed = true,
   theme = "default",
 }: PosterSummaryProps) {
   const getThemeColors = () => {
@@ -125,7 +127,7 @@ export function PosterSummary({
         <div className="space-y-3">
           <Button
             onClick={onNext}
-            disabled={!hasSeats}
+            disabled={!hasSeats || (typeof canProceed !== "undefined" && !canProceed)}
             className={`
               w-full ${colors.button} ${colors.glow}
               transition-all duration-200

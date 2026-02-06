@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useNavigate } from "react-router-dom";
 
 interface TimePillProps {
   time: string;
@@ -6,6 +7,7 @@ interface TimePillProps {
   isDisabled?: boolean;
   isSoldOut?: boolean;
   onClick?: () => void;
+  screeningId?: string | number | null;
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
@@ -15,6 +17,7 @@ export function TimePill({
   isDisabled = false,
   isSoldOut = false,
   onClick,
+  screeningId = null,
   theme = "default",
 }: TimePillProps) {
   const getThemeColors = () => {
@@ -49,13 +52,25 @@ export function TimePill({
   const colors = getThemeColors();
   const disabled = isDisabled || isSoldOut;
 
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (disabled) return;
+    try {
+      onClick?.();
+    } catch {}
+    if (screeningId) {
+      navigate(`/booking/${screeningId}`);
+    }
+  };
+
   return (
     <motion.button
       whileHover={!disabled ? { scale: 1.05 } : {}}
       whileTap={!disabled ? { scale: 0.98 } : {}}
-      onClick={disabled ? undefined : onClick}
+      onClick={handleClick}
       className={`
-        relative min-w-[88px] h-10 px-4 rounded-lg
+        relative min-w-22 h-10 px-4 rounded-lg
         border transition-all duration-200
         focus:outline-none focus:ring-2 focus:ring-slate-400/50
         ${
@@ -86,7 +101,7 @@ export function TimePill({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 rounded-lg bg-gradient-to-b from-white/10 to-transparent pointer-events-none"
+          className="absolute inset-0 rounded-lg bg-linear-to-b from-white/10 to-transparent pointer-events-none"
         />
       )}
     </motion.button>
