@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Mail, Lock, LogIn, ChevronLeft } from "lucide-react";
+import { useLogin } from "../../hooks/useLogin";
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;
@@ -24,8 +25,25 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
 
   const colors = THEME;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { login, loading, error: loginError } = useLogin();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newErrors: { email?: string; password?: string } = {};
+    if (!email) newErrors.email = "Email is required";
+    if (!password) newErrors.password = "Password is required";
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length) return;
+
+    try {
+      await login({ email, password });
+      onNavigate("");
+    } catch (err) {
+      // error stored in hook; leave UI to render it
+      // eslint-disable-next-line no-console
+      console.error("Login failed", err);
+    }
   };
 
   return (
@@ -71,6 +89,15 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {loginError && (
+              <motion.p
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-red-400 text-sm mb-2"
+              >
+                {((loginError as any)?.data && ((loginError as any).data.message || JSON.stringify((loginError as any).data))) || (loginError as any).message || "Login failed"}
+              </motion.p>
+            )}
             {/* Email field */}
             <div>
               <label htmlFor="email" className="block text-slate-300 text-sm font-light mb-2">
@@ -151,9 +178,10 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`w-full ${colors.button} ${colors.buttonGlow} text-black font-medium py-3.5 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 ${colors.focus} ring-offset-2 ring-offset-black`}
+              disabled={loading}
+              className={`w-full ${colors.button} ${colors.buttonGlow} text-black font-medium py-3.5 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 ${colors.focus} ring-offset-2 ring-offset-black ${loading ? 'opacity-60 pointer-events-none' : ''}`}
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </motion.button>
           </form>
 

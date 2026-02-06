@@ -3,6 +3,7 @@ import { Search, User, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { SearchBar } from "../../features/search/SearchBar";
 import { useEra } from "../../context/EraContext";
+import { useToken } from "../../context/TokenContext";
 import { useNavigate, useLocation } from "react-router-dom";
 
 type PageType = "home" | "screenings" | "movies" | "news" | "profile" | "era";
@@ -59,6 +60,30 @@ export function Navbar({
         return { accent: "text-amber-500", hover: "hover:text-amber-400", glow: "hover:drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]", active: "text-amber-500", underline: "from-amber-600 to-amber-400" };
     }
   })();
+
+  // Read token and user from context. Prefer explicit `user` (fetched from `/api/me`).
+  const { token, user, logout } = useToken();
+  const getUsernameFromToken = (t?: string | null) => {
+    try {
+      if (!t) return null;
+      const parts = t.split(".");
+      if (parts.length < 2) return null;
+      // base64url -> base64
+      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const json = atob(base64);
+      // handle UTF-8 payloads
+      const payload = JSON.parse(decodeURIComponent(json));
+      return payload.username || payload.name || payload.user_name || null;
+    } catch {
+      return null;
+    }
+  };
+  const usernameFromToken = getUsernameFromToken(token);
+  const username = user?.data?.username || usernameFromToken || null;
+  // Debug: log token and decoded payload to help diagnose missing username display
+  // (use safe accessors)
+  // eslint-disable-next-line no-console
+  console.debug("[Navbar debug] token:", token, "user:", user, "username:", username);
 
   // NAV ITEMS
   const navItems = [
@@ -184,14 +209,56 @@ export function Navbar({
             <Search className="w-5 h-5" />
           </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleNavClick("/login")}
-            className={`relative ${activePage === "profile" ? colors.active : "text-slate-300"} ${colors.hover} ${colors.glow} transition-all duration-200 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-400/50`}
-          >
-            <User className="w-5 h-5" />
-          </motion.button>
+          {token ? (
+            <div className="flex items-center gap-3">
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleNavClick("/profile")}
+                className={`relative ${activePage === "profile" ? colors.active : "text-slate-300"} ${colors.hover} ${colors.glow} transition-all duration-200 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-400/50 flex items-center cursor-pointer`}
+              >
+                <User className="w-5 h-5" />
+                {username && (
+                  <span className="ml-2 text-sm text-slate-300 hidden sm:inline truncate max-w-30">{username}</span>
+                )}
+              </motion.div>
+
+              {username && (
+                <motion.button
+                  type="button"
+                  onClick={async (e) => {
+                    // Prevent parent navigation when clicking logout
+                    e.stopPropagation();
+                    e.preventDefault();
+                    try {
+                      await logout();
+                      navigate("/");
+                    } catch (err) {
+                      // minimal feedback
+                      // eslint-disable-next-line no-console
+                      console.warn("Logout failed", err);
+                      // eslint-disable-next-line no-alert
+                      alert("Logout failed");
+                    }
+                  }}
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="ml-2 px-3 py-1 rounded-md text-xs text-slate-200 bg-white/5 border border-white/6 hover:bg-white/10 transition-colors duration-150 hidden sm:inline"
+                >
+                  Log out
+                </motion.button>
+              )}
+            </div>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleNavClick("/login")}
+              className={`relative text-slate-300 ${colors.hover} ${colors.glow} transition-all duration-200 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-400/50`}
+            >
+              <User className="w-5 h-5" />
+            </motion.button>
+          )}
         </div>
       </div>
 

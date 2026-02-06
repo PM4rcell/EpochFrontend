@@ -9,6 +9,20 @@
 // Default timeout for requests (ms).
 const DEFAULT_TIMEOUT = 10000; // 10s
 
+// Module-level auth token used to automatically attach an Authorization header
+// to outgoing API requests. Call `setAuthToken()` from your React auth/token
+// context after login/logout so `apiFetch` will include the bearer token.
+let authToken: string | null = null;
+
+/**
+ * setAuthToken
+ * - Set or clear the token used by `apiFetch` for Authorization headers.
+ * - Pass `null` to clear the token (e.g. on logout).
+ */
+export function setAuthToken(token: string | null) {
+  authToken = token;
+}
+
 // Base URL for API requests. Prefer using `VITE_API_BASE` in your env.
 // If not provided the helper falls back to localhost for local dev.
 const API_BASE = (import.meta && (import.meta as any).env && (import.meta as any).env.VITE_API_BASE) || "http://localhost:8000";
@@ -35,7 +49,7 @@ export interface ApiFetchOptions extends RequestInit {
  *   controller.abort();
  */
 export async function apiFetch<T = any>(path: string, options: ApiFetchOptions = {}): Promise<T> {
-  const { timeoutMs = DEFAULT_TIMEOUT, signal: userSignal, headers, body, ...rest } = options;
+  const { timeoutMs = DEFAULT_TIMEOUT, signal: userSignal, headers: userHeaders, body, ...rest } = options;
 
   // Local controller used for timeout + forwarded aborts.
   const controller = new AbortController();
@@ -58,13 +72,18 @@ export async function apiFetch<T = any>(path: string, options: ApiFetchOptions =
   // Build URL: accept absolute URLs or join with the API_BASE.
   const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
 
+  // Attach auth header automatically when an `authToken` is set via
+  // `setAuthToken(token)` in your application (see TokenContext below).
+  const authHeader = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
   const init: RequestInit = {
     // Default to POST when a body is present, otherwise GET.
     method: rest.method ?? (body ? "POST" : "GET"),
-    headers: {
+    headers: ({
       "Content-Type": "application/json",
-      ...(headers as Record<string, string> | undefined),
-    },
+      ...(userHeaders as Record<string, string> | undefined),
+      ...authHeader,
+    } as HeadersInit),
     // Stringify object bodies; allow callers to pass a pre-serialized string.
     body: body && typeof body === "object" ? JSON.stringify(body) : (body as any) ?? undefined,
     signal: controller.signal,
