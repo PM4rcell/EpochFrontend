@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import { Search, User, Menu, X } from "lucide-react";
 import { useState } from "react";
-import { Spinner } from "../ui/spinner";
 import { SearchBar } from "../../features/search/SearchBar";
 import { useEra } from "../../context/EraContext";
 import { useToken } from "../../context/TokenContext";
@@ -252,7 +251,7 @@ export function Navbar({
                   disabled={logoutLoading}
                   className={`ml-2 px-3 py-1 rounded-md text-xs text-slate-200 bg-white/5 border border-white/6 transition-colors duration-150 hidden sm:inline ${logoutLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-white/10"}`}
                 >
-                  {logoutLoading ? <span className="flex items-center gap-2"><Spinner size="sm" theme={appliedTheme as any} /> <span>Signing out</span></span> : "Sign out"}
+                  {logoutLoading ? "Signing out..." : "Sign out"}
                 </motion.button>
               )}
             </div>

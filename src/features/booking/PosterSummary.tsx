@@ -143,6 +143,9 @@ export function PosterSummary({
           >
             Cancel
           </Button>
+          {!canProceed && (
+            <p className="text-red-500 text-sm mt-2">Please log in to book a ticket</p>
+          )}
         </div>
       </div>
     </div>

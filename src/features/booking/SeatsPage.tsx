@@ -7,8 +7,9 @@ import { SeatMap } from "./SeatMap";
 import { ShowInfo } from "./ShowInfo";
 import { useParams } from "react-router-dom";
 import { useSeats } from "../../hooks/useSeats";
+import { useScreening } from "../../hooks/useScreening";
 import { useToken } from "../../context/TokenContext";
-import { Spinner } from "../../components/ui/spinner";
+import { Skeleton } from "../../components/ui/skeleton";
 
 interface SeatsPageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -40,17 +41,19 @@ export function SeatsPage({
 
   const { token } = useToken();
 
-  const movieData = {
-    title: "The Eternal Voyage",
-    poster:
-      "https://images.unsplash.com/photo-1574923930958-9b653a0e5148?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-    backdrop:
-      "https://images.unsplash.com/photo-1639306406821-c45e6cd384e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
-    date: "Friday, November 8, 2025",
-    time: "7:30 PM",
-    format: "IMAX 3D",
-    venue: "Epoch Cinema Downtown",
-  };
+  const { screening, loading: loadingScreening } = useScreening(screeningId ?? null);
+
+  // Derive display fields from the fetched screening object. Backend returns
+  // either `{ data: { ... } }` or the object directly; `useScreening` normalizes
+  // that. Fall back to empty strings when values are not yet available.
+  const movie = screening?.movie ?? null;
+  const poster = movie?.poster ?? null;
+  const backdrop = movie?.backdrop ?? null;
+  const title = movie?.title ?? "";
+  const date = screening?.start_date ?? "";
+  const time = screening?.start_time ?? "";
+  const format = movie?.era?.name ?? screening?.auditorium?.name ?? "";
+  const venue = screening?.auditorium?.name ?? "";
 
   const handleSeatClick = (row: string, number: number) => {
     const seatIndex = seats.findIndex((s) => s.row === row && s.number === number);
@@ -76,6 +79,21 @@ export function SeatsPage({
     handleSeatClick(row, number);
   };
 
+  // Clear all selected seats and mark them available again
+  const clearSelection = () => {
+    if (selectedSeats.length === 0) return;
+    const newSeats = seats.map((s) => {
+      const isSelected = selectedSeats.some((sel) => sel.row === s.row && sel.number === s.number);
+      return isSelected ? { ...s, status: "available" as SeatStatus } : s;
+    });
+    setSeats(newSeats);
+    setSelectedSeats([]);
+    // Call external onCancel prop if provided (e.g., parent navigation)
+    try {
+      onCancel?.();
+    } catch {}
+  };
+
   // Synchronize fetched seats into local state when available
   // Keep local selection modifications separate from the fetched shape.
   // Convert API seats to local `Seat` shape if necessary.
@@ -93,7 +111,14 @@ export function SeatsPage({
       setSeats([]);
       return;
     }
-    const normalized = array.map((s: any) => ({ row: s.row, number: s.number, status: s.status }));
+    const normalized = array.map((s: any) => ({
+      row: String(s.row),
+      number: Number(s.number),
+      // API may use `state` or `status` — prefer `state`, fall back to `status`.
+      // Default to `available` to avoid undefined behavior that required
+      // an initial click to initialize the seat state.
+      status: (s.state ?? s.status ?? "available") as SeatStatus,
+    }));
     setSeats(normalized);
   }, [fetchedSeats]);
 
@@ -106,7 +131,7 @@ export function SeatsPage({
 
       {!token && (
         <div className="container mx-auto px-6 py-4">
-          <div className="bg-amber-600/10 border border-amber-600/20 text-amber-300 rounded-md px-4 py-2 text-sm">
+          <div className="bg-red-600/6 border border-red-600/20 text-red-300 rounded-md px-4 py-2 text-sm">
             Please log in to book a ticket
           </div>
         </div>
@@ -116,14 +141,14 @@ export function SeatsPage({
       <div className="relative h-40 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/80 to-black z-10" />
         <img
-          src={movieData.backdrop}
-          alt={movieData.title}
+          src={backdrop || ""}
+          alt={title}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 flex items-end z-20 pointer-events-none">
           <div className="container mx-auto px-6 pb-6">
             <h1 className="text-white pointer-events-auto">
-              {movieData.title}
+              {title}
             </h1>
           </div>
         </div>
@@ -137,16 +162,33 @@ export function SeatsPage({
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_280px] gap-6">
           {/* Left: Poster & Summary */}
           <div className="order-2 lg:order-1">
-            <PosterSummary
-              posterUrl={movieData.poster}
-              movieTitle={movieData.title}
-              selectedSeats={selectedSeats}
-              onRemoveSeat={handleRemoveSeat}
-              onCancel={onCancel || (() => {})}
-              onNext={onNext || (() => {})}
-              canProceed={Boolean(token)}
-              theme={theme}
-            />
+            {loadingScreening ? (
+              <div className="bg-black/40 border border-slate-700/50 rounded-lg p-6 space-y-6 h-fit lg:sticky lg:top-28 overflow-hidden">
+                <div className="aspect-2/3 rounded-lg overflow-hidden border border-slate-700/30">
+                  <Skeleton className="w-full h-full" />
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+                <div className="pt-4 border-t border-slate-700/50">
+                  <Skeleton className="h-6 w-1/3" />
+                  <Skeleton className="h-10 w-full mt-4" />
+                </div>
+              </div>
+            ) : (
+              <PosterSummary
+                  posterUrl={poster ?? ""}
+                  movieTitle={title}
+                  selectedSeats={selectedSeats}
+                  onRemoveSeat={handleRemoveSeat}
+                  onCancel={clearSelection}
+                  onNext={onNext || (() => {})}
+                  canProceed={Boolean(token)}
+                  theme={theme}
+                />
+            )}
           </div>
 
           {/* Center: Seat Map - Fully interactive, no blockers */}
@@ -157,9 +199,16 @@ export function SeatsPage({
               transition={{ duration: 0.3, delay: 0.1 }}
               className="bg-black/40 border border-slate-700/50 rounded-lg p-4 md:p-8 overflow-x-auto relative z-10"
             >
-                {loading ? (
+                {loading || loadingScreening ? (
                   <div className="w-full flex items-center justify-center py-12">
-                    <Spinner size="md" theme={theme === "default" ? "modern" : (theme as any)} />
+                    <div className="w-full max-w-4xl">
+                      <Skeleton className="h-56 w-full rounded-lg" />
+                      <div className="mt-6 grid grid-cols-6 gap-2">
+                        {Array.from({ length: 24 }).map((_, i) => (
+                          <Skeleton key={i} className="h-10 w-full rounded-md" />
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 ) : error ? (
                   <div className="w-full text-center py-8 text-slate-400">
@@ -183,19 +232,28 @@ export function SeatsPage({
 
           {/* Right: Show Info */}
           <div className="order-3">
-            <ShowInfo
-              date={movieData.date}
-              time={movieData.time}
-              format={movieData.format}
-              venue={movieData.venue}
-              theme={theme}
-            />
+            {loadingScreening ? (
+              <div className="bg-black/40 border border-slate-700/50 rounded-lg p-6 space-y-4 h-fit lg:sticky lg:top-28 overflow-hidden">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-10 w-2/3 rounded-md" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+            ) : (
+              <ShowInfo
+                date={date}
+                time={time}
+                era={format}
+                venue={venue}
+                theme={theme}
+              />
+            )}
           </div>
         </div>
       </div>
 
       {/* Mobile sticky CTA - Fixed height, safe area, no seat blocking */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-22 bg-black/90 backdrop-blur-md border-t border-white/10 p-4 z-50 pointer-events-auto">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-white/10 p-4 z-50 pointer-events-auto">
         <div className="flex items-center justify-between mb-2">
           <span className="text-slate-400 text-sm">
             {selectedSeats.length} seat
@@ -237,6 +295,9 @@ export function SeatsPage({
         >
           Next
         </button>
+        {!token && (
+          <p className="text-red-500 text-xs mt-2">Please log in to book a ticket</p>
+        )}
       </div>
     </div>
   );
