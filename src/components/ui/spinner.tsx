@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 
 interface SpinnerProps {
-  theme?: "90s" | "2000s" | "modern";
+  theme?: "90s" | "2000s" | "modern" | "default";
   size?: "sm" | "md" | "lg";
 }
 
@@ -45,7 +45,10 @@ const sizeConfig = {
 };
 
 export function Spinner({ theme = "modern", size = "md" }: SpinnerProps) {
-  const colors = themeConfig[theme];
+  // Guard against unknown/unsupported theme keys (for example "default")
+  // by falling back to the `modern` theme. This prevents runtime errors
+  // when other components pass a broader set of theme identifiers.
+  const colors = themeConfig[theme as keyof typeof themeConfig] ?? themeConfig.modern;
   const sizing = sizeConfig[size];
 
   return (
@@ -96,7 +99,7 @@ export function Spinner({ theme = "modern", size = "md" }: SpinnerProps) {
 }
 
 // Loading overlay component for full-screen loading states
-export function LoadingOverlay({ theme = "modern" }: { theme?: "90s" | "2000s" | "modern" }) {
+export function LoadingOverlay({ theme = "modern" }: { theme?: "90s" | "2000s" | "modern" | "default" }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}

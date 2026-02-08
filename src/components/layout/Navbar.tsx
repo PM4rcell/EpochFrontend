@@ -252,7 +252,7 @@ export function Navbar({
                   disabled={logoutLoading}
                   className={`ml-2 px-3 py-1 rounded-md text-xs text-slate-200 bg-white/5 border border-white/6 transition-colors duration-150 hidden sm:inline ${logoutLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-white/10"}`}
                 >
-                  {logoutLoading ? <span className="flex items-center gap-2"><Spinner size="sm" theme={appliedTheme as any} /> <span>Signing out</span></span> : "Log out"}
+                  {logoutLoading ? <span className="flex items-center gap-2"><Spinner size="sm" theme={appliedTheme as any} /> <span>Signing out</span></span> : "Sign out"}
                 </motion.button>
               )}
             </div>
