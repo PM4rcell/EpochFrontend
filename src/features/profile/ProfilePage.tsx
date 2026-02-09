@@ -13,7 +13,7 @@ interface ProfilePageProps {
   onSearchSubmit?: (query: string) => void;
 }
 
-export type ProfileTab = "overview" | "tickets" | "collections" | "watchlist" | "payments" | "settings";
+export type ProfileTab = "overview" | "tickets" | "watchlist" | "settings";
 
 export function ProfilePage({
   theme = "default",
@@ -59,22 +59,10 @@ export function ProfilePage({
                 <p className="text-slate-500">Your ticket history will appear here</p>
               </div>
             )}
-            {activeTab === "collections" && (
-              <div className="py-20 text-center">
-                <h2 className="text-slate-400 mb-2">Collections</h2>
-                <p className="text-slate-500">Your curated collections will appear here</p>
-              </div>
-            )}
             {activeTab === "watchlist" && (
               <div className="py-20 text-center">
                 <h2 className="text-slate-400 mb-2">Watchlist</h2>
                 <p className="text-slate-500">Your saved films will appear here</p>
-              </div>
-            )}
-            {activeTab === "payments" && (
-              <div className="py-20 text-center">
-                <h2 className="text-slate-400 mb-2">Payments</h2>
-                <p className="text-slate-500">Payment methods and history will appear here</p>
               </div>
             )}
             {activeTab === "settings" && (

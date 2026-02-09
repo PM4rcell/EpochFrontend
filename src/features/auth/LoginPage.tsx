@@ -88,7 +88,13 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={handleSubmit}
+            onKeyDown={(e: React.KeyboardEvent<HTMLFormElement>) => {
+              if (e.key === "Enter") e.preventDefault();
+            }}
+            className="space-y-6"
+          >
             {loginError && (
               <motion.p
                 initial={{ opacity: 0, y: -6 }}

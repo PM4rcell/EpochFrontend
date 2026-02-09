@@ -66,9 +66,7 @@ export function ProfileTabs({ theme = "default", activeTab, onTabChange }: Profi
   const tabs: Array<{ id: ProfileTab; label: string }> = [
     { id: "overview", label: "Overview" },
     { id: "tickets", label: "Tickets" },
-    { id: "collections", label: "Collections" },
     { id: "watchlist", label: "Watchlist" },
-    { id: "payments", label: "Payments" },
     { id: "settings", label: "Settings" },
   ];
 

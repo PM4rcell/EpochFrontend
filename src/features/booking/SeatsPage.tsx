@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom";
 import { useSeats } from "../../hooks/useSeats";
 import { useScreening } from "../../hooks/useScreening";
 import { useToken } from "../../context/TokenContext";
+import { useEra } from "../../context/EraContext";
 import { Skeleton } from "../../components/ui/skeleton";
 
 interface SeatsPageProps {
@@ -40,6 +41,8 @@ export function SeatsPage({
   >([]);
 
   const { token } = useToken();
+  const { era } = useEra();
+  const appliedTheme = era ?? theme;
 
   const { screening, loading: loadingScreening } = useScreening(screeningId ?? null);
 
@@ -125,7 +128,7 @@ export function SeatsPage({
   return (
     <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
       <Navbar
-        theme={theme}
+        theme={appliedTheme}
         activePage="screenings"
       />
 
@@ -155,7 +158,7 @@ export function SeatsPage({
       </div>
 
       {/* Stepper - Constrained height, clipped */}
-      <BookingStepper activeStep="seats" theme={theme} />
+      <BookingStepper activeStep="seats" theme={appliedTheme} />
 
       {/* Main Content - Extra bottom padding on mobile for sticky bar */}
       <div className="container mx-auto px-6 py-8 pb-32 lg:pb-8">
@@ -186,7 +189,7 @@ export function SeatsPage({
                   onCancel={clearSelection}
                   onNext={onNext || (() => {})}
                   canProceed={Boolean(token)}
-                  theme={theme}
+                  theme={appliedTheme}
                 />
             )}
           </div>
@@ -224,7 +227,7 @@ export function SeatsPage({
                   <SeatMap
                     seats={seats}
                     onSeatClick={handleSeatClick}
-                    theme={theme}
+                    theme={appliedTheme}
                   />
                 )}
             </motion.div>
@@ -245,7 +248,7 @@ export function SeatsPage({
                 time={time}
                 era={format}
                 venue={venue}
-                theme={theme}
+                theme={appliedTheme}
               />
             )}
           </div>
@@ -262,11 +265,11 @@ export function SeatsPage({
           <span
             className={`
             ${
-              theme === "90s"
+              appliedTheme === "90s"
                 ? "text-amber-500"
-                : theme === "2000s"
+                : appliedTheme === "2000s"
                   ? "text-blue-400"
-                  : theme === "modern"
+                  : appliedTheme === "modern"
                     ? "text-slate-300"
                     : "text-amber-500"
             }
@@ -281,11 +284,11 @@ export function SeatsPage({
           className={`
             w-full py-3 rounded-lg transition-all duration-200
             ${
-              theme === "90s"
+              appliedTheme === "90s"
                 ? "bg-amber-600 hover:bg-amber-500"
-                : theme === "2000s"
+                : appliedTheme === "2000s"
                   ? "bg-blue-500 hover:bg-blue-400"
-                  : theme === "modern"
+                  : appliedTheme === "modern"
                     ? "bg-slate-300 hover:bg-slate-200"
                     : "bg-amber-600 hover:bg-amber-500"
             }
