@@ -1,4 +1,5 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
+import usePendingBookingCleanup from "../hooks/usePendingBookingCleanup";
 import LandingPage from "../features/landing-page/LandingPage.tsx";
 import { EraPage } from "../features/era-page/EraPage.tsx";
 import { ScreeningsPage } from "../features/screening/ScreeningsPage.tsx";
@@ -17,6 +18,9 @@ import CheckoutGuard from "../features/booking/CheckoutGuard";
 export function AppRoutes() {
   const navigate = useNavigate();
   const handleNavigate = (page: string) => navigate(page);
+
+  // Keep pending booking while on booking routes; clear when leaving.
+  usePendingBookingCleanup();
 
   return (
     <Routes>

@@ -3,7 +3,7 @@ import { CheckCircle } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
 import { BookingStepper } from "./BookingStepper";
 import { Button } from "../../components/ui/button";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useEra } from "../../context/EraContext";
 
 interface TicketsPageProps {
@@ -17,6 +17,7 @@ export function TicketPage({ theme = "default", onNavigate, onDone }: TicketsPag
   const appliedTheme = era ?? theme;
   const location = useLocation();
   const params = useParams() as { bookingId?: string };
+  const navigate = useNavigate();
 
   // Resolve bookingId from navigation state, route param, or sessionStorage
   let bookingId: string | null = (location.state as any)?.booking?.id ?? params.bookingId ?? null;
@@ -59,6 +60,11 @@ export function TicketPage({ theme = "default", onNavigate, onDone }: TicketsPag
 
   const colors = getThemeColors();
 
+  const clearPendingBooking = () => {
+    try {
+      if (typeof window !== "undefined") sessionStorage.removeItem("epoch:pendingBooking");
+    } catch {}
+  };
   return (
     <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
       <Navbar theme={appliedTheme} activePage="screenings"/>
@@ -135,7 +141,7 @@ export function TicketPage({ theme = "default", onNavigate, onDone }: TicketsPag
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Button
-              onClick={() => onNavigate?.("profile")}
+              onClick={() => navigate("/profile")}
               className={`
                 ${
                   appliedTheme === "90s"
@@ -152,7 +158,7 @@ export function TicketPage({ theme = "default", onNavigate, onDone }: TicketsPag
               View My Tickets
             </Button>
             <Button
-              onClick={onDone}
+              onClick={() => { clearPendingBooking(); onDone?.(); navigate("/"); }}
               variant="outline"
               className="border-slate-700 text-slate-300 hover:bg-slate-700/20"
             >
