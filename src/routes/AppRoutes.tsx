@@ -49,6 +49,7 @@ export function AppRoutes() {
 
       {/*Payment page */}
       <Route path="/payment" element={<PaymentPage />} />
+      <Route path="/payment/:bookingId" element={<PaymentPage />} />
       
       {/*Login page */}
       <Route path="/login" element={<LoginPage onNavigate={handleNavigate} />}/>

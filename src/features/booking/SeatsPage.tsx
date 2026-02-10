@@ -119,14 +119,36 @@ export function SeatsPage({
     } as const;
 
     try {
+      // create client-side preview in case server lock fails to provide full booking
+      const bookingPreview = {
+        screening_id: Number(screeningId),
+        screening: screening ?? null,
+        movie: movie ?? null,
+        seats: selectedSeats.map((s) => ({ id: s.id, row: s.row, number: s.number, price: s.price })),
+        seat_ids: seatIds,
+        total: selectedSeats.reduce((sum, s) => sum + (s.price ?? 0), 0),
+      } as const;
+
+      // attempt server lock
       const res = await lock(body as any);
-      const bookingId = res?.id ?? res?.booking_id ?? res?.booking?.id;
-      // navigate to payment page, pass bookingId via state
-      navigate("/payment", { state: { bookingId } });
+      const serverBooking = res?.booking ?? res ?? null;
+      const bookingId = serverBooking?.id ?? res?.id ?? res?.booking_id ?? null;
+
+      // persist a merged booking object so we always have displayable data
+      try {
+        const persisted = serverBooking ? { ...bookingPreview, ...serverBooking } : bookingPreview;
+        sessionStorage.setItem("epoch:pendingBooking", JSON.stringify(persisted));
+        if (bookingId) {
+          navigate(`/payment/${bookingId}`, { state: { booking: persisted } });
+          return;
+        }
+      } catch {}
+
+      // fallback: navigate to payment without id but with persisted preview in sessionStorage
+      navigate("/payment", { state: { booking: serverBooking ? { ...bookingPreview, ...serverBooking } : bookingPreview } });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn("Booking failed", err);
-      // TODO: surface this error to the UI (toast or inline)
     }
   };
 

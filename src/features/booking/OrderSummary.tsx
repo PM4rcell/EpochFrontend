@@ -75,7 +75,18 @@ export function OrderSummary({
   };
 
   const colors = getThemeColors();
-  
+  const normalizeEraLabel = (raw?: string | null) => {
+    if (!raw) return "";
+    const s = String(raw).toLowerCase();
+    if (s.includes("90s")) return "90s";
+    if (s.includes("20s") || s.includes("00s")) return "2000s";
+    if (s.includes("nowdays")) return "modern";
+    if (s === "90s" || s === "2000s" || s === "modern") return raw as string;
+    return raw;
+  };
+
+  const formatLabel = normalizeEraLabel(format);
+
   const subtotal = seats.reduce((sum, seat) => sum + seat.price, 0);
   const total = subtotal + fees + taxes;
 
@@ -116,7 +127,7 @@ export function OrderSummary({
       {/* Format */}
       <div className={`inline-flex items-center px-3 py-1.5 rounded-md border ${colors.border} bg-black/40`}>
         <Film className="w-4 h-4 mr-2" />
-        <span className={colors.accent}>{format}</span>
+        <span className={colors.accent}>{formatLabel}</span>
       </div>
 
       {/* Seats */}
