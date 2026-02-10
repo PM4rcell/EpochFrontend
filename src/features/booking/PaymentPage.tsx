@@ -5,6 +5,8 @@ import { BookingStepper } from "./BookingStepper";
 import { OrderSummary } from "./OrderSummary";
 import { useEra } from "../../context/EraContext";
 import { useLocation, useParams } from "react-router-dom";
+import { useCheckout } from "../../hooks/useCheckout";
+import { useNavigate } from "react-router-dom";
 
 interface PaymentPageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -23,6 +25,8 @@ export function PaymentPage({
   const appliedTheme = era ?? theme;
   const location = useLocation();
   const params = useParams() as { bookingId?: string };
+  const navigate = useNavigate();
+  const { checkout, loading: checkoutLoading } = useCheckout();
 
   // Prefer booking from navigation state, then sessionStorage fallback.
   let booking: any = location.state?.booking ?? null;
@@ -63,15 +67,26 @@ export function PaymentPage({
   const total = subtotal + fees + taxes;
 
   const handlePayment = async () => {
-    setIsProcessing(true);
-    
-    // Simulate payment processing
-    setTimeout(() => {
+    // Determine bookingId to checkout
+    const bookingId = params.bookingId ?? booking?.id ?? booking?.booking_id ?? booking?.bookingId ?? null;
+    if (!bookingId) {
+      // eslint-disable-next-line no-console
+      console.warn("No bookingId available for checkout");
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      await checkout(bookingId);
+      // navigate to checkout/ticket page; pass booking via state if available
+      navigate(`/checkout/${bookingId}`, { state: { booking } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn("Checkout failed", err);
+    } finally {
       setIsProcessing(false);
-      if (onComplete) {
-        onComplete();
-      }
-    }, 2000);
+      if (onComplete) onComplete();
+    }
   };
 
   return (

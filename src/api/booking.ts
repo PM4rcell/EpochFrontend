@@ -27,3 +27,15 @@ export async function lockBooking(body: CreateBookingBody) {
     body: JSON.stringify(body),
   });
 }
+
+/**
+ * checkoutBooking
+ * - Finalize/checkout a previously created booking on the server.
+ * - Calls POST /api/bookings/{id}/checkout. No body required.
+ * - `apiFetch` will include the current auth token when set via `setAuthToken()`.
+ */
+export async function checkoutBooking(bookingId: string | number) {
+  return apiFetch<any>(`/api/bookings/${bookingId}/checkout`, {
+    method: "POST",
+  });
+}

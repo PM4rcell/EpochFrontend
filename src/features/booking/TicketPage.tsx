@@ -3,6 +3,8 @@ import { CheckCircle } from "lucide-react";
 import { Navbar } from "../../components/layout/Navbar";
 import { BookingStepper } from "./BookingStepper";
 import { Button } from "../../components/ui/button";
+import { useLocation, useParams } from "react-router-dom";
+import { useEra } from "../../context/EraContext";
 
 interface TicketsPageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -10,14 +12,28 @@ interface TicketsPageProps {
   onDone?: () => void;
 }
 
-export function TicketsPage({ theme = "default", onNavigate, onDone }: TicketsPageProps) {
+export function TicketPage({ theme = "default", onNavigate, onDone }: TicketsPageProps) {
+  const { era } = useEra();
+  const appliedTheme = era ?? theme;
+  const location = useLocation();
+  const params = useParams() as { bookingId?: string };
+
+  // Resolve bookingId from navigation state, route param, or sessionStorage
+  let bookingId: string | null = (location.state as any)?.booking?.id ?? params.bookingId ?? null;
+  if (!bookingId) {
+    try {
+      const raw = typeof window !== "undefined" ? sessionStorage.getItem("epoch:pendingBooking") : null;
+      const stored = raw ? JSON.parse(raw) : null;
+      bookingId = stored?.id ?? stored?.booking_id ?? null;
+    } catch {}
+  }
   const movieData = {
     title: "The Eternal Voyage",
     backdrop: "https://images.unsplash.com/photo-1639306406821-c45e6cd384e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
   };
 
   const getThemeColors = () => {
-    switch (theme) {
+    switch (appliedTheme) {
       case "90s":
         return {
           accent: "text-amber-500",
@@ -45,7 +61,7 @@ export function TicketsPage({ theme = "default", onNavigate, onDone }: TicketsPa
 
   return (
     <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
-      <Navbar theme={theme} activePage="screenings"/>
+      <Navbar theme={appliedTheme} activePage="screenings"/>
 
       {/* Hero Header - Compact */}
       <div className="relative h-40 overflow-hidden pointer-events-none">
@@ -66,7 +82,7 @@ export function TicketsPage({ theme = "default", onNavigate, onDone }: TicketsPa
       <BookingStepper
         activeStep="tickets"
         completedSteps={["seats", "payment"]}
-        theme={theme}
+        theme={appliedTheme}
       />
 
       {/* Main Content - Centered Success Message */}
@@ -103,6 +119,12 @@ export function TicketsPage({ theme = "default", onNavigate, onDone }: TicketsPa
             <p className="text-slate-400 text-lg mb-8">
               Your tickets are ready. You can view and manage them in your profile page.
             </p>
+              {/* Booking ID display */}
+              {bookingId && (
+                <div className="mb-6">
+                  <p className="text-slate-400">Your booking ID: <span className="text-white">{bookingId}</span></p>
+                </div>
+              )}
           </motion.div>
 
           {/* Action Buttons */}
@@ -116,11 +138,11 @@ export function TicketsPage({ theme = "default", onNavigate, onDone }: TicketsPa
               onClick={() => onNavigate?.("profile")}
               className={`
                 ${
-                  theme === "90s"
+                  appliedTheme === "90s"
                     ? "bg-amber-600 hover:bg-amber-500"
-                    : theme === "2000s"
+                    : appliedTheme === "2000s"
                     ? "bg-blue-500 hover:bg-blue-400"
-                    : theme === "modern"
+                    : appliedTheme === "modern"
                     ? "bg-slate-300 hover:bg-slate-200"
                     : "bg-amber-600 hover:bg-amber-500"
                 }
