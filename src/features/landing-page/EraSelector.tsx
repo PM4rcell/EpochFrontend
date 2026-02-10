@@ -30,7 +30,12 @@ export function EraSelector({ onSelectEra, eras = [], loading = false, error = n
         <p className="mt-3 italic text-slate-400 text-center">Loading eras...</p>
       </div>
     );
-  if (error) return <p>Failed to load eras.</p>;
+  if (error)
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p className="italic text-slate-400 text-center">Failed to load eras.</p>
+      </div>
+    );
 
   // Presentation metadata for each canonical era key.
   // This maps the frontend key ("90s"/"2000s"/"modern") to images,

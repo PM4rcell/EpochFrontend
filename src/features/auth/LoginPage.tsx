@@ -38,7 +38,7 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
 
     try {
       await login({ email, password });
-      onNavigate("");
+      window.history.back();
     } catch (err) {
       // error stored in hook; leave UI to render it
       // eslint-disable-next-line no-console
