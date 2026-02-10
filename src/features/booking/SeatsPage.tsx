@@ -10,6 +10,8 @@ import { useSeats } from "../../hooks/useSeats";
 import { useScreening } from "../../hooks/useScreening";
 import { useToken } from "../../context/TokenContext";
 import { useEra } from "../../context/EraContext";
+import { useNavigate } from "react-router-dom";
+import { useLockBooking } from "../../hooks/useLockBooking";
 import { Skeleton } from "../../components/ui/skeleton";
 
 interface SeatsPageProps {
@@ -19,9 +21,10 @@ interface SeatsPageProps {
   onCancel?: () => void;
 }
 
-type SeatStatus = "available" | "reserved" | "selected";
+type SeatStatus = "available" | "unavailable" | "selected";
 
 interface Seat {
+  id?: number;
   row: string;
   number: number;
   status: SeatStatus;
@@ -29,7 +32,6 @@ interface Seat {
 
 export function SeatsPage({
   theme = "default",
-  onNext,
   onCancel,
 }: SeatsPageProps) {
   const { screeningId } = useParams<{ screeningId: string }>();
@@ -37,7 +39,7 @@ export function SeatsPage({
   const { seats: fetchedSeats, loading, error } = useSeats(screeningId ?? null);
   const [seats, setSeats] = useState<Seat[]>(() => []);
   const [selectedSeats, setSelectedSeats] = useState<
-    Array<{ row: string; number: number; price: number }>
+    Array<{ id: number; row: string; number: number; price: number }>
   >([]);
 
   const { token } = useToken();
@@ -45,6 +47,8 @@ export function SeatsPage({
   const appliedTheme = era ?? theme;
 
   const { screening, loading: loadingScreening } = useScreening(screeningId ?? null);
+  const navigate = useNavigate();
+  const { lock, loading: bookingLoading } = useLockBooking();
 
   // Derive display fields from the fetched screening object. Backend returns
   // either `{ data: { ... } }` or the object directly; `useScreening` normalizes
@@ -63,13 +67,17 @@ export function SeatsPage({
     if (seatIndex === -1) return;
 
     const seat = seats[seatIndex];
-    if (seat.status === "reserved") return;
+    if (seat.status === "unavailable") return;
 
     const newSeats = [...seats];
 
     if (seat.status === "available") {
       newSeats[seatIndex] = { ...seat, status: "selected" };
-      setSelectedSeats([...selectedSeats, { row, number, price: 15 }]);
+      if (seat.id != null) {
+        setSelectedSeats([...selectedSeats, { id: Number(seat.id), row, number, price: 15 }]);
+      } else {
+        setSelectedSeats([...selectedSeats, { id: 0, row, number, price: 15 }]);
+      }
     } else {
       newSeats[seatIndex] = { ...seat, status: "available" };
       setSelectedSeats(selectedSeats.filter((s) => !(s.row === row && s.number === number)));
@@ -97,6 +105,31 @@ export function SeatsPage({
     } catch {}
   };
 
+  const handleProceed = async () => {
+    if (selectedSeats.length === 0) return;
+    // ensure we have numeric ids
+    const seatIds = selectedSeats.map((s) => Number(s.id)).filter((id) => !Number.isNaN(id));
+    if (seatIds.length === 0) return;
+
+    const body = {
+      screening_id: Number(screeningId),
+      ticket_type_id: 1,
+      seat_ids: seatIds,
+      customer: { mode: "user" },
+    } as const;
+
+    try {
+      const res = await lock(body as any);
+      const bookingId = res?.id ?? res?.booking_id ?? res?.booking?.id;
+      // navigate to payment page, pass bookingId via state
+      navigate("/payment", { state: { bookingId } });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn("Booking failed", err);
+      // TODO: surface this error to the UI (toast or inline)
+    }
+  };
+
   // Synchronize fetched seats into local state when available
   // Keep local selection modifications separate from the fetched shape.
   // Convert API seats to local `Seat` shape if necessary.
@@ -114,14 +147,24 @@ export function SeatsPage({
       setSeats([]);
       return;
     }
-    const normalized = array.map((s: any) => ({
-      row: String(s.row),
-      number: Number(s.number),
-      // API may use `state` or `status` — prefer `state`, fall back to `status`.
-      // Default to `available` to avoid undefined behavior that required
-      // an initial click to initialize the seat state.
-      status: (s.state ?? s.status ?? "available") as SeatStatus,
-    }));
+    const normalized = array.map((s: any) => {
+      const rawStatus = s.state ?? s.status ?? "available";
+      // Normalize a variety of possible API status representations into our SeatStatus
+      const status: SeatStatus = (() => {
+        if (typeof rawStatus === "number") return rawStatus === 1 ? "unavailable" : "available";
+        const str = String(rawStatus).toLowerCase();
+        if (str === "selected") return "selected";
+        if (str === "unavailable") return "unavailable";
+        return "available";
+      })();
+
+      return {
+        id: s.id ?? s.seat_id ?? s._id ?? undefined,
+        row: String(s.row),
+        number: Number(s.number),
+        status,
+      } as Seat;
+    });
     setSeats(normalized);
   }, [fetchedSeats]);
 
@@ -182,15 +225,16 @@ export function SeatsPage({
               </div>
             ) : (
               <PosterSummary
-                  posterUrl={poster ?? ""}
-                  movieTitle={title}
-                  selectedSeats={selectedSeats}
-                  onRemoveSeat={handleRemoveSeat}
-                  onCancel={clearSelection}
-                  onNext={onNext || (() => {})}
-                  canProceed={Boolean(token)}
-                  theme={appliedTheme}
-                />
+                    posterUrl={poster ?? ""}
+                    movieTitle={title}
+                    selectedSeats={selectedSeats}
+                    onRemoveSeat={handleRemoveSeat}
+                    onCancel={clearSelection}
+                onNext={handleProceed}
+                isReserving={bookingLoading}
+                    canProceed={Boolean(token)}
+                    theme={appliedTheme}
+                  />
             )}
           </div>
 
@@ -279,8 +323,8 @@ export function SeatsPage({
           </span>
         </div>
         <button
-          onClick={() => { if (!token) return; onNext?.(); }}
-          disabled={!token || selectedSeats.length === 0}
+          onClick={() => { if (!token) return; handleProceed(); }}
+          disabled={!token || selectedSeats.length === 0 || bookingLoading}
           className={`
             w-full py-3 rounded-lg transition-all duration-200
             ${
@@ -296,7 +340,7 @@ export function SeatsPage({
             disabled:opacity-50 disabled:cursor-not-allowed
           `}
         >
-          Next
+          {bookingLoading ? "Processing..." : "Next"}
         </button>
         {!token && (
           <p className="text-red-500 text-xs mt-2">Please log in to book a ticket</p>

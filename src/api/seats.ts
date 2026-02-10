@@ -3,7 +3,7 @@ import { apiFetch } from "./fetch";
 export interface SeatApi {
   row: string;
   number: number;
-  status: "available" | "reserved" | "selected";
+  status: "available" | "unavailable" | "selected";
 }
 
 export async function fetchSeats(screeningId: string) {

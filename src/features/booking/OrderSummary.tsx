@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/button";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 
 interface SeatInfo {
+  id?: number;
   row: string;
   number: number;
   price: number;
@@ -123,7 +124,7 @@ export function OrderSummary({
         <p className="text-slate-400 text-sm mb-3">Selected Seats</p>
         {seats.map((seat) => (
           <div
-            key={`${seat.row}${seat.number}`}
+            key={seat.id ?? `${seat.row}-${seat.number}`}
             className="flex items-center justify-between text-sm"
           >
             <span className="text-slate-400">

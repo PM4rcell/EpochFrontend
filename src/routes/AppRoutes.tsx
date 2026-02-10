@@ -10,6 +10,7 @@ import { ProfilePage } from "../features/profile/ProfilePage.tsx";
 import { SeatsPage } from "../features/booking/SeatsPage.tsx";
 import { LoginPage } from "../features/auth/LoginPage.tsx";
 import { RegisterPage } from "../features/auth/RegisterPage.tsx";
+import { PaymentPage } from "../features/booking/PaymentPage.tsx";
 
 export function AppRoutes() {
   const navigate = useNavigate();
@@ -45,6 +46,9 @@ export function AppRoutes() {
        (1. Choose your place -> 2. Payment -> 3. Done) */}
       <Route path="/booking" element={<SeatsPage/>}/>
       <Route path="/booking/:screeningId" element={<SeatsPage/>} />
+
+      {/*Payment page */}
+      <Route path="/payment" element={<PaymentPage />} />
       
       {/*Login page */}
       <Route path="/login" element={<LoginPage onNavigate={handleNavigate} />}/>

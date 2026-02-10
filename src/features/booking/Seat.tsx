@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-type SeatStatus = "available" | "selected" | "reserved";
+type SeatStatus = "available" | "selected" | "unavailable";
 
 interface SeatProps {
   row: string;
@@ -45,7 +45,7 @@ export function Seat({ row, number, status, onClick, theme = "default" }: SeatPr
   };
 
   const colors = getThemeColors();
-  const isClickable = status !== "reserved";
+  const isClickable = status !== "unavailable";
 
   return (
     <motion.button
@@ -141,8 +141,8 @@ export function Seat({ row, number, status, onClick, theme = "default" }: SeatPr
           </>
         )}
 
-        {/* Reserved seat */}
-        {status === "reserved" && (
+        {/* Unavailable seat */}
+        {status === "unavailable" && (
           <>
             <div className="absolute inset-0 rounded-lg bg-slate-800 border border-slate-700/50 opacity-50">
               {/* Cross-hatch pattern */}

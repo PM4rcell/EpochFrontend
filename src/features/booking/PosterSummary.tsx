@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/button";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 
 interface SelectedSeat {
+  id?: number;
   row: string;
   number: number;
   price: number;
@@ -17,6 +18,7 @@ interface PosterSummaryProps {
   onCancel: () => void;
   onNext: () => void;
   canProceed?: boolean;
+  isReserving?: boolean;
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
@@ -28,6 +30,7 @@ export function PosterSummary({
   onCancel,
   onNext,
   canProceed = true,
+  isReserving = false,
   theme = "default",
 }: PosterSummaryProps) {
   const getThemeColors = () => {
@@ -84,7 +87,7 @@ export function PosterSummary({
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {selectedSeats.map((seat) => (
               <motion.div
-                key={`${seat.row}${seat.number}`}
+                key={seat.id ?? `${seat.row}-${seat.number}`}
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -12 }}
@@ -127,14 +130,14 @@ export function PosterSummary({
         <div className="space-y-3">
           <Button
             onClick={onNext}
-            disabled={!hasSeats || (typeof canProceed !== "undefined" && !canProceed)}
+            disabled={!hasSeats || (typeof canProceed !== "undefined" && !canProceed) || isReserving}
             className={`
               w-full ${colors.button} ${colors.glow}
               transition-all duration-200
               disabled:opacity-50 disabled:cursor-not-allowed
             `}
           >
-            Next
+            {isReserving ? "Reserving seats..." : "Next"}
           </Button>
           <Button
             onClick={onCancel}

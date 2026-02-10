@@ -81,10 +81,6 @@ export function Navbar({
   };
   const usernameFromToken = getUsernameFromToken(token);
   const username = user?.data?.username || usernameFromToken || null;
-  // Debug: log token and decoded payload to help diagnose missing username display
-  // (use safe accessors)
-  // eslint-disable-next-line no-console
-  console.debug("[Navbar debug] token:", token, "user:", user, "username:", username);
 
   // NAV ITEMS
   const navItems = [

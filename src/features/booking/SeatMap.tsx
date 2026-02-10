@@ -2,9 +2,10 @@ import { motion } from "motion/react";
 import { Seat } from "./Seat";
 
 interface SeatData {
+  id?: number;
   row: string;
   number: number;
-  status: "available" | "selected" | "reserved";
+  status: "available" | "selected" | "unavailable";
 }
 
 interface SeatMapProps {
@@ -167,7 +168,7 @@ export function SeatMap({ seats, onSeatClick, theme = "default" }: SeatMapProps)
                     const showAisle = index === 3 || index === 7;
 
                     return (
-                      <div key={seat.number} className="flex items-center gap-2">
+                      <div key={seat.id ?? `${seat.row}-${seat.number}`} className="flex items-center gap-2">
                         <Seat
                           row={seat.row}
                           number={seat.number}
@@ -248,7 +249,7 @@ export function SeatMap({ seats, onSeatClick, theme = "default" }: SeatMapProps)
             </div>
           </motion.div>
 
-          {/* Reserved */}
+          {/* Unavailable */}
           <motion.div
             className="flex items-center gap-3 group cursor-default"
             whileHover={{ scale: 1.05 }}
