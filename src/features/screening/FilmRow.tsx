@@ -24,7 +24,6 @@ interface FilmRowProps {
   rating: number;
   poster: string;
   formats: FormatShowtimes[];
-  activeDays?: string[];
   onTimeSelect?: (format: string, time: string) => void;
   theme?: "90s" | "2000s" | "modern" | "default";
   delay?: number;
@@ -38,7 +37,7 @@ export function FilmRow({
   rating,
   poster,
   formats,
-  activeDays = ["Mon", "Tue", "Wed", "Thu"],
+  
   onTimeSelect,
   theme = "default",
   delay = 0,
@@ -128,26 +127,7 @@ export function FilmRow({
                 {runtime} • {genre}
               </p>
 
-              {/* Days indicator */}
-              <div className="flex items-center gap-2 mb-3">
-                {weekDays.map((day) => {
-                  const isActive = activeDays.includes(day);
-                  return (
-                    <div key={day} className="relative">
-                      <span
-                        className={`text-xs ${
-                          isActive ? "text-slate-300" : "text-slate-600"
-                        }`}
-                      >
-                        {day}
-                      </span>
-                      {isActive && (
-                        <div className={`absolute -top-1 -right-1 w-1 h-1 rounded-full ${colors.dot}`} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              {/* Days indicator removed; showtimes now rendered as time pills */}
             </div>
 
             {/* IMDb Rating */}

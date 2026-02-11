@@ -30,10 +30,6 @@ export default function useHeader(initial?: HeaderState) {
 
   const refreshHeader = useCallback(() => {
     setHeader(readFromStorage());
-    try {
-      const title = (readFromStorage().title) || "Epoch";
-      if (typeof document !== "undefined") document.title = `${title} — Epoch`;
-    } catch {}
   }, [readFromStorage]);
 
   useEffect(() => {
