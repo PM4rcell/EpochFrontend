@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { setAuthToken, apiFetch } from "../api/fetch";
+import { setAuthToken } from "../api/fetch";
+import { fetchMe } from "../api/user";
 
 // Key used to persist token to localStorage (optional).
 const STORAGE_KEY = "epoch_token";
@@ -63,7 +64,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       }
       try {
         // Ensure the fetch module has the auth token set (setAuthToken ran in previous effect).
-        const me = await apiFetch("/api/user/me");
+        const me = await fetchMe();
         if (mounted) setUser(me || null);
       } catch (err) {
         if (mounted) setUser(null);

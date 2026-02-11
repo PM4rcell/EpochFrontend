@@ -1,14 +1,19 @@
 import { motion } from "motion/react";
 import { Edit2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Avatar, AvatarFallback } from "../../components/ui/avatar";
+import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { Badge } from "../../components/ui/badge";
 
 interface ProfileHeaderProps {
   theme?: "90s" | "2000s" | "modern" | "default";
+  title?: string;
+  subtitle?: string;
+  avatar?: string | null;
+  userId?: string | number | null;
 }
 
-export function ProfileHeader({ theme = "default" }: ProfileHeaderProps) {
+export function ProfileHeader({ theme = "default", title, subtitle, avatar, userId }: ProfileHeaderProps) {
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
@@ -74,23 +79,22 @@ export function ProfileHeader({ theme = "default" }: ProfileHeaderProps) {
             className={`rounded-full p-1 bg-linear-to-br from-slate-800 to-slate-900 ${colors.border} border-2`}
           >
             <Avatar className="w-16 h-16 sm:w-24 sm:h-24">
-              <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400" alt="Alex Carter" />
-              <AvatarFallback className="bg-slate-800 text-slate-300">AC</AvatarFallback>
+              <ImageWithFallback src={avatar || ""} alt={title || "Profile"} className="aspect-square size-full" />
+              <AvatarFallback className="bg-slate-800 text-slate-300">{(title || "").split(" ").filter(Boolean).map(s => s[0]).slice(0,2).join("") || "U"}</AvatarFallback>
             </Avatar>
           </motion.div>
 
           {/* User info */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-              <h1 className="text-white truncate">Alex Carter</h1>
-              <Badge
-                variant="outline"
-                className={`${colors.badgeBorder} ${colors.badgeText} bg-black/40 backdrop-blur-sm w-fit`}
-              >
-                Silver Member
-              </Badge>
+              <h1 className="text-white truncate">{title || "Profile"}</h1>
             </div>
-            <p className="text-slate-400">Member since November 2023</p>
+            {subtitle ? <p className="text-slate-400">{subtitle}</p> : null}
+            {userId ? (
+              <p className="text-slate-500 text-sm mt-1">
+                User ID: <span className="text-slate-300">{userId}</span>
+              </p>
+            ) : null}
           </div>
 
           {/* Edit button */}

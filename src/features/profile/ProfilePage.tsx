@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Navbar } from "../../components/layout/Navbar";
 import { ProfileHeader } from "./ProfileHeader";
+import useHeader from "../../hooks/useHeader";
 import { ProfileTabs } from "./ProfleTabs";
 import { OverviewContent } from "./OverViewContent";
 
@@ -20,6 +21,7 @@ export function ProfilePage({
   onNavigate,
 }: ProfilePageProps) {
   const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
+  const { header } = useHeader();
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -41,7 +43,7 @@ export function ProfilePage({
           className="container mx-auto px-4 sm:px-6 max-w-7xl"
         >
           {/* Profile Header */}
-          <ProfileHeader theme={theme} />
+          <ProfileHeader theme={theme} title={header.title} subtitle={header.subtitle} avatar={header.avatar} userId={header.userId} />
 
           {/* Sticky Tabs */}
           <ProfileTabs
