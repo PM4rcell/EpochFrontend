@@ -47,8 +47,6 @@ export function FilmRow({
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [activeFormat, setActiveFormat] = useState<string>(formats[0]?.format || "");
 
-  const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
   const handleTimeClick = (format: string, time: string) => {
     setSelectedTime(`${format}-${time}`);
     onTimeSelect?.(format, time);
