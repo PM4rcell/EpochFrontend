@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { StarRating } from "./StarRating.tsx";
 import { Button } from "../../components/ui/button";
@@ -7,15 +7,18 @@ interface AddReviewCardProps {
   onSubmit?: (rating: number, text: string) => void;
   onCancel?: () => void;
   theme?: "90s" | "2000s" | "modern" | "default";
+  isSubmitting?: boolean;
 }
 
 export function AddReviewCard({ 
   onSubmit, 
   onCancel, 
-  theme = "default" 
+  theme = "default", 
+  isSubmitting = false,
 }: AddReviewCardProps) {
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const getThemeColors = () => {
     switch (theme) {
@@ -58,12 +61,22 @@ export function AddReviewCard({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoggedIn) return;
     if (rating > 0 && text.trim()) {
       onSubmit?.(rating, text);
       setRating(0);
       setText("");
     }
   };
+
+  useEffect(() => {
+    try {
+      const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+      setIsLoggedIn(!!raw);
+    } catch {
+      setIsLoggedIn(false);
+    }
+  }, []);
 
   return (
     <motion.div
@@ -114,14 +127,14 @@ export function AddReviewCard({
         <div className="flex gap-3">
           <Button
             type="submit"
-            disabled={rating === 0 || !text.trim()}
+            disabled={!isLoggedIn || rating === 0 || !text.trim() || isSubmitting}
             className={`
               ${colors.button} ${colors.buttonGlow}
               transition-all duration-200
               disabled:opacity-50 disabled:cursor-not-allowed
             `}
           >
-            Post review
+            {isSubmitting ? "Posting..." : "Post review"}
           </Button>
           {onCancel && (
             <Button
@@ -132,6 +145,9 @@ export function AddReviewCard({
             >
               Cancel
             </Button>
+          )}
+          {!isLoggedIn && (
+            <p className="text-red-500 text-sm mt-2">Please log in to leave a review</p>
           )}
         </div>
       </form>

@@ -12,6 +12,7 @@ import { SimilarCard } from "./SimilarCard";
 import { SimilarCardCompact } from "./SimilarCardCompact";
 import { ReviewItem } from "./ReviewItem.tsx";
 import { AddReviewCard } from "./AddReviewCard";
+import useComment from "../../hooks/useComment";
 import { CTAButton } from "./CTAButton";
 import { Button } from "../../components/ui/button";
 import { useMovie } from "../../hooks/useMovie";
@@ -38,14 +39,29 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
   
 
-  const handleReviewSubmit = (rating: number, text: string) => {
+  const { submit: submitComment, loading: commentLoading } = useComment();
+
+  const handleReviewSubmit = async (rating: number, text: string) => {
     const newReview = {
       username: "You",
       rating,
       date: "Just now",
       text,
     };
+
+    // Optimistic update
     setReviews([newReview, ...reviews]);
+
+    try {
+      const id = m?.id ?? movieId ?? null;
+      if (!id) throw new Error("Missing movie id");
+      await submitComment(id, { text, rating });
+    } catch (err) {
+      // Revert optimistic update on error
+      setReviews((prev) => prev.filter((r) => r !== newReview));
+      // eslint-disable-next-line no-console
+      console.error("Failed to post review", err);
+    }
   };
 
   // Resolve the visual era/theme key from the API-provided era record
@@ -308,6 +324,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                 <AddReviewCard
                   onSubmit={handleReviewSubmit}
                   theme={theme}
+                  isSubmitting={commentLoading}
                 />
               )}
 
@@ -316,7 +333,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                 {reviews.slice(0, 4).map((review, index) => (
                   <ReviewItem
                     key={index}
-                    username={review.user_name || review.username || review.name || "Guest"}
+                    username={review.user?.username || review.username || review.name || "Guest"}
                     rating={review.rating ?? review.score ?? 0}
                     date={review.created_at || review.date || ""}
                     text={review.text || review.body || ""}
@@ -424,7 +441,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                   <div className="flex items-center justify-center p-4">
                     <Spinner size="sm" theme={theme} />
                   </div>
-                ) : (
+                ) : (similarItems && similarItems.length > 0) ? (
                   (similarItems || []).map((movie, index) => (
                     <SimilarCardCompact
                       key={movie.id ?? index}
@@ -437,6 +454,10 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                       onClick={() => navigateToMovie(movie.id)}
                     />
                   ))
+                ) : (
+                  <div className="p-4">
+                    <p className="text-slate-400">No similar movies found</p>
+                  </div>
                 )}
               </div>
 
@@ -446,7 +467,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                   <div className="col-span-2 flex items-center justify-center p-4">
                     <Spinner size="sm" theme={theme} />
                   </div>
-                ) : (
+                ) : (similarItems && similarItems.length > 0) ? (
                   (similarItems || []).map((movie, index) => (
                     <SimilarCard
                       key={movie.id ?? index}
@@ -457,6 +478,10 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                       onClick={() => navigateToMovie(movie.id)}
                     />
                   ))
+                ) : (
+                  <div className="col-span-2 p-4">
+                    <p className="text-slate-400">No similar movies found</p>
+                  </div>
                 )}
               </div>
             </div>
