@@ -3,7 +3,6 @@ import { Edit2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
-import { Badge } from "../../components/ui/badge";
 
 interface ProfileHeaderProps {
   theme?: "90s" | "2000s" | "modern" | "default";

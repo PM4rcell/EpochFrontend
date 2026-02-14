@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { setAuthToken } from "../api/fetch";
+import { apiFetch, setAuthToken } from "../api/fetch";
 import { fetchMe } from "../api/user";
 
 // Key used to persist token to localStorage (optional).

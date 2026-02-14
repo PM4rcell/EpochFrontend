@@ -12,7 +12,7 @@ interface TicketsPageProps {
   onDone?: () => void;
 }
 
-export function TicketPage({ theme = "default", onNavigate, onDone }: TicketsPageProps) {
+export function TicketPage({ theme = "default", onDone }: TicketsPageProps) {
   const { era } = useEra();
   const appliedTheme = era ?? theme;
   const location = useLocation();
@@ -141,7 +141,7 @@ export function TicketPage({ theme = "default", onNavigate, onDone }: TicketsPag
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Button
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate("/profile", { state: { tab: "tickets" } })}
               className={`
                 ${
                   appliedTheme === "90s"

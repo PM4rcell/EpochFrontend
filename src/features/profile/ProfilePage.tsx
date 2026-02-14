@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 import { Navbar } from "../../components/layout/Navbar";
 import { ProfileHeader } from "./ProfileHeader";
 import useHeader from "../../hooks/useHeader";
 import { ProfileTabs } from "./ProfleTabs";
 import { OverviewContent } from "./OverViewContent";
+import { TicketCard } from "./TicketCard";
+import useTickets from "../../hooks/useTickets";
 
 interface ProfilePageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -20,8 +23,21 @@ export function ProfilePage({
   theme = "default",
   onNavigate,
 }: ProfilePageProps) {
-  const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
+  const location = useLocation();
+  const initialTabFromState = (location.state as any)?.tab as ProfileTab | undefined;
+  const searchParams = new URLSearchParams(location.search);
+  const initialTabFromQuery = (searchParams.get("tab") as ProfileTab | null) || undefined;
+
+  const [activeTab, setActiveTab] = useState<ProfileTab>(initialTabFromState ?? initialTabFromQuery ?? "overview");
   const { header } = useHeader();
+
+  // If navigation pushes a state with a tab after mount (e.g. via navigate), update activeTab.
+  useEffect(() => {
+    const tab = (location.state as any)?.tab as ProfileTab | undefined;
+    if (tab && tab !== activeTab) setActiveTab(tab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
+  const { tickets } = useTickets();
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -56,10 +72,32 @@ export function ProfilePage({
           <div className="pb-16">
             {activeTab === "overview" && <OverviewContent theme={theme} onNavigate={onNavigate} />}
             {activeTab === "tickets" && (
-              <div className="py-20 text-center">
-                <h2 className="text-slate-400 mb-2">Tickets</h2>
-                <p className="text-slate-500">Your ticket history will appear here</p>
-              </div>
+              <section className="py-8">
+                <h2 className="text-slate-300 mb-4">Tickets</h2>
+                {(!tickets || tickets.length === 0) ? (
+                  <div className="py-20 text-center">
+                    <p className="text-slate-500">You have no tickets yet.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {tickets.map((t) => (
+                      <TicketCard
+                        key={t.id}
+                        movieTitle={t.movieTitle}
+                        posterUrl={t.posterUrl}
+                        row={t.row}
+                        seat={t.seat}
+                        date={t.date}
+                        time={t.time}
+                        format={t.format}
+                        venue={t.venue}
+                        barcode={t.barcode}
+                        theme={theme}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
             )}
             {activeTab === "watchlist" && (
               <div className="py-20 text-center">

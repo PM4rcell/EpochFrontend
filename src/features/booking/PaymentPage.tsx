@@ -26,7 +26,7 @@ export function PaymentPage({
   const location = useLocation();
   const params = useParams() as { bookingId?: string };
   const navigate = useNavigate();
-  const { checkout, loading: checkoutLoading } = useCheckout();
+  const { checkout } = useCheckout();
 
   // Prefer booking from navigation state, then sessionStorage fallback.
   let booking: any = location.state?.booking ?? null;
