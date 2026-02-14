@@ -36,8 +36,6 @@ export function OrderSummary({
   screeningType,
   venue,
   seats,
-  fees = 2.5,
-  taxes = 0,
   onBack,
   onPay,
   theme = "default",
@@ -98,7 +96,28 @@ export function OrderSummary({
   const screeningLabel = getScreeningLabelFromSession() ?? (screeningType ?? format);
 
   const subtotal = seats.reduce((sum, seat) => sum + seat.price, 0);
-  const total = subtotal + fees + taxes;
+  const sessionScreeningName = getScreeningLabelFromSession();
+
+  const getPriceMultiplierFromSession = (): number => {
+    try {
+      const raw =
+        sessionStorage.getItem("epoch:pendingBooking") ??
+        sessionStorage.getItem("screening") ??
+        sessionStorage.getItem("pendingBooking");
+      if (!raw) return 1;
+      const parsed = JSON.parse(raw);
+      const screeningObj = parsed?.screening ?? parsed;
+      const rawMultiplier =
+        screeningObj?.screening_type?.priceMultiplier ?? screeningObj?.screening_type?.price_multiplier ?? parsed?.screening_type?.priceMultiplier;
+      const n = Number(rawMultiplier);
+      return isFinite(n) && n > 0 ? n : 1;
+    } catch {
+      return 1;
+    }
+  };
+
+  const multiplier = getPriceMultiplierFromSession();
+  const total = subtotal * multiplier;
 
   return (
     <motion.div
@@ -160,21 +179,15 @@ export function OrderSummary({
       {/* Pricing breakdown */}
       <div className="space-y-2 border-t border-slate-700/50 pt-4">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-slate-400">Subtotal</span>
+          <span className="text-slate-400">Seats total</span>
           <span className="text-slate-300">${subtotal.toFixed(2)}</span>
         </div>
-        {fees > 0 && (
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Booking Fee</span>
-            <span className="text-slate-300">${fees.toFixed(2)}</span>
-          </div>
-        )}
-        {taxes > 0 && (
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-400">Taxes</span>
-            <span className="text-slate-300">${taxes.toFixed(2)}</span>
-          </div>
-        )}
+          {sessionScreeningName && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-400">{sessionScreeningName} Format</span>
+              <span className="text-slate-300">X {multiplier.toFixed(2)}</span>
+            </div>
+          )}
       </div>
 
       {/* Total */}

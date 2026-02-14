@@ -174,7 +174,7 @@ export function FilmRow({
                 <>
                   <FormatTag
                     key="lang-all"
-                    label="All Languages"
+                    label="All"
                     isActive={selectedLanguage === ""}
                     onClick={() => setSelectedLanguage("")}
                     theme={theme}
