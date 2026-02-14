@@ -1,15 +1,16 @@
 import { motion } from "motion/react";
 import { Calendar, Clock, Film } from "lucide-react";
+import dayjs from "dayjs";
 
 interface ShowInfoProps {
   date: string;
   time: string;
-  era?: string;
+  screeningType?: string;
   venue?: string;
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
-export function ShowInfo({ date, time, era, venue, theme = "default" }: ShowInfoProps) {
+export function ShowInfo({ date, time, screeningType, venue, theme = "default" }: ShowInfoProps) {
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
@@ -37,18 +38,10 @@ export function ShowInfo({ date, time, era, venue, theme = "default" }: ShowInfo
 
   const colors = getThemeColors();
 
-  const normalizeEraLabel = (raw?: string | null) => {
-    if (!raw) return "";
-    const s = String(raw).toLowerCase();
-    if (s.includes("90s")) return "90s";
-    if (s.includes("20s") || s.includes("00s") || s.includes("00s")) return "2000s";
-    if (s.includes("nowdays")) return "modern";
-    // fallback: if it already looks like a short era label
-    if (s === "90s" || s === "2000s" || s === "modern") return raw as string;
-    return raw;
-  };
+  // Prefer screeningType when provided (this comes from screening.screening_type.name)
+  const screeningLabel = screeningType;
 
-  const eraLabel = normalizeEraLabel(era);
+  const formattedTime = time ? dayjs(time).format("HH:mm") : "";
 
   return (
     <motion.div
@@ -73,17 +66,17 @@ export function ShowInfo({ date, time, era, venue, theme = "default" }: ShowInfo
         <Clock className={`w-5 h-5 ${colors.accent} mt-0.5`} />
         <div>
           <p className="text-slate-500 text-sm mb-1">Time</p>
-          <p className="text-slate-200">{time}</p>
+          <p className="text-slate-200">{formattedTime}</p>
         </div>
       </div>
 
-      {/* Era */}
+      {/* Format / Screening Type */}
       <div className="flex items-start gap-3">
         <Film className={`w-5 h-5 ${colors.accent} mt-0.5`} />
         <div>
-          <p className="text-slate-500 text-sm mb-1">Era</p>
+          <p className="text-slate-500 text-sm mb-1">Format</p>
           <div className={`inline-flex items-center px-3 py-1.5 rounded-md border ${colors.border} bg-black/40`}>
-            <span className={colors.accent}>{eraLabel}</span>
+            <span className={colors.accent}>{screeningLabel}</span>
           </div>
         </div>
       </div>

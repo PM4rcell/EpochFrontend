@@ -181,7 +181,7 @@ export function ScreeningsPage({
                 if (!m || !m.id) return;
 
                 const mid = m.id;
-                const formatLabel = s.language?.name || "Original";
+                const formatLabel = s.screening_type?.name || s.language?.name || "Original";
                 const time = new Date(s.start_time).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",

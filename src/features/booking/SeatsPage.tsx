@@ -312,7 +312,7 @@ export function SeatsPage({
               <ShowInfo
                 date={date}
                 time={time}
-                era={format}
+                screeningType={screening?.screening_type?.name ?? format}
                 venue={venue}
                 theme={appliedTheme}
               />

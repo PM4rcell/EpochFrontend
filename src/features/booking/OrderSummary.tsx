@@ -16,6 +16,7 @@ interface OrderSummaryProps {
   date: string;
   time: string;
   format: string;
+  screeningType?: string;
   venue?: string;
   seats: SeatInfo[];
   fees?: number;
@@ -32,6 +33,7 @@ export function OrderSummary({
   date,
   time,
   format,
+  screeningType,
   venue,
   seats,
   fees = 2.5,
@@ -75,17 +77,25 @@ export function OrderSummary({
   };
 
   const colors = getThemeColors();
-  const normalizeEraLabel = (raw?: string | null) => {
-    if (!raw) return "";
-    const s = String(raw).toLowerCase();
-    if (s.includes("90s")) return "90s";
-    if (s.includes("20s") || s.includes("00s")) return "2000s";
-    if (s.includes("nowdays")) return "modern";
-    if (s === "90s" || s === "2000s" || s === "modern") return raw as string;
-    return raw;
+  
+  const getScreeningLabelFromSession = (): string | undefined => {
+    try {
+      const raw =
+        sessionStorage.getItem("epoch:pendingBooking") ?? sessionStorage.getItem("screening") ?? sessionStorage.getItem("pendingBooking");
+      if (!raw) return undefined;
+      const parsed = JSON.parse(raw);
+      // payload may be the full booking (with `screening` property) or the screening object itself
+      const screeningObj = parsed?.screening ?? parsed;
+      const name =
+        screeningObj?.screening_type?.name ?? screeningObj?.screeningType?.name ?? parsed?.screening_type?.name;
+      if (typeof name === "string" && name.length > 0) return name;
+      return undefined;
+    } catch {
+      return undefined;
+    }
   };
 
-  const formatLabel = normalizeEraLabel(format);
+  const screeningLabel = getScreeningLabelFromSession() ?? (screeningType ?? format);
 
   const subtotal = seats.reduce((sum, seat) => sum + seat.price, 0);
   const total = subtotal + fees + taxes;
@@ -127,7 +137,8 @@ export function OrderSummary({
       {/* Format */}
       <div className={`inline-flex items-center px-3 py-1.5 rounded-md border ${colors.border} bg-black/40`}>
         <Film className="w-4 h-4 mr-2" />
-        <span className={colors.accent}>{formatLabel}</span>
+        <span className="text-slate-400 mr-2">Format:</span>
+        <span className={colors.accent}>{screeningLabel}</span>
       </div>
 
       {/* Seats */}

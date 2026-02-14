@@ -45,7 +45,9 @@ export function FilmRow({
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [activeFormat, setActiveFormat] = useState<string>(formats[0]?.format || "");
+  const [selectedFilter, setSelectedFilter] = useState<string>("");
+
+  const FORMAT_FILTERS = ["2D", "3D", "4DX"];
 
   const handleTimeClick = (format: string, time: string) => {
     setSelectedTime(`${format}-${time}`);
@@ -139,13 +141,21 @@ export function FilmRow({
         {/* Right: Formats and Showtimes */}
         <div className="flex-1">
           {/* Format tabs */}
+          {/* Single format filter row: All, 2D, 3D, 4DX */}
           <div className="flex gap-2 mb-4">
-            {formats.map((format) => (
+            <FormatTag
+              key="all"
+              label="All"
+              isActive={selectedFilter === ""}
+              onClick={() => setSelectedFilter("")}
+              theme={theme}
+            />
+            {FORMAT_FILTERS.map((f) => (
               <FormatTag
-                key={format.format}
-                label={format.format}
-                isActive={activeFormat === format.format}
-                onClick={() => setActiveFormat(format.format)}
+                key={f}
+                label={f}
+                isActive={selectedFilter === f}
+                onClick={() => setSelectedFilter((p) => (p === f ? "" : f))}
                 theme={theme}
               />
             ))}
@@ -153,22 +163,41 @@ export function FilmRow({
 
           {/* Time pills */}
           <div className="flex flex-wrap gap-3">
-            {formats
-              .find((f) => f.format === activeFormat)
-              ?.times.map((showtime) => {
-                const timeKey = `${activeFormat}-${showtime.time}`;
+            {(() => {
+              const items: { format: string; time: Showtime }[] = [];
+
+              if (selectedFilter) {
+                formats.forEach((f) => {
+                  if (f.format === selectedFilter) {
+                    f.times.forEach((t) => items.push({ format: f.format, time: t }));
+                  }
+                });
+              } else {
+                // 'All' selected: include times from all formats
+                formats.forEach((f) => f.times.forEach((t) => items.push({ format: f.format, time: t })));
+              }
+
+              if (items.length === 0) {
+                return (
+                  <div className="text-slate-400 py-4">No screenings found in this format</div>
+                );
+              }
+
+              return items.map(({ format, time: showtime }) => {
+                const timeKey = `${format}-${showtime.time}`;
                 return (
                   <TimePill
                     key={timeKey}
                     time={showtime.time}
                     isActive={selectedTime === timeKey}
                     isSoldOut={!showtime.available}
-                    onClick={() => handleTimeClick(activeFormat, showtime.time)}
+                    onClick={() => handleTimeClick(format, showtime.time)}
                     screeningId={showtime.screeningId}
                     theme={theme}
                   />
                 );
-              })}
+              });
+            })()}
           </div>
         </div>
       </div>
