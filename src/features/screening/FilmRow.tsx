@@ -9,6 +9,7 @@ interface Showtime {
   time: string;
   available: boolean;
   screeningId?: string | number;
+  language?: string;
 }
 
 interface FormatShowtimes {
@@ -46,6 +47,7 @@ export function FilmRow({
   const isInView = useInView(ref, { once: true, margin: "-50px" });
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>("");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
 
   const FORMAT_FILTERS = ["2D", "3D", "4DX"];
 
@@ -161,6 +163,36 @@ export function FilmRow({
             ))}
           </div>
 
+          {/* Language tags (one row below formats) */}
+          <div className="flex gap-2 mb-4">
+            {/* derive languages present in the formats */}
+            {(() => {
+              const langs = Array.from(
+                new Set(formats.flatMap((f) => f.times.map((t) => t.language ?? "Original")))
+              );
+              return (
+                <>
+                  <FormatTag
+                    key="lang-all"
+                    label="All Languages"
+                    isActive={selectedLanguage === ""}
+                    onClick={() => setSelectedLanguage("")}
+                    theme={theme}
+                  />
+                  {langs.map((lng) => (
+                    <FormatTag
+                      key={`lang-${lng}`}
+                      label={lng}
+                      isActive={selectedLanguage === lng}
+                      onClick={() => setSelectedLanguage((p) => (p === lng ? "" : lng))}
+                      theme={theme}
+                    />
+                  ))}
+                </>
+              );
+            })()}
+          </div>
+
           {/* Time pills */}
           <div className="flex flex-wrap gap-3">
             {(() => {
@@ -169,12 +201,22 @@ export function FilmRow({
               if (selectedFilter) {
                 formats.forEach((f) => {
                   if (f.format === selectedFilter) {
-                    f.times.forEach((t) => items.push({ format: f.format, time: t }));
+                    f.times.forEach((t) => {
+                      if (!selectedLanguage || (t.language ?? "Original") === selectedLanguage) {
+                        items.push({ format: f.format, time: t });
+                      }
+                    });
                   }
                 });
               } else {
                 // 'All' selected: include times from all formats
-                formats.forEach((f) => f.times.forEach((t) => items.push({ format: f.format, time: t })));
+                formats.forEach((f) =>
+                  f.times.forEach((t) => {
+                    if (!selectedLanguage || (t.language ?? "Original") === selectedLanguage) {
+                      items.push({ format: f.format, time: t });
+                    }
+                  })
+                );
               }
 
               if (items.length === 0) {

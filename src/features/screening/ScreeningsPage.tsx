@@ -19,6 +19,7 @@ type ScreeningEntry = {
   time: string;
   available: boolean;
   screeningId: string | number;
+  language?: string;
 };
 
 type GroupedMovie = {
@@ -191,6 +192,7 @@ export function ScreeningsPage({
                   time,
                   available: true,
                   screeningId: s.id,
+                  language: s.language?.name ?? "Original",
                 };
 
                 if (!grouped.has(mid)) {
