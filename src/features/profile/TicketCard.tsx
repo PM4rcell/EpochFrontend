@@ -78,7 +78,7 @@ export function TicketCard({
         <div className="space-y-6 md:col-start-1 md:row-start-1">
           {/* Title */}
           <div>
-            <h3 className="text-white mb-1">{movieTitle}</h3>
+            <h3 className={`${colors.accent} mb-1`}>{movieTitle}</h3>
             {venue && <p className="text-slate-400 text-sm">{venue}</p>}
           </div>
 

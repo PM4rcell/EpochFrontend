@@ -20,6 +20,7 @@ function normalizeBookingsToTickets(bookings: any[] = []) {
       const posterUrl = movie.poster || movie.poster_url || screening.movie_poster || "";
       const date = screening.date || screening.start_date || b.date || "";
       const time = screening.time || screening.start_time || b.time || "";
+      const format = screening.screeningType || "";
       const venue = screening.auditorium || (screening.auditorium && screening.auditorium.name) || b.venue || "";
 
       tickets.push({
@@ -30,7 +31,7 @@ function normalizeBookingsToTickets(bookings: any[] = []) {
         seat: s.seat_number ?? s.number ?? s.seat?.number ?? idx + 1,
         date,
         time,
-        format: screening.format || b.format || movie.format || "",
+        format,
         venue,
         barcode: `${b.barcode || b.id || b.booking_id || "bk"}-${idx + 1}`,
         ticketType: s.tickets?.ticket_type ?? s.ticket_type ?? null,
