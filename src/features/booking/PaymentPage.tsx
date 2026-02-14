@@ -1,4 +1,7 @@
 import { useState } from "react";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 import { motion } from "motion/react";
 import { Navbar } from "../../components/layout/Navbar";
 import { BookingStepper } from "./BookingStepper";
@@ -39,13 +42,25 @@ export function PaymentPage({
     }
   }
 
+  // Use dayjs to normalize time strings to 24-hour `HH:mm`.
+  const formatTimeTo24 = (t?: string | null) => {
+    if (!t) return "";
+    const s = String(t).trim();
+    const timeMatch = s.match(/(\d{1,2}:\d{2}\s*(AM|PM)?)/i);
+    const raw = timeMatch ? timeMatch[1] : s;
+    // Try common time formats (with/without AM/PM)
+    const parsed = dayjs(raw, ["h:mm A", "hh:mm A", "H:mm", "HH:mm", "h:mm"], true);
+    if (parsed.isValid()) return parsed.format("HH:mm");
+    return raw;
+  };
+
   const movieData = booking?.movie
     ? {
         title: booking.movie?.title ?? booking.movie?.name ?? "",
         poster: booking.movie?.poster ?? "",
         backdrop: booking.movie?.backdrop ?? "",
         date: booking?.screening?.start_date ?? booking?.date ?? "",
-        time: booking?.screening?.start_time ?? booking?.time ?? "",
+        time: formatTimeTo24(booking?.screening?.start_time ?? booking?.time ?? ""),
         format: booking?.movie?.era?.name ?? booking?.format ?? "",
         venue: booking?.screening?.auditorium?.name ?? booking?.venue ?? "",
       }

@@ -33,6 +33,8 @@ function normalizeBookingsToTickets(bookings: any[] = []) {
         format: screening.format || b.format || movie.format || "",
         venue,
         barcode: `${b.barcode || b.id || b.booking_id || "bk"}-${idx + 1}`,
+        ticketType: s.tickets?.ticket_type ?? s.ticket_type ?? null,
+        bookingStatus: b.status ?? null,
       });
     });
   });

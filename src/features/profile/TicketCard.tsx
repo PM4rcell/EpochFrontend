@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import { Calendar } from "lucide-react";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 
 
@@ -13,6 +12,8 @@ interface TicketCardProps {
   format: string;
   venue?: string;
   barcode?: string;
+  ticketType?: string | null;
+  bookingStatus?: string | null;
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
@@ -26,6 +27,8 @@ export function TicketCard({
   format,
   venue,
   barcode = "1234567890",
+  ticketType = null,
+  bookingStatus = null,
   theme = "default",
 }: TicketCardProps) {
   const getThemeColors = () => {
@@ -70,9 +73,9 @@ export function TicketCard({
         transition-all duration-200
       `}
     >
-      <div className="grid md:grid-cols-[1fr_200px] gap-6 p-6">
-        {/* Left: Details and Barcode */}
-        <div className="space-y-6">
+      <div className="grid md:grid-cols-[1fr_200px] md:grid-rows-[auto_auto] p-6">
+        {/* Left: Details (top-left) */}
+        <div className="space-y-6 md:col-start-1 md:row-start-1">
           {/* Title */}
           <div>
             <h3 className="text-white mb-1">{movieTitle}</h3>
@@ -84,7 +87,6 @@ export function TicketCard({
             <div>
               <p className="text-slate-500 text-sm mb-1">Date</p>
               <div className="flex items-center gap-2">
-                <Calendar className={`w-4 h-4 ${colors.accent}`} />
                 <p className="text-slate-200">{date}</p>
               </div>
             </div>
@@ -106,32 +108,52 @@ export function TicketCard({
             </div>
           </div>
 
-          {/* Barcode */}
-          <div className="pt-4 border-t border-slate-700/50">
-            <p className="text-slate-500 text-sm mb-3">Barcode</p>
-            <div className="bg-white p-4 rounded inline-flex flex-col items-center">
-              {/* Simple barcode representation */}
-              <div className="flex gap-0.5 mb-2">
-                {barcode.split("").map((digit, index) => (
-                  <div
-                    key={index}
-                    className="bg-black"
-                    style={{
-                      width: parseInt(digit) % 2 === 0 ? "3px" : "2px",
-                      height: "60px",
-                    }}
-                  />
-                ))}
-              </div>
-              <span className="text-black text-xs font-mono">{barcode}</span>
-            </div>
-          </div>
-
           {/* Actions removed: no download/wallet/print buttons */}
         </div>
 
-        {/* Right: Poster */}
-        <div className="hidden md:block">
+        {/* Barcode (bottom-left) */}
+        <div className="pt-4 border-t border-slate-700/50 md:col-start-1 md:row-start-2">
+          <div className="flex items-start">
+            <div className="flex flex-col items-start">
+              <p className="text-slate-500 text-sm mb-2">Barcode</p>
+              <div className="bg-white p-3 rounded inline-flex items-center">
+                <div className="flex gap-0.5 mr-3">
+                  {String(barcode).split("").map((digit, index) => (
+                    <div
+                      key={index}
+                      className="bg-black"
+                      style={{
+                        width: Number.isNaN(parseInt(digit, 10)) ? 2 : (parseInt(digit, 10) % 2 === 0 ? 3 : 2),
+                        height: "48px",
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="text-black text-xs font-mono">{barcode}</span>
+              </div>
+            </div>
+            {/* On small screens show ticket info next to barcode */}
+            <div className="ml-4 md:hidden">
+              <p className="text-slate-500 text-xs">Ticket type:</p>
+              <span className={`text-sm ${colors.accent} font-medium`}>{ticketType ?? ""}</span>
+              <p className="text-slate-500 text-xs mt-2">Status</p>
+              <span className={`text-sm ${colors.accent} font-medium`}>{bookingStatus ?? ""}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: ticket info (bottom-right) */}
+        <div className="hidden md:flex md:col-start-2 md:row-start-2 md:items-start md:justify-end">
+          <div className="flex flex-col items-end text-right mr-14 mt-5">
+            <p className="text-slate-500 text-xs">Ticket type:</p>
+            <span className={`text-sm ${colors.accent} font-medium`}>{ticketType ?? ""}</span>
+            <p className="text-slate-500 text-xs mt-2">Status:</p>
+            <span className={`text-sm ${colors.accent} font-medium`}>{bookingStatus ?? ""}</span>
+          </div>
+        </div>
+
+        {/* Right: Poster (top-right) */}
+        <div className="hidden md:block md:col-start-2 md:row-start-1">
           <div className="aspect-2/3 rounded-lg overflow-hidden border border-slate-700/30">
             <ImageWithFallback
               src={posterUrl}

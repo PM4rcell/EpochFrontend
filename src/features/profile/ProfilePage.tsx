@@ -92,6 +92,8 @@ export function ProfilePage({
                         format={t.format}
                         venue={t.venue}
                         barcode={t.barcode}
+                        ticketType={t.ticketType}
+                        bookingStatus={t.bookingStatus}
                         theme={theme}
                       />
                     ))}
