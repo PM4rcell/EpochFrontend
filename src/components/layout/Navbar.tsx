@@ -232,6 +232,12 @@ export function Navbar({
                     try {
                       await logout();
                       navigate("/");
+                      // Clear era after signing out so the app returns to landing state
+                      try {
+                        setEra(null);
+                      } catch (e) {
+                        // ignore
+                      }
                     } catch (err) {
                       // minimal feedback
                       // eslint-disable-next-line no-console

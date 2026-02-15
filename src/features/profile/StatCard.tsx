@@ -56,20 +56,20 @@ export function StatCard({ icon: Icon, label, value, description, theme = "defau
       className={`relative overflow-hidden rounded-2xl p-6 bg-linear-to-br from-slate-900/60 to-black/60 backdrop-blur-sm border ${colors.border} ${colors.hoverBorder} ${colors.hoverGlow} transition-all duration-300 cursor-pointer`}
     >
       {/* Icon */}
-      <div className="mb-4">
+      <div className="mb-4 flex justify-center">
         <Icon className={`w-8 h-8 ${colors.iconColor} ${colors.iconGlow}`} />
       </div>
 
       {/* Label */}
-      <p className="text-slate-400 mb-2">{label}</p>
+      <p className="text-slate-400 mb-2 text-center">{label}</p>
 
-      {/* Value */}
-      <div className="mb-1">
-        <span className="text-white">{value}</span>
+      {/* Value: large, centered orange number */}
+      <div className="mb-2 flex justify-center">
+        <span className="text-3xl sm:text-4xl font-semibold text-amber-500">{value}</span>
       </div>
 
       {/* Description */}
-      <p className="text-slate-500">{description}</p>
+      <p className="text-slate-500 text-center">{description}</p>
 
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none" />

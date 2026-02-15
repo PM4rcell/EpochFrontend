@@ -3,11 +3,12 @@ import {
   Ticket,
   Award,
   Bookmark,
-  TrendingUp,
+  Star,
 } from "lucide-react";
 import { StatCard } from "./StatCard";
 import { NextShowCard } from "./NextShowCard";
 import { RecentActivityCard } from "./RecentActivityCard";
+import { useTickets } from "../../hooks/useTickets";
 
 interface OverviewContentProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -18,12 +19,23 @@ export function OverviewContent({
   theme = "default",
   onNavigate,
 }: OverviewContentProps) {
+  const { tickets } = useTickets();
+  let commentCount = 0;
+  try {
+    const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+    const stored = raw ? JSON.parse(raw) : null;
+    const comments = stored?.data?.comments ?? stored?.comments ?? [];
+    commentCount = Array.isArray(comments) ? comments.length : 0;
+  } catch {
+    commentCount = 0;
+  }
+
   const stats = [
     {
       icon: Ticket,
-      label: "Tickets This Year",
-      value: "12",
-      description: "+3 this month",
+      label: "Tickets Booked",
+      value: String( (typeof tickets !== 'undefined' && tickets) ? tickets.length : 0 ),
+      description: "",
     },
     {
       icon: Award,
@@ -38,10 +50,10 @@ export function OverviewContent({
       description: "5 new releases",
     },
     {
-      icon: TrendingUp,
-      label: "Era Progress",
-      value: "60%",
-      description: "Modern era",
+      icon: Star,
+      label: "Ratings Given",
+      value: String(commentCount),
+      description: "",
     },
   ];
 
