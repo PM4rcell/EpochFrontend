@@ -6,6 +6,7 @@ import { ProfileHeader } from "./ProfileHeader";
 import useHeader from "../../hooks/useHeader";
 import { ProfileTabs } from "./ProfleTabs";
 import { OverviewContent } from "./OverViewContent";
+import { SettingsContent } from "./SettingsContent";
 import { TicketCard } from "./TicketCard";
 import useTickets from "../../hooks/useTickets";
 
@@ -108,10 +109,9 @@ export function ProfilePage({
               </div>
             )}
             {activeTab === "settings" && (
-              <div className="py-20 text-center">
-                <h2 className="text-slate-400 mb-2">Settings</h2>
-                <p className="text-slate-500">Account settings will appear here</p>
-              </div>
+              <section className="py-8">
+                <SettingsContent theme={theme} />
+              </section>
             )}
           </div>
         </motion.div>

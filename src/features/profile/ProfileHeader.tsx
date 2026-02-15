@@ -56,6 +56,21 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
 
   const colors = getThemeColors();
 
+  // Prefer explicit `avatar` prop, otherwise try to read a poster URL from persisted user
+  let storedPosterUrl: string | null = null;
+  try {
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("epoch_user");
+      if (raw) {
+        const su = JSON.parse(raw);
+        storedPosterUrl = su?.data?.poster?.url || su?.data?.poster_url || su?.poster?.url || su?.poster || null;
+      }
+    }
+  } catch {
+    storedPosterUrl = null;
+  }
+  const avatarSrc = avatar ?? storedPosterUrl ?? "";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -78,7 +93,7 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
             className={`rounded-full p-1 bg-linear-to-br from-slate-800 to-slate-900 ${colors.border} border-2`}
           >
             <Avatar className="w-16 h-16 sm:w-24 sm:h-24">
-              <ImageWithFallback src={avatar || ""} alt={title || "Profile"} className="aspect-square size-full" />
+              <ImageWithFallback src={avatarSrc} alt={title || "Profile"} className="aspect-square size-full" />
               <AvatarFallback className="bg-slate-800 text-slate-300">{(title || "").split(" ").filter(Boolean).map(s => s[0]).slice(0,2).join("") || "U"}</AvatarFallback>
             </Avatar>
           </motion.div>

@@ -76,16 +76,19 @@ export async function apiFetch<T = any>(path: string, options: ApiFetchOptions =
   // `setAuthToken(token)` in your application (see TokenContext below).
   const authHeader = authToken ? { Authorization: `Bearer ${authToken}` } : {};
 
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+
   const init: RequestInit = {
     // Default to POST when a body is present, otherwise GET.
     method: rest.method ?? (body ? "POST" : "GET"),
     headers: ({
-      "Content-Type": "application/json",
+      // Let the browser set Content-Type for FormData (including boundary).
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(userHeaders as Record<string, string> | undefined),
       ...authHeader,
     } as HeadersInit),
-    // Stringify object bodies; allow callers to pass a pre-serialized string.
-    body: body && typeof body === "object" ? JSON.stringify(body) : (body as any) ?? undefined,
+    // Stringify object bodies unless caller provided a FormData (files/uploads).
+    body: body && typeof body === "object" && !isFormData ? JSON.stringify(body) : (body as any) ?? undefined,
     signal: controller.signal,
     ...rest,
   };
