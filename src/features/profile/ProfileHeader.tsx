@@ -3,6 +3,7 @@ import { Edit2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
+import { useNavigate } from "react-router-dom";
 
 interface ProfileHeaderProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -55,6 +56,8 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
   };
 
   const colors = getThemeColors();
+
+  const navigate = useNavigate();
 
   // Prefer explicit `avatar` prop, otherwise try to read a poster URL from persisted user
   let storedPosterUrl: string | null = null;
@@ -118,6 +121,7 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
           >
             <Button
               variant="outline"
+              onClick={() => navigate('/profile', { state: { tab: 'settings' } })}
               className={`border-slate-700 bg-black/40 backdrop-blur-sm text-slate-300 ${colors.buttonHover} transition-all duration-250`}
             >
               <Edit2 className="w-4 h-4 mr-2" />

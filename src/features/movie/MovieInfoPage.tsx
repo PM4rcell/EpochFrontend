@@ -35,6 +35,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const [showTrailer, setShowTrailer] = useState(false);
   const [isLoggedIn] = useState(true); // Simulate logged-in state
   const [reviews, setReviews] = useState<any[]>([]);
+  const [showAllReviews, setShowAllReviews] = useState(false);
 
 
   
@@ -42,8 +43,20 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const { submit: submitComment, loading: commentLoading } = useComment();
 
   const handleReviewSubmit = async (rating: number, text: string) => {
+    const getLocalUsername = () => {
+      try {
+        if (typeof window === "undefined") return "You";
+        const raw = localStorage.getItem("epoch_user");
+        if (!raw) return "You";
+        const me = JSON.parse(raw);
+        return me?.data?.username ?? me?.username ?? "You";
+      } catch {
+        return "You";
+      }
+    };
+
     const newReview = {
-      username: "You",
+      username: getLocalUsername(),
       rating,
       date: "Just now",
       text,
@@ -330,7 +343,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
               {/* Reviews List */}
               <div className="space-y-3">
-                {reviews.slice(0, 4).map((review, index) => (
+                {(showAllReviews ? reviews : reviews.slice(0, 4)).map((review, index) => (
                   <ReviewItem
                     key={index}
                     username={review.user?.username || review.username || review.name || "Guest"}
@@ -347,6 +360,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowAllReviews((s) => !s)}
                   className={`
                     mt-4 w-full py-3 px-4 rounded-lg border
                     bg-black/40 text-slate-300 hover:text-white
@@ -361,7 +375,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                     transition-all duration-200
                   `}
                 >
-                  See all {reviews.length} reviews
+                  {showAllReviews ? `Show less` : `See all ${reviews.length} reviews`}
                 </motion.button>
               )}
 

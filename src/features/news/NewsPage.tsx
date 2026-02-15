@@ -6,7 +6,7 @@ import { CategoryFilters } from "./CategoryFilters";
 import { ArticleGrid } from "./ArticleGrid.tsx";
 import { useNews } from "../../hooks/useArticles.ts";
 import { useArticleNavigationId } from "../../hooks/useArticleNavigationId";
-import { NewsSidebar } from "./NewsSidebar";
+// Sidebar removed for now - news page uses full-width article grid.
 
 interface NewsPageProps {
   onNavigate?: (page: any) => void;
@@ -55,9 +55,9 @@ export function NewsPage({
           />
 
           {/* Main Content Layout */}
-          <div className="mt-8 lg:grid lg:grid-cols-12 lg:gap-8">
-            {/* Article Grid - 9 columns on desktop */}
-            <div className="lg:col-span-9">
+          <div className="mt-8">
+            {/* Article Grid - full width */}
+            <div className="lg:col-span-12">
               <ArticleGrid
                 category={activeCategory}
                 articles={articles}
@@ -65,11 +65,6 @@ export function NewsPage({
                 error={error}
                 onArticleClick={onArticleClick ?? navigateToArticle}
               />
-            </div>
-
-            {/* Sidebar - 3 columns on desktop, below grid on mobile */}
-            <div className="lg:col-span-3 mt-8 lg:mt-0">
-              <NewsSidebar onArticleClick={onArticleClick ?? navigateToArticle} />
             </div>
           </div>
         </motion.div>

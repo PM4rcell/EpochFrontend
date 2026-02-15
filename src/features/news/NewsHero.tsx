@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { useEra } from "../../context/EraContext";
+import useFeaturedArticle from "../../hooks/useFeaturedArticle";
 
 interface NewsHeroProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -49,12 +50,7 @@ export function NewsHero({ theme, onArticleClick }: NewsHeroProps) {
 
   const colors = getThemeColors();
 
-  const featuredArticle = {
-    id: "featured-1",
-    title: "Behind the Scenes: The Making of Modern Cinema",
-    tag: "Announcements",
-    image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=1200&h=600&fit=crop",
-  };
+  const { featured: featuredArticle } = useFeaturedArticle();
 
   return (
     <motion.div
@@ -109,6 +105,10 @@ export function NewsHero({ theme, onArticleClick }: NewsHeroProps) {
             <h3 className="text-white mb-4">{featuredArticle.title}</h3>
             <Button
               variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                onArticleClick?.(featuredArticle.id);
+              }}
               className={`${colors.buttonBg} backdrop-blur-sm transition-all duration-250 w-fit`}
             >
               Read Article

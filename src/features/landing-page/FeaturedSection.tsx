@@ -2,6 +2,7 @@ import { motion, useInView } from "motion/react";
 import { useRef, useEffect, useState } from "react";
 import { ArrowRight, Newspaper } from "lucide-react";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
+import { Skeleton } from "../../components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useNews, type Article } from "../../hooks/useArticles";
 
@@ -18,6 +19,7 @@ export function FeaturedSection() {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
   const { articles: allArticles } = useNews();
+  const { loading } = useNews();
   const [randomArticles, setRandomArticles] = useState<Article[]>([]);
   const navigate = useNavigate();
 
@@ -67,7 +69,23 @@ export function FeaturedSection() {
 
         {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {cardsToShow.map((card, index) => {
+          {loading
+            ? Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} className="group bg-[#101010] rounded-[20px] overflow-hidden border border-amber-500/20 shadow-[0_8px_20px_rgba(255,255,255,0.08)] transition-all duration-150">
+                  <div className="relative h-48 overflow-hidden">
+                    <Skeleton className="h-full w-full" />
+                  </div>
+                  <div className="p-6">
+                    <Skeleton className="h-5 w-3/4 mb-3" />
+                    <Skeleton className="h-3 w-full mb-4" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3 w-1/4" />
+                      <Skeleton className="h-3 w-1/6" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            : cardsToShow.map((card, index) => {
             const Icon = card.icon;
             return (
               <motion.div
