@@ -9,17 +9,17 @@ import { useEra } from "../context/EraContext";
  * @param fallbackPath - Optional fallback path if there's no history to go back to
  * @returns A function to handle back navigation
  */
-export function useBackNavigation(fallbackPath?: string) {
+export function useBackNavigation(fallbackPath?: string, options?: { restoreEra?: boolean }) {
   const navigate = useNavigate();
   const { restorePreviousEra } = useEra();
 
   const handleBack = useCallback(() => {
     try {
-      // Restore the previous era context before going back
-      if (typeof restorePreviousEra === 'function') {
+      // Restore the previous era context before going back unless explicitly disabled
+      if (options?.restoreEra !== false && typeof restorePreviousEra === 'function') {
         restorePreviousEra();
       }
-      
+
       // Go back to the previous page in browser history
       navigate(-1);
     } catch (error) {
@@ -27,7 +27,7 @@ export function useBackNavigation(fallbackPath?: string) {
       // Fallback: navigate to provided path or home if back navigation fails
       navigate(fallbackPath || '/');
     }
-  }, [navigate, restorePreviousEra, fallbackPath]);
+  }, [navigate, restorePreviousEra, fallbackPath, options]);
 
   return handleBack;
 }

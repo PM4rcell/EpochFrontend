@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { motion } from "motion/react";
+import { BackButton } from "../../components/ui/back-button";
 import { Navbar } from "../../components/layout/Navbar";
 import { ProfileHeader } from "./ProfileHeader";
 import useHeader from "../../hooks/useHeader";
@@ -60,6 +61,9 @@ export function ProfilePage({
           className="container mx-auto px-4 sm:px-6 max-w-7xl"
         >
           {/* Profile Header */}
+          <div className="mb-4 md:mb-6">
+            <BackButton theme={theme} restoreEra={false} />
+          </div>
           <ProfileHeader theme={theme} title={header.title} subtitle={header.subtitle} avatar={header.avatar} userId={header.userId} />
 
           {/* Sticky Tabs */}

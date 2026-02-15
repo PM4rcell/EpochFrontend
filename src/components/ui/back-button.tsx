@@ -7,10 +7,12 @@ interface BackButtonProps {
   theme?: "90s" | "2000s" | "modern" | "default";
   label?: string;
   fallbackPath?: string;
+  // When false, the back navigation will not restore the previous era
+  restoreEra?: boolean;
 }
 
-export function BackButton({ onBack, theme = "default", label = "Back", fallbackPath }: BackButtonProps) {
-  const handleBackNavigation = useBackNavigation(fallbackPath);
+export function BackButton({ onBack, theme = "default", label = "Back", fallbackPath, restoreEra = true }: BackButtonProps) {
+  const handleBackNavigation = useBackNavigation(fallbackPath, { restoreEra });
   
   const handleClick = () => {
     handleBackNavigation();
