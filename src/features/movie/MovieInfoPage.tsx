@@ -142,8 +142,10 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   }, [m, setEra]);
 
   useEffect(() => {
-    if (m && Array.isArray(m.comments)) setReviews(m.comments);
-    else setReviews([]);
+    if (m && Array.isArray(m.comments)) {
+      // Map comments from the end so newest appear first without relying on dates
+      setReviews([...m.comments].reverse());
+    } else setReviews([]);
   }, [m]);
 
   // Similar movies

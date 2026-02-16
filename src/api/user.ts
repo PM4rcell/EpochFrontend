@@ -10,6 +10,7 @@ export async function fetchMe() {
 export type UpdateMePayload = {
   username?: string;
   email?: string;
+  external_url?: string;
   watchlist?: number[];
   poster?: File;
   points?: number;
@@ -34,6 +35,7 @@ export async function updateMe(payload: UpdateMePayload) {
       // backend may expect repeated fields or a JSON string; send repeated fields
       payload.watchlist.forEach((id) => form.append("watchlist[]", String(id)));
     }
+    if (typeof payload.external_url !== "undefined") form.append("external_url", payload.external_url);
     form.append("poster", payload.poster);
     if (typeof payload.points !== "undefined") form.append("points", String(payload.points));
 
@@ -47,6 +49,7 @@ export async function updateMe(payload: UpdateMePayload) {
   const body: any = {};
   if (typeof payload.username !== "undefined") body.username = payload.username;
   if (typeof payload.email !== "undefined") body.email = payload.email;
+  if (typeof payload.external_url !== "undefined") body.external_url = payload.external_url;
   if (typeof payload.watchlist !== "undefined") body.watchlist = payload.watchlist;
   if (typeof payload.points !== "undefined") body.points = payload.points;
 

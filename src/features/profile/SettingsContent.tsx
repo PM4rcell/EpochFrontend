@@ -374,15 +374,15 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
           </div>
         </motion.div>
       </motion.div>
-      <div className="max-w-4xl mx-auto py-6 flex justify-end">
-        <div className="flex items-center gap-3">
-          {error && <p className="text-red-400">Failed to save changes.</p>}
+      <div className="max-w-4xl mx-auto py-6">
+        <div className="w-full">
+          {error && <p className="text-red-400 mb-2">Failed to save changes.</p>}
           <Button
             onClick={async () => {
               await saveChanges();
             }}
             disabled={!isDirty || saving}
-            className={`${colors.accent} ${colors.buttonBg} ${colors.buttonHover} ${colors.buttonBorder} ml-2 px-5 py-2 rounded-lg font-semibold shadow-lg transition-transform duration-150 ${!isDirty ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+            className={`${colors.accent} ${colors.buttonBg} ${colors.buttonHover} ${colors.buttonBorder} w-full px-5 py-3 rounded-lg font-semibold shadow-lg transition-transform duration-150 ${!isDirty ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
           >
             {saving ? "Saving..." : "Save changes"}
           </Button>

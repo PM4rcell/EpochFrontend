@@ -62,7 +62,7 @@ export default function useSettings() {
       if (dirty.has("email") && typeof settings.email !== "undefined") payload.email = settings.email ?? undefined;
       if (dirty.has("avatar")) {
         if (settings.avatar instanceof File) payload.poster = settings.avatar;
-        else if (typeof settings.avatar === "string") payload.avatar = settings.avatar;
+        else if (typeof settings.avatar === "string") payload.external_url = settings.avatar;
       }
 
       const res = await updateMe(payload);
