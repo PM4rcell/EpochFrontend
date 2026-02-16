@@ -41,6 +41,7 @@ export function SeatsPage({
   const [selectedSeats, setSelectedSeats] = useState<
     Array<{ id: number; row: string; number: number; price: number }>
   >([]);
+  const [ticketTypeId, setTicketTypeId] = useState<number>(1);
 
   const { token } = useToken();
   const { era } = useEra();
@@ -113,7 +114,7 @@ export function SeatsPage({
 
     const body = {
       screening_id: Number(screeningId),
-      ticket_type_id: 1,
+      ticket_type_id: Number(ticketTypeId),
       seat_ids: seatIds,
       customer: { mode: "user" },
     } as const;
@@ -247,16 +248,18 @@ export function SeatsPage({
               </div>
             ) : (
               <PosterSummary
-                    posterUrl={poster ?? ""}
-                    movieTitle={title}
-                    selectedSeats={selectedSeats}
-                    onRemoveSeat={handleRemoveSeat}
-                    onCancel={clearSelection}
+                posterUrl={poster ?? ""}
+                movieTitle={title}
+                selectedSeats={selectedSeats}
+                onRemoveSeat={handleRemoveSeat}
+                onCancel={clearSelection}
                 onNext={handleProceed}
+                ticketType={ticketTypeId}
+                onTicketTypeChange={setTicketTypeId}
                 isReserving={bookingLoading}
-                    canProceed={Boolean(token)}
-                    theme={appliedTheme}
-                  />
+                canProceed={Boolean(token)}
+                theme={appliedTheme}
+              />
             )}
           </div>
 

@@ -1,18 +1,21 @@
 import { motion } from "motion/react";
 import { Calendar } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface CTAButtonProps {
   label?: string;
   onClick: () => void;
   theme?: "90s" | "2000s" | "modern" | "default";
   icon?: boolean;
+  Icon?: LucideIcon | null;
 }
 
 export function CTAButton({ 
   label = "View schedules", 
   onClick, 
   theme = "default",
-  icon = true 
+  icon = true,
+  Icon = null,
 }: CTAButtonProps) {
   const getThemeColors = () => {
     switch (theme) {
@@ -55,7 +58,7 @@ export function CTAButton({
         focus:outline-none focus:ring-2 focus:ring-slate-400/50
       `}
     >
-      {icon && <Calendar className="w-5 h-5" />}
+      {icon && (Icon ? <Icon className="w-5 h-5" /> : <Calendar className="w-5 h-5" />)}
       <span>{label}</span>
     </motion.button>
   );

@@ -17,6 +17,8 @@ interface PosterSummaryProps {
   onRemoveSeat: (row: string, number: number) => void;
   onCancel: () => void;
   onNext: () => void;
+  ticketType?: number;
+  onTicketTypeChange?: (id: number) => void;
   canProceed?: boolean;
   isReserving?: boolean;
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -29,6 +31,8 @@ export function PosterSummary({
   onRemoveSeat,
   onCancel,
   onNext,
+  ticketType = 1,
+  onTicketTypeChange,
   canProceed = true,
   isReserving = false,
   theme = "default",
@@ -119,6 +123,17 @@ export function PosterSummary({
 
       {/* Total */}
       <div className="pt-4 border-t border-slate-700/50">
+        <div className="mb-4">
+          <label className="text-slate-400 text-sm block mb-2">Ticket type</label>
+          <select
+            value={ticketType}
+            onChange={(e) => onTicketTypeChange?.(Number(e.target.value))}
+            className="w-full bg-black/40 border border-slate-700/30 rounded px-3 py-2 text-slate-200"
+          >
+            <option value={1}>Standard</option>
+            <option value={2}>Student</option>
+          </select>
+        </div>
         <div className="flex items-center justify-between mb-6">
           <span className="text-slate-400">Total</span>
           <span className={`text-2xl ${colors.accent}`}>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Play, X, Star } from "lucide-react";
+import { Play, X, Star, Bookmark } from "lucide-react";
+import { updateMe } from "../../api/user";
 import { Navbar } from "../../components/layout/Navbar";
 import { BackButton } from "../../components/ui/back-button.tsx";
 import { Footer } from "../../components/layout/Footer";
@@ -36,6 +37,8 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const [isLoggedIn] = useState(true); // Simulate logged-in state
   const [reviews, setReviews] = useState<any[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
+  const [watchlistAdded, setWatchlistAdded] = useState(false);
 
 
   
@@ -239,20 +242,41 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
               <RatingBadge rating={m?.vote_avg ?? 0} theme={theme} />
             </motion.div>
 
-            {/* CTA Button */}
+            {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.8 }}
             >
-              <CTAButton
-                onClick={() => {
-                  // prefer parent handler, otherwise use router navigate
-                  if (onNavigate) return onNavigate("/screenings");
-                  navigate("/screenings");
-                }}
-                theme={theme}
-              />
+              <div className="flex items-center gap-3">
+                <CTAButton
+                  onClick={() => {
+                    if (onNavigate) return onNavigate("/screenings");
+                    navigate("/screenings");
+                  }}
+                  theme={theme}
+                />
+
+                <CTAButton
+                  onClick={async () => {
+                    if (!m?.id) return;
+                    setWatchlistLoading(true);
+                    try {
+                      // Send body: { watchlist: [movieId] } (array of numbers)
+                      await updateMe({ watchlist: [m.id] });
+                      setWatchlistAdded(true);
+                    } catch (err) {
+                      // eslint-disable-next-line no-console
+                      console.error("Failed to update watchlist", err);
+                    } finally {
+                      setWatchlistLoading(false);
+                    }
+                  }}
+                  theme={theme}
+                  label={watchlistAdded ? "Added" : "Add to Watchlist"}
+                  Icon={Bookmark}
+                />
+              </div>
             </motion.div>
           </div>
         </div>
