@@ -41,6 +41,21 @@ export function ProfilePage({
   }, [location.state]);
   const { tickets } = useTickets();
 
+  const handleOverviewNavigate = (page: string) => {
+    if (page === "booking-tickets") {
+      setActiveTab("tickets");
+      window.setTimeout(() => {
+        document.getElementById("profile-tickets-header")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 0);
+      return;
+    }
+
+    onNavigate?.(page);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Background gradients */}
@@ -75,9 +90,10 @@ export function ProfilePage({
 
           {/* Tab Content */}
           <div className="pb-16">
-            {activeTab === "overview" && <OverviewContent theme={theme} onNavigate={onNavigate} />}
+            {activeTab === "overview" && <OverviewContent theme={theme} onNavigate={handleOverviewNavigate} />}
             {activeTab === "tickets" && (
               <section className="py-8">
+                <h2 id="profile-tickets-header" className="text-slate-300 mb-4">Tickets</h2>
 
                 {(!tickets || tickets.length === 0) ? (
                   <div className="py-20 text-center">

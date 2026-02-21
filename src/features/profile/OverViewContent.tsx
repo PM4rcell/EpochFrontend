@@ -9,6 +9,7 @@ import { StatCard } from "./StatCard";
 import { NextShowCard } from "./NextShowCard";
 import { RecentActivityCard } from "./RecentActivityCard";
 import { useTickets } from "../../hooks/useTickets";
+import useUpcomingShow from "../../hooks/useUpcomingShow";
 
 interface OverviewContentProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -20,6 +21,7 @@ export function OverviewContent({
   onNavigate,
 }: OverviewContentProps) {
   const { tickets } = useTickets();
+  const { nextShow, hasUpcomingBooking } = useUpcomingShow();
   let commentCount = 0;
   try {
     const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
@@ -56,17 +58,6 @@ export function OverviewContent({
       description: "",
     },
   ];
-
-  const nextShow = {
-    title: "The Eternal Voyage",
-    poster:
-      "https://images.unsplash.com/photo-1574923930958-9b653a0e5148?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-    date: "Friday, Nov 8",
-    time: "7:30 PM",
-    theater: "Cinema 1",
-    seats: "E7, E8",
-    format: "IMAX",
-  };
 
   const recentActivities = [
     {
@@ -125,11 +116,15 @@ export function OverviewContent({
       {/* Next Show */}
       <section>
         <h2 className="text-slate-300 mb-4">Upcoming Show</h2>
-        <NextShowCard
-          show={nextShow}
-          theme={theme}
-          onNavigate={onNavigate}
-        />
+        {hasUpcomingBooking ? (
+          <NextShowCard
+            show={nextShow}
+            theme={theme}
+            onNavigate={onNavigate}
+          />
+        ) : (
+          <p className="text-slate-400">You have no upcoming bookings</p>
+        )}
       </section>
 
       {/* Recent Activity */}
