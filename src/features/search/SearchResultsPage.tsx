@@ -48,44 +48,14 @@ export function SearchResultsPage({
   }, [location.search, initialQuery]);
 
   const getThemeColors = () => {
-    switch (appliedTheme) {
-      case "90s":
-        return {
-          accent: "text-amber-500",
-          activeBg: "bg-amber-500/20 border-amber-500",
-          inactiveBorder: "border-amber-500/30",
-          hoverBg: "hover:bg-amber-500/10",
-          gradientFrom: "from-amber-600",
-          gradientTo: "to-amber-400",
-        };
-      case "2000s":
-        return {
-          accent: "text-blue-400",
-          activeBg: "bg-blue-400/20 border-blue-400",
-          inactiveBorder: "border-blue-400/30",
-          hoverBg: "hover:bg-blue-400/10",
-          gradientFrom: "from-blue-500",
-          gradientTo: "to-blue-400",
-        };
-      case "modern":
-        return {
-          accent: "text-slate-300",
-          activeBg: "bg-slate-300/20 border-slate-300",
-          inactiveBorder: "border-slate-300/30",
-          hoverBg: "hover:bg-slate-300/10",
-          gradientFrom: "from-slate-400",
-          gradientTo: "to-slate-300",
-        };
-      default:
-        return {
-          accent: "text-amber-500",
-          activeBg: "bg-amber-500/20 border-amber-500",
-          inactiveBorder: "border-amber-500/30",
-          hoverBg: "hover:bg-amber-500/10",
-          gradientFrom: "from-amber-600",
-          gradientTo: "to-amber-400",
-        };
-    }
+    return {
+      accent: "text-[var(--theme-accent)]",
+      activeBg: "bg-[color:var(--theme-glow)] border-[color:var(--theme-border)]",
+      inactiveBorder: "border-[color:var(--theme-border)]",
+      hoverBg: "hover:bg-[color:var(--theme-glow)]",
+      gradientFrom: "from-[var(--theme-button-bg)]",
+      gradientTo: "to-[var(--theme-button-hover)]",
+    };
   };
 
   const colors = getThemeColors();
@@ -157,7 +127,7 @@ export function SearchResultsPage({
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div data-theme={appliedTheme} className="min-h-screen bg-black text-white">
       <Navbar theme={appliedTheme} activePage="movies" />
 
       <main className="pt-24 pb-16">

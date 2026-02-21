@@ -44,32 +44,11 @@ export function ArticleDetailPage({
   }, []);
 
   const getThemeColors = () => {
-    switch (appliedTheme) {
-      case "90s":
-        return {
-          accent: "text-amber-500",
-          badge: "border-amber-500/50 text-amber-400 bg-amber-500/10",
-          buttonHover: "hover:text-amber-400",
-        };
-      case "2000s":
-        return {
-          accent: "text-blue-400",
-          badge: "border-blue-400/50 text-blue-300 bg-blue-400/10",
-          buttonHover: "hover:text-blue-300",
-        };
-      case "modern":
-        return {
-          accent: "text-slate-300",
-          badge: "border-slate-400/50 text-slate-300 bg-slate-400/10",
-          buttonHover: "hover:text-slate-200",
-        };
-      default:
-        return {
-          accent: "text-amber-500",
-          badge: "border-amber-500/50 text-amber-400 bg-amber-500/10",
-          buttonHover: "hover:text-amber-400",
-        };
-    }
+    return {
+      accent: "text-[var(--theme-accent)]",
+      badge: "border-[color:var(--theme-border)] text-[var(--theme-accent)] bg-[color:var(--theme-glow)]",
+      buttonHover: "hover:text-[var(--theme-accent)]",
+    };
   };
 
   const colors = getThemeColors();
@@ -85,7 +64,7 @@ export function ArticleDetailPage({
   }, [allArticles, articleId]);
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div data-theme={appliedTheme} className="min-h-screen bg-black text-white">
         <Navbar activePage="news" />
 
         <div className="pt-20">
@@ -162,7 +141,7 @@ export function ArticleDetailPage({
     console.error("Article load error:", error);
     const extra = (error as any)?.data ? ` - ${JSON.stringify((error as any).data)}` : "";
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div data-theme={appliedTheme} className="min-h-screen bg-black text-white flex items-center justify-center">
         <div>
           Error loading article: {(error as Error).message}{extra}
         </div>
@@ -172,7 +151,7 @@ export function ArticleDetailPage({
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div data-theme={appliedTheme} className="min-h-screen bg-black text-white flex items-center justify-center">
         <div>Article not found</div>
       </div>
     );
@@ -180,10 +159,10 @@ export function ArticleDetailPage({
 
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div data-theme={appliedTheme} className="min-h-screen bg-black text-white">
       {/* Background gradients */}
       <div className="fixed inset-0 bg-linear-to-b from-black via-slate-900 to-black -z-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(245,158,11,0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,var(--theme-glow),transparent_50%)]" />
       </div>
 
       {/* Navbar */}

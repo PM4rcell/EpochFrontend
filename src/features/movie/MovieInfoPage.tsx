@@ -37,7 +37,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const [isLoggedIn] = useState(true); // Simulate logged-in state
   const [reviews, setReviews] = useState<any[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [watchlistLoading, setWatchlistLoading] = useState(false);
+  const [, setWatchlistLoading] = useState(false);
   const [watchlistAdded, setWatchlistAdded] = useState(false);
 
 
@@ -101,24 +101,10 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const theme = m ? resolveEraKey(m.era) : "modern";
 
   const getThemeColors = () => {
-    switch (theme) {
-      case "90s":
-        return {
-          playButton: "bg-amber-600 hover:bg-amber-500 border-amber-500",
-          playGlow: "hover:shadow-[0_0_40px_rgba(245,158,11,0.6)]",
-        };
-      case "2000s":
-        return {
-          playButton: "bg-blue-500 hover:bg-blue-400 border-blue-400",
-          playGlow: "hover:shadow-[0_0_40px_rgba(96,165,250,0.6)]",
-        };
-      case "modern":
-      default:
-        return {
-          playButton: "bg-slate-300 hover:bg-slate-200 border-slate-200",
-          playGlow: "hover:shadow-[0_0_40px_rgba(226,232,240,0.6)]",
-        };
-    }
+    return {
+      playButton: "bg-[var(--theme-button-bg)] hover:bg-[var(--theme-button-hover)] border-[color:var(--theme-border)]",
+      playGlow: "hover:shadow-[0_0_40px_var(--theme-glow)]",
+    };
   };
 
   const colors = getThemeColors();
@@ -162,7 +148,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
   if (error || !movieData)
     return (
-      <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
+      <div data-theme={theme} className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
         <Navbar theme={theme} activePage="movies" />
         <div className="container mx-auto px-6 py-32">
           <p className="text-center text-slate-400">Failed to load movie.</p>
@@ -171,7 +157,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
       </div>
     );
   return (
-    <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
+    <div data-theme={theme} className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
       <Navbar theme={theme} activePage="movies"/>
 
       {/* Hero Section */}

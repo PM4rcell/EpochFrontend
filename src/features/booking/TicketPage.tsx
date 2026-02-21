@@ -34,28 +34,11 @@ export function TicketPage({ theme = "default", onDone }: TicketsPageProps) {
   };
 
   const getThemeColors = () => {
-    switch (appliedTheme) {
-      case "90s":
-        return {
-          accent: "text-amber-500",
-          icon: "text-amber-500",
-        };
-      case "2000s":
-        return {
-          accent: "text-blue-400",
-          icon: "text-blue-400",
-        };
-      case "modern":
-        return {
-          accent: "text-slate-300",
-          icon: "text-slate-300",
-        };
-      default:
-        return {
-          accent: "text-amber-500",
-          icon: "text-amber-500",
-        };
-    }
+    return {
+      accent: "text-[var(--theme-accent)]",
+      icon: "text-[var(--theme-accent)]",
+      button: "bg-[var(--theme-button-bg)] hover:bg-[var(--theme-button-hover)]",
+    };
   };
 
   const colors = getThemeColors();
@@ -66,7 +49,7 @@ export function TicketPage({ theme = "default", onDone }: TicketsPageProps) {
     } catch {}
   };
   return (
-    <div className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
+    <div data-theme={appliedTheme} className="min-h-screen bg-linear-to-b from-black via-slate-950 to-black">
       <Navbar theme={appliedTheme} activePage="screenings"/>
 
       {/* Hero Header - Compact */}
@@ -143,15 +126,7 @@ export function TicketPage({ theme = "default", onDone }: TicketsPageProps) {
             <Button
               onClick={() => navigate("/profile", { state: { tab: "tickets" } })}
               className={`
-                ${
-                  appliedTheme === "90s"
-                    ? "bg-amber-600 hover:bg-amber-500"
-                    : appliedTheme === "2000s"
-                    ? "bg-blue-500 hover:bg-blue-400"
-                    : appliedTheme === "modern"
-                    ? "bg-slate-300 hover:bg-slate-200"
-                    : "bg-amber-600 hover:bg-amber-500"
-                }
+                ${colors.button}
                 text-black transition-all duration-200
               `}
             >

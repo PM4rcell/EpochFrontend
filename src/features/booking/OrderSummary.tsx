@@ -44,36 +44,12 @@ export function OrderSummary({
   isProcessing = false,
 }: OrderSummaryProps) {
   const getThemeColors = () => {
-    switch (theme) {
-      case "90s":
-        return {
-          button: "bg-amber-600 hover:bg-amber-500 text-black",
-          glow: "hover:shadow-[0_8px_24px_rgba(245,158,11,0.5)]",
-          accent: "text-amber-500",
-          border: "border-amber-600/20",
-        };
-      case "2000s":
-        return {
-          button: "bg-blue-500 hover:bg-blue-400 text-black",
-          glow: "hover:shadow-[0_8px_24px_rgba(96,165,250,0.5)]",
-          accent: "text-blue-400",
-          border: "border-blue-500/20",
-        };
-      case "modern":
-        return {
-          button: "bg-slate-300 hover:bg-slate-200 text-black",
-          glow: "hover:shadow-[0_8px_24px_rgba(226,232,240,0.5)]",
-          accent: "text-slate-300",
-          border: "border-slate-400/20",
-        };
-      default:
-        return {
-          button: "bg-amber-600 hover:bg-amber-500 text-black",
-          glow: "hover:shadow-[0_8px_24px_rgba(245,158,11,0.5)]",
-          accent: "text-amber-500",
-          border: "border-amber-600/20",
-        };
-    }
+    return {
+      button: "bg-[var(--theme-button-bg)] hover:bg-[var(--theme-button-hover)] text-black",
+      glow: "hover:shadow-[0_8px_24px_var(--theme-glow)]",
+      accent: "text-[var(--theme-accent)]",
+      border: "border-[color:var(--theme-border)]",
+    };
   };
 
   const colors = getThemeColors();
@@ -83,6 +59,7 @@ export function OrderSummary({
 
   return (
     <motion.div
+      data-theme={theme}
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}

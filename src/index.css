@@ -1,1 +1,34 @@
 @import "tailwindcss";
+
+:root,
+[data-theme="default"] {
+	--theme-accent: #f59e0b;
+	--theme-border: rgba(217, 119, 6, 0.2);
+	--theme-button-bg: #d97706;
+	--theme-button-hover: #f59e0b;
+	--theme-glow: rgba(245, 158, 11, 0.5);
+}
+
+[data-theme="90s"] {
+	--theme-accent: #f59e0b;
+	--theme-border: rgba(217, 119, 6, 0.2);
+	--theme-button-bg: #d97706;
+	--theme-button-hover: #f59e0b;
+	--theme-glow: rgba(245, 158, 11, 0.5);
+}
+
+[data-theme="2000s"] {
+	--theme-accent: #60a5fa;
+	--theme-border: rgba(59, 130, 246, 0.2);
+	--theme-button-bg: #3b82f6;
+	--theme-button-hover: #60a5fa;
+	--theme-glow: rgba(96, 165, 250, 0.5);
+}
+
+[data-theme="modern"] {
+	--theme-accent: #cbd5e1;
+	--theme-border: rgba(148, 163, 184, 0.2);
+	--theme-button-bg: #cbd5e1;
+	--theme-button-hover: #e2e8f0;
+	--theme-glow: rgba(226, 232, 240, 0.5);
+}
