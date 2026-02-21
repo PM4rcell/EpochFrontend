@@ -1,15 +1,5 @@
 import { apiFetch } from "./fetch";
-
-export interface NewsItem {
-  id: number;
-  title: string;
-  body: string;
-  category?: string;
-  excerp?: string; // backend uses this field name in example
-  read_time_min?: number;
-  external_link?: string | null;
-  [key: string]: any;
-}
+import type { NewsItem } from "../types";
 
 /**
  * Fetch news from the backend and normalize common response shapes.

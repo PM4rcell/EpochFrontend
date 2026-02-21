@@ -1,9 +1,5 @@
 import { apiFetch } from "./fetch";
-
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
+import type { LoginPayload } from "../types";
 
 // Returns whatever the server responds with (commonly { token })
 export async function loginUser(payload: LoginPayload) {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchMoviesByTitle } from "../api/movies";
-import type { Movie } from "../api/movies";
+import type { Movie } from "../types";
 
 type UseSearchMoviesResult = {
   movies: Movie[];

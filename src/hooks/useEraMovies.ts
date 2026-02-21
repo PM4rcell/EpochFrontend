@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { fetchMoviesByEra, type Movie } from "../api/movies";
+import { fetchMoviesByEra } from "../api/movies";
+import type { Movie } from "../types";
 
 // Hook: fetch and manage movies for a given era.
 // Params:

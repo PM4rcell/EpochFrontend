@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { fetchEras, type Era as EraType } from "../api/eras";
+import { fetchEras } from "../api/eras";
+import type { Era as EraType } from "../types";
 
 export function useEras() {
   const [eras, setEras] = useState<EraType[]>([]);

@@ -1,11 +1,5 @@
 import { apiFetch } from "./fetch";
-
-export interface RegisterPayload {
-  username: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-}
+import type { RegisterPayload } from "../types";
 
 // Sends a registration POST to the backend. Returns parsed response or throws on error.
 export async function registerUser(payload: { username: string; email: string; password: string; password_confirmation: string; }) {

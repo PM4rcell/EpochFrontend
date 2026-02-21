@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { fetchNews, type NewsItem } from "../api/news";
+import { fetchNews } from "../api/news";
+import type { NewsItem } from "../types";
 
 // Lightweight Article shape used by the UI (ArticleCard / ArticleGrid)
 export interface Article {

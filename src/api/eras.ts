@@ -1,10 +1,5 @@
 import { apiFetch } from "./fetch";
-
-export interface Era {
-  id: number;
-  name: string;
-  image: string;
-}
+import type { Era } from "../types";
 
 export async function fetchEras(signal?: AbortSignal): Promise<Era[]> {
   const data = await apiFetch<any>("/api/eras", { signal });

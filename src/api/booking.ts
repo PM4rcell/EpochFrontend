@@ -1,14 +1,5 @@
 import { apiFetch } from "./fetch";
-
-export interface CreateBookingBody {
-  screening_id: number;
-  ticket_type_id: number;
-  seat_ids: number[];
-  customer: {
-    mode: "user" | "guest";
-    email?: string;
-  };
-}
+import type { CreateBookingBody } from "../types";
 
 /**
  * lockBooking

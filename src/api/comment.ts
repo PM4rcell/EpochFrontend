@@ -1,9 +1,5 @@
 import { apiFetch } from "./fetch";
-
-export interface CommentPayload {
-  text: string;
-  rating: number;
-}
+import type { CommentPayload } from "../types";
 
 /**
  * postComment

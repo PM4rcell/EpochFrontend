@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { lockBooking, type CreateBookingBody } from "../api/booking";
+import { lockBooking } from "../api/booking";
+import type { CreateBookingBody } from "../types";
 
 export function useLockBooking() {
   const [loading, setLoading] = useState(false);

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
-import { fetchArticle, type NewsItem } from "../api/news";
+import { fetchArticle } from "../api/news";
+import type { NewsItem } from "../types";
 
 export interface ArticleDetail {
   id: string;

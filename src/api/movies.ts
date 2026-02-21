@@ -1,25 +1,5 @@
 import { apiFetch } from "./fetch";
-
-// Movie interface representing the structure of a movie object
-export interface Movie {
-    id: number;
-    era_id: number;
-    director_id: number;
-    title: string;
-    description: string;
-    vote_avg: number;
-    imdb_id: number;
-    omdb_category: string;
-    age_rating: string;
-    release_date: string; // ISO date string (YYYY-MM-DD)
-    runtime_min: number;
-    is_featured: boolean;
-    slug: string;
-    trailer_link: string;
-    created_at?: string;
-    updated_at?: string;
-    deleted_at?: string | null;
-}
+import type { Movie } from "../types";
 
 //fetches movies by era id
 export async function fetchMoviesByEra(eraId: number, signal?: AbortSignal): Promise<Movie[]> {

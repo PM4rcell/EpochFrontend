@@ -10,7 +10,7 @@ import { SearchBar } from "./SearchBar";
 import { MovieCard } from "../../components/ui/movie-card";
 import { useSearchMovies } from "../../hooks/useSearchMovies";
 import { useMovieNavigationId } from "../../hooks/useMovieNavigationId";
-import type { Movie as ApiMovie } from "../../api/movies";
+import type { Movie as ApiMovie } from "../../types";
 import { Filter, ChevronDown } from "lucide-react";
 
 interface SearchResultsPageProps {

@@ -1,10 +1,5 @@
 import { apiFetch } from "./fetch";
-
-export interface SeatApi {
-  row: string;
-  number: number;
-  status: "available" | "unavailable" | "selected";
-}
+import type { SeatApi } from "../types";
 
 export async function fetchSeats(screeningId: string) {
   return apiFetch<SeatApi[]>(`/api/screenings/${screeningId}/seats`);

@@ -33,7 +33,7 @@ export default function useSettings() {
   const [settings, setSettings] = useState<EditableSettings>(() => readStoredUser());
   const [dirty, setDirty] = useState<Set<keyof EditableSettings>>(new Set());
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const refresh = useCallback(() => setSettings(readStoredUser()), []);
 
@@ -79,16 +79,17 @@ export default function useSettings() {
         if (avatarUrl) me.data.avatar_url = avatarUrl;
         else if (typeof settings.avatar === "string") me.data.avatar_url = settings.avatar;
         localStorage.setItem("epoch_user", JSON.stringify(me));
-      } catch {}
+      } catch { /* Ignore localStorage errors */ }
 
       setDirty(new Set());
       setSaving(false);
       refresh();
       return { ok: true };
     } catch (err) {
-      setError(err);
+      const error = err instanceof Error ? err : new Error("An unknown error occurred");
+      setError(error);
       setSaving(false);
-      return { ok: false, error: err };
+      return { ok: false, error: error.message };
     }
   }, [dirty, settings, refresh]);
 

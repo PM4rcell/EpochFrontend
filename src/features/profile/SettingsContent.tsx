@@ -12,6 +12,8 @@ interface SettingsContentProps {
 }
 
 export function SettingsContent({ theme = "default" }: SettingsContentProps) {
+  const DEFAULT_PROFILE_PICTURE = "https://cdn.britannica.com/65/227665-050-D74A477E/American-actor-Leonardo-DiCaprio-2016.jpg";
+
   const [isChangingUsername, setIsChangingUsername] = useState(false);
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [isChangingPicture, setIsChangingPicture] = useState(false);
@@ -32,13 +34,14 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
   const [username, setUsername] = useState(settings.username ?? "Alex Carter");
   const [email, setEmail] = useState(settings.email ?? "alex.carter@email.com");
   const [profilePicture, setProfilePicture] = useState<string>(
-    typeof settings.avatar === "string" ? settings.avatar : (storedPosterUrl ?? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400")
+    typeof settings.avatar === "string" ? settings.avatar : (storedPosterUrl ?? DEFAULT_PROFILE_PICTURE)
   );
 
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [newPictureUrl, setNewPictureUrl] = useState("");
+  const isDefaultProfilePicture = profilePicture === DEFAULT_PROFILE_PICTURE;
 
   const getThemeColors = () => {
     switch (theme) {
@@ -119,6 +122,13 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
       setNewPictureUrl("");
       setIsChangingPicture(false);
     }
+  };
+
+  const handlePictureReset = () => {
+    setProfilePicture(DEFAULT_PROFILE_PICTURE);
+    setField("avatar", DEFAULT_PROFILE_PICTURE);
+    setNewPictureUrl("");
+    setIsChangingPicture(false);
   };
 
   const settingItemVariants = {
@@ -291,11 +301,21 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
           className={`rounded-xl bg-linear-to-br from-slate-900/60 via-black/40 to-black/60 backdrop-blur-sm border ${colors.border} ${colors.glow} overflow-hidden`}
         >
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`p-2 rounded-lg ${colors.buttonBg} ${colors.border} border`}>
-                <ImageIcon className={`w-5 h-5 ${colors.accent}`} />
+            <div className="flex items-center justify-between mb-4 gap-3">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${colors.buttonBg} ${colors.border} border`}>
+                  <ImageIcon className={`w-5 h-5 ${colors.accent}`} />
+                </div>
+                <h3 className="text-white">Profile Picture</h3>
               </div>
-              <h3 className="text-white">Profile Picture</h3>
+              <Button
+                onClick={handlePictureReset}
+                variant="outline"
+                disabled={isDefaultProfilePicture}
+                className={`bg-black/40 border-slate-700 text-slate-300 transition-all duration-250 ${isDefaultProfilePicture ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-800/60"}`}
+              >
+                Reset
+              </Button>
             </div>
 
             {!isChangingPicture ? (

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { fetchSeats } from "../api/seats";
-import type { SeatApi } from "../api/seats";
+import type { SeatApi } from "../types";
 
 export function useSeats(screeningId?: string | null) {
   const [seats, setSeats] = useState<SeatApi[] | null>(null);

@@ -1,6 +1,6 @@
 // Hook that encapsulates fetching logic for eras
 // API era type for resolving keys
-import type { Era as ApiEra } from "../../api/eras";
+import type { Era as ApiEra } from "../../types";
 // Motion library for simple entrance/hover animations
 import { motion } from "motion/react";
 import { Spinner } from "../../components/ui/spinner";

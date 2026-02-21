@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import postComment, { type CommentPayload } from "../api/comment";
+import postComment from "../api/comment";
+import type { CommentPayload } from "../types";
 
 export function useComment() {
   const [loading, setLoading] = useState(false);
