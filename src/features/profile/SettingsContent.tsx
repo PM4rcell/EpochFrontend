@@ -6,14 +6,13 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { DEFAULT_PROFILE_PICTURE } from "../../constants/profile";
 
 interface SettingsContentProps {
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
 export function SettingsContent({ theme = "default" }: SettingsContentProps) {
-  const DEFAULT_PROFILE_PICTURE = "https://cdn.britannica.com/65/227665-050-D74A477E/American-actor-Leonardo-DiCaprio-2016.jpg";
-
   const [isChangingUsername, setIsChangingUsername] = useState(false);
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [isChangingPicture, setIsChangingPicture] = useState(false);

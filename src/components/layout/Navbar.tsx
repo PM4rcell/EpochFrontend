@@ -5,6 +5,8 @@ import { SearchBar } from "../../features/search/SearchBar";
 import { useEra } from "../../context/EraContext";
 import { useToken } from "../../context/TokenContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { DEFAULT_PROFILE_PICTURE } from "../../constants/profile";
 
 type PageType = "home" | "screenings" | "movies" | "news" | "profile" | "era";
 
@@ -81,6 +83,27 @@ export function Navbar({
   };
   const usernameFromToken = getUsernameFromToken(token);
   const username = user?.data?.username || usernameFromToken || null;
+
+  let storedAvatar: string | null = null;
+  try {
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("epoch_user");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        storedAvatar =
+          parsed?.poster ||
+          null;
+      }
+    }
+  } catch {
+    storedAvatar = null;
+  }
+
+  const avatarSrc = [
+    user?.data?.poster.url,
+    storedAvatar,
+    DEFAULT_PROFILE_PICTURE,
+  ].find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? DEFAULT_PROFILE_PICTURE;
 
   // NAV ITEMS
   const navItems = [
@@ -214,7 +237,18 @@ export function Navbar({
                 onClick={() => handleNavClick("/profile")}
                 className={`relative ${activePage === "profile" ? colors.active : "text-slate-300"} ${colors.hover} ${colors.glow} transition-all duration-200 p-2 rounded focus:outline-none focus:ring-2 focus:ring-slate-400/50 flex items-center cursor-pointer`}
               >
-                <User className="w-5 h-5" />
+                <Avatar className="w-6 h-6 border border-slate-700/60">
+                  <AvatarImage src={avatarSrc} alt={username ? `${username} avatar` : "Profile avatar"} className="object-cover" />
+                  <AvatarFallback className="bg-slate-800 text-slate-300 text-xs">
+                    {(username || "U")
+                      .split(" ")
+                      .filter(Boolean)
+                      .map((part: string) => part[0])
+                      .slice(0, 2)
+                      .join("")
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
                 {username && (
                   <span className="ml-2 text-sm text-slate-300 hidden sm:inline truncate max-w-30">{username}</span>
                 )}

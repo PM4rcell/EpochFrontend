@@ -4,6 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Avatar, AvatarFallback } from "../../components/ui/avatar";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { useNavigate } from "react-router-dom";
+import { DEFAULT_PROFILE_PICTURE } from "../../constants/profile";
 
 interface ProfileHeaderProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -66,13 +67,24 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
       const raw = localStorage.getItem("epoch_user");
       if (raw) {
         const su = JSON.parse(raw);
-        storedPosterUrl = su?.data?.poster?.url || su?.data?.poster_url || su?.poster?.url || su?.poster || null;
+        storedPosterUrl =
+          su?.data?.avatar_url ||
+          su?.data?.avatar ||
+          su?.avatar_url ||
+          su?.avatar ||
+          su?.data?.poster?.url ||
+          su?.data?.poster_url ||
+          su?.poster?.url ||
+          su?.poster ||
+          null;
       }
     }
   } catch {
     storedPosterUrl = null;
   }
-  const avatarSrc = avatar ?? storedPosterUrl ?? "";
+  const avatarSrc = [avatar, storedPosterUrl].find(
+    (value): value is string => typeof value === "string" && value.trim().length > 0
+  ) ?? DEFAULT_PROFILE_PICTURE;
 
   return (
     <motion.div
