@@ -37,7 +37,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const [isLoggedIn] = useState(true); // Simulate logged-in state
   const [reviews, setReviews] = useState<any[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [, setWatchlistLoading] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
   const [watchlistAdded, setWatchlistAdded] = useState(false);
 
 
@@ -109,6 +109,17 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
   const colors = getThemeColors();
 
+  const uniqueGenres = Array.from(
+    new Map(
+      (m?.genres || []).map((genre: any, index: number) => {
+        const genreName = String(genre?.name || genre || "").trim();
+        const genreId = genre?.id;
+        const key = genreId != null ? `id:${genreId}` : `name:${genreName.toLowerCase() || index}`;
+        return [key, genre] as const;
+      })
+    ).values()
+  );
+
   // (m is defined above)
 
   // Map era_id to era string: 1 = "90s", 2 = "2000s", 3 = "modern"
@@ -136,6 +147,39 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
       setReviews([...m.comments].reverse());
     } else setReviews([]);
   }, [m]);
+
+  useEffect(() => {
+    const currentMovieId = Number(m?.id ?? movieId);
+    if (!Number.isFinite(currentMovieId)) {
+      setWatchlistAdded(false);
+      return;
+    }
+
+    try {
+      if (typeof window === "undefined") return;
+      const raw = localStorage.getItem("epoch_user");
+      if (!raw) {
+        setWatchlistAdded(false);
+        return;
+      }
+
+      const stored = JSON.parse(raw);
+      const watchlist = stored?.data?.watchlist;
+      if (!Array.isArray(watchlist)) {
+        setWatchlistAdded(false);
+        return;
+      }
+
+      const alreadyInWatchlist = watchlist.some((item: any) => {
+        const itemMovieId = Number(item?.movie_id ?? item?.id ?? item);
+        return Number.isFinite(itemMovieId) && itemMovieId === currentMovieId;
+      });
+
+      setWatchlistAdded(alreadyInWatchlist);
+    } catch {
+      setWatchlistAdded(false);
+    }
+  }, [m?.id, movieId]);
 
   // Similar movies
   const { items: similarItems, loading: similarLoading } = useSimilarMovies(m?.id ?? movieId ?? null);
@@ -222,8 +266,12 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
               <MetaChip label={m?.release_date ? new Date(m.release_date).getFullYear().toString() : ""} theme={theme} />
               <MetaChip label={m?.runtime_min ? `${m.runtime_min} min` : ""} theme={theme} />
               <MetaChip label={`Dir: ${m?.director?.name || m?.director || ""}`} theme={theme} />
-              {(m?.genres || []).map((genre: any) => (
-                <MetaChip key={genre.id || genre} label={genre.name || genre} theme={theme} />
+              {uniqueGenres.map((genre: any, index: number) => (
+                <MetaChip
+                  key={genre?.id != null ? `genre-${genre.id}` : `genre-${String(genre?.name || genre || index).toLowerCase()}`}
+                  label={genre?.name || genre}
+                  theme={theme}
+                />
               ))}
               <RatingBadge rating={m?.vote_avg ?? 0} theme={theme} />
             </motion.div>
@@ -245,11 +293,32 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
                 <CTAButton
                   onClick={async () => {
-                    if (!m?.id) return;
+                    if (!m?.id || watchlistLoading || watchlistAdded) return;
                     setWatchlistLoading(true);
                     try {
                       // Send body: { watchlist: [movieId] } (array of numbers)
                       await updateMe({ watchlist: [m.id] });
+
+                      // Keep local storage in sync for Profile watchlist tab.
+                      try {
+                        const raw = localStorage.getItem("epoch_user");
+                        if (raw) {
+                          const stored = JSON.parse(raw);
+                          stored.data = stored.data ?? {};
+                          const watchlist = Array.isArray(stored.data.watchlist) ? stored.data.watchlist : [];
+                          const movieIdToAdd = Number(m.id);
+                          const alreadyExists = watchlist.some((item: any) => Number(item?.movie_id ?? item) === movieIdToAdd);
+
+                          if (!alreadyExists) {
+                            watchlist.push({ movie_id: movieIdToAdd });
+                            stored.data.watchlist = watchlist;
+                            localStorage.setItem("epoch_user", JSON.stringify(stored));
+                          }
+                        }
+                      } catch {
+                        // ignore local cache sync errors
+                      }
+
                       setWatchlistAdded(true);
                     } catch (err) {
                       // eslint-disable-next-line no-console
@@ -259,6 +328,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                     }
                   }}
                   theme={theme}
+                  disabled={watchlistAdded || watchlistLoading}
                   label={watchlistAdded ? "Added" : "Add to Watchlist"}
                   Icon={Bookmark}
                 />

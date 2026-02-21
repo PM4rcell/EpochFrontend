@@ -8,6 +8,7 @@ interface CTAButtonProps {
   theme?: "90s" | "2000s" | "modern" | "default";
   icon?: boolean;
   Icon?: LucideIcon | null;
+  disabled?: boolean;
 }
 
 export function CTAButton({ 
@@ -16,6 +17,7 @@ export function CTAButton({
   theme = "default",
   icon = true,
   Icon = null,
+  disabled = false,
 }: CTAButtonProps) {
   const getThemeColors = () => {
     switch (theme) {
@@ -47,6 +49,7 @@ export function CTAButton({
   return (
     <motion.button
       onClick={onClick}
+      disabled={disabled}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
@@ -54,7 +57,7 @@ export function CTAButton({
         flex items-center justify-center gap-2 px-6 py-3 rounded-lg
         ${colors.bg} ${colors.glow}
         text-black
-        transition-all duration-200
+        transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:shadow-none
         focus:outline-none focus:ring-2 focus:ring-slate-400/50
       `}
     >

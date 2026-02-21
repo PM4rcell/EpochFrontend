@@ -10,6 +10,7 @@ import { NextShowCard } from "./NextShowCard";
 import { RecentActivityCard } from "./RecentActivityCard";
 import { useTickets } from "../../hooks/useTickets";
 import useUpcomingShow from "../../hooks/useUpcomingShow";
+import useWatchlist from "../../hooks/useWatchlist";
 
 interface OverviewContentProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -21,6 +22,7 @@ export function OverviewContent({
   onNavigate,
 }: OverviewContentProps) {
   const { tickets } = useTickets();
+  const { watchlistItems } = useWatchlist();
   const { nextShow, hasUpcomingBooking } = useUpcomingShow();
   let commentCount = 0;
   try {
@@ -48,8 +50,8 @@ export function OverviewContent({
     {
       icon: Bookmark,
       label: "Watchlist",
-      value: "18",
-      description: "5 new releases",
+      value: String(watchlistItems.length),
+      description: "",
     },
     {
       icon: Star,

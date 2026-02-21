@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { BackButton } from "../../components/ui/back-button";
 import { Navbar } from "../../components/layout/Navbar";
@@ -9,7 +9,9 @@ import { ProfileTabs } from "./ProfleTabs";
 import { OverviewContent } from "./OverViewContent";
 import { SettingsContent } from "./SettingsContent";
 import { TicketCard } from "./TicketCard";
+import { WatchlistItem } from "./WatchlistItem";
 import useTickets from "../../hooks/useTickets";
+import useWatchlist from "../../hooks/useWatchlist";
 
 interface ProfilePageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -26,6 +28,7 @@ export function ProfilePage({
   onNavigate,
 }: ProfilePageProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const initialTabFromState = (location.state as any)?.tab as ProfileTab | undefined;
   const searchParams = new URLSearchParams(location.search);
   const initialTabFromQuery = (searchParams.get("tab") as ProfileTab | null) || undefined;
@@ -40,6 +43,11 @@ export function ProfilePage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state]);
   const { tickets } = useTickets();
+  const { watchlistItems, refreshWatchlist } = useWatchlist();
+
+  useEffect(() => {
+    if (activeTab === "watchlist") refreshWatchlist();
+  }, [activeTab, refreshWatchlist]);
 
   const handleOverviewNavigate = (page: string) => {
     if (page === "booking-tickets") {
@@ -93,7 +101,6 @@ export function ProfilePage({
             {activeTab === "overview" && <OverviewContent theme={theme} onNavigate={handleOverviewNavigate} />}
             {activeTab === "tickets" && (
               <section className="py-8">
-                <h2 id="profile-tickets-header" className="text-slate-300 mb-4">Tickets</h2>
 
                 {(!tickets || tickets.length === 0) ? (
                   <div className="py-20 text-center">
@@ -123,10 +130,32 @@ export function ProfilePage({
               </section>
             )}
             {activeTab === "watchlist" && (
-              <div className="py-20 text-center">
-                <h2 className="text-slate-400 mb-2">Watchlist</h2>
-                <p className="text-slate-500">Your saved films will appear here</p>
-              </div>
+              <section className="py-8">
+
+                {watchlistItems.length === 0 ? (
+                  <div className="py-20 text-center">
+                    <p className="text-slate-500">Your saved movies will appear here</p>
+                  </div>
+                ) : (
+                  // Temporary fallback cards until API returns expanded movie data.
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {watchlistItems.map((item) => (
+                      <WatchlistItem
+                        key={`${item.id}-${item.movieId}`}
+                        movieId={item.movieId}
+                        title={`Movie #${item.movieId}`}
+                        rating={0}
+                        length="Unknown runtime"
+                        releaseYear={0}
+                        posterUrl="https://images.unsplash.com/photo-1639306406821-c45e6cd384e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600"
+                        theme={theme}
+                        // Navigate directly to movie details from watchlist card.
+                        onBookNow={() => navigate(`/movies/${item.movieId}`)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
             )}
             {activeTab === "settings" && (
               <section className="py-8">

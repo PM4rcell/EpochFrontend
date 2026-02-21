@@ -91,6 +91,13 @@ export function Navbar({
       if (raw) {
         const parsed = JSON.parse(raw);
         storedAvatar =
+          parsed?.data?.avatar_url ||
+          parsed?.data?.avatar ||
+          parsed?.avatar_url ||
+          parsed?.avatar ||
+          parsed?.data?.poster?.url ||
+          parsed?.data?.poster_url ||
+          parsed?.poster?.url ||
           parsed?.poster ||
           null;
       }
@@ -100,7 +107,9 @@ export function Navbar({
   }
 
   const avatarSrc = [
-    user?.data?.poster.url,
+    user?.data?.avatar_url,
+    user?.data?.avatar,
+    user?.data?.poster?.url,
     storedAvatar,
     DEFAULT_PROFILE_PICTURE,
   ].find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? DEFAULT_PROFILE_PICTURE;
