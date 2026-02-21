@@ -1,13 +1,13 @@
 import { useState, useCallback } from "react";
 import { lockBooking } from "../api/booking";
-import type { CreateBookingBody } from "../types";
+import type { CreateBookingBody, LockBookingResponse } from "../types";
 
 export function useLockBooking() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<LockBookingResponse | null>(null);
 
-  const lock = useCallback(async (body: CreateBookingBody) => {
+  const lock = useCallback(async (body: CreateBookingBody): Promise<LockBookingResponse> => {
     setLoading(true);
     setError(null);
     setData(null);

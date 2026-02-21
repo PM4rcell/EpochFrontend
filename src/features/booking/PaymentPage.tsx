@@ -10,6 +10,7 @@ import { useEra } from "../../context/EraContext";
 import { useLocation, useParams } from "react-router-dom";
 import { useCheckout } from "../../hooks/useCheckout";
 import { useNavigate } from "react-router-dom";
+import type { LockBookingBooking } from "../../types";
 
 interface PaymentPageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -31,12 +32,12 @@ export function PaymentPage({
   const navigate = useNavigate();
   const { checkout } = useCheckout();
 
-  // Prefer booking from navigation state, then sessionStorage fallback.
-  let booking: any = location.state?.booking ?? null;
+  // Read the locked booking from navigation state first, then session storage.
+  let booking: LockBookingBooking | null = (location.state?.booking as LockBookingBooking | undefined) ?? null;
   if (!booking) {
     try {
       const raw = typeof window !== "undefined" ? sessionStorage.getItem("epoch:pendingBooking") : null;
-      booking = raw ? JSON.parse(raw) : null;
+      booking = raw ? (JSON.parse(raw) as LockBookingBooking) : null;
     } catch (e) {
       booking = null;
     }
@@ -54,15 +55,15 @@ export function PaymentPage({
     return raw;
   };
 
-  const movieData = booking?.movie
+  const movieData = booking
     ? {
-        title: booking.movie?.title ?? booking.movie?.name ?? "",
-        poster: booking.movie?.poster ?? "",
-        backdrop: booking.movie?.backdrop ?? "",
-        date: booking?.screening?.start_date ?? booking?.date ?? "",
-        time: formatTimeTo24(booking?.screening?.start_time ?? booking?.time ?? ""),
-        format: booking?.movie?.era?.name ?? booking?.format ?? "",
-        venue: booking?.screening?.auditorium?.name ?? booking?.venue ?? "",
+        title: booking.screening?.movie_title ?? "",
+        poster: booking.screening?.movie_poster ?? "",
+        backdrop: booking.screening?.movie_poster ?? "",
+        date: booking.screening?.date ?? "",
+        time: formatTimeTo24(booking.screening?.time ?? ""),
+        screeningType: booking.screening?.screeningType ?? "",
+        venue: booking.screening?.auditorium ?? "",
       }
     : {
         title: "The Eternal Voyage",
@@ -70,20 +71,32 @@ export function PaymentPage({
         backdrop: "https://images.unsplash.com/photo-1639306406821-c45e6cd384e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
         date: "Friday, November 8, 2025",
         time: "7:30 PM",
-        format: "IMAX 3D",
+        screeningType: "IMAX 3D",
         venue: "Epoch Cinema Downtown",
       };
 
-  const selectedSeats = (booking?.seats ?? booking?.seats_preview ?? booking?.selected_seats) as Array<{ row: string; number: number; price: number }>;
+  // Convert API tickets to summary seat rows.
+  const selectedSeats = (booking?.tickets ?? []).map((ticket, idx) => ({
+    id: idx,
+    row: ticket.row,
+    number: ticket.seat_number,
+    price: Number(ticket.price ?? 0),
+  }));
 
-  const subtotal = (selectedSeats && Array.isArray(selectedSeats)) ? selectedSeats.reduce((s, x) => s + (x.price ?? 0), 0) : 0;
-  const fees = booking?.fees ?? 2.5;
-  const taxes = booking?.taxes ?? 0;
-  const total = subtotal + fees + taxes;
+  // Backend may return "Adult"; UI label should be "Standard".
+  const ticketTypeLabel = (() => {
+    const raw = String(booking?.tickets?.[0]?.ticket_type ?? "").trim().toLowerCase();
+    if (raw === "adult" || raw === "standard") return "Standard";
+    if (raw === "student") return "Student";
+    return "Standard";
+  })();
+
+  const subtotal = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+  const total = Number(booking?.total ?? 0) > 0 ? Number(booking?.total ?? 0) : subtotal;
 
   const handlePayment = async () => {
     // Determine bookingId to checkout
-    const bookingId = params.bookingId ?? booking?.id ?? booking?.booking_id ?? booking?.bookingId ?? null;
+    const bookingId = params.bookingId ?? booking?.id ?? null;
     if (!bookingId) {
       // eslint-disable-next-line no-console
       console.warn("No bookingId available for checkout");
@@ -145,11 +158,12 @@ export function PaymentPage({
                 movieTitle={movieData.title}
                 date={movieData.date}
                 time={movieData.time}
-                format={movieData.format}
+                format={movieData.screeningType}
+                screeningType={movieData.screeningType}
+                ticketType={ticketTypeLabel}
                 venue={movieData.venue}
                 seats={selectedSeats ?? []}
-                fees={fees}
-                taxes={taxes}
+                total={total}
                 onBack={onBack}
                 onPay={handlePayment}
                 theme={appliedTheme}

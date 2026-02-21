@@ -13,6 +13,7 @@ import { useEra } from "../../context/EraContext";
 import { useNavigate } from "react-router-dom";
 import { useLockBooking } from "../../hooks/useLockBooking";
 import { Skeleton } from "../../components/ui/skeleton";
+import type { CreateBookingBody } from "../../types";
 
 interface SeatsPageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -112,41 +113,30 @@ export function SeatsPage({
     const seatIds = selectedSeats.map((s) => Number(s.id)).filter((id) => !Number.isNaN(id));
     if (seatIds.length === 0) return;
 
-    const body = {
+    const body: CreateBookingBody = {
       screening_id: Number(screeningId),
       ticket_type_id: Number(ticketTypeId),
       seat_ids: seatIds,
       customer: { mode: "user" },
-    } as const;
+    };
 
     try {
-      // create client-side preview in case server lock fails to provide full booking
-      const bookingPreview = {
-        screening_id: Number(screeningId),
-        screening: screening ?? null,
-        movie: movie ?? null,
-        seats: selectedSeats.map((s) => ({ id: s.id, row: s.row, number: s.number, price: s.price })),
-        seat_ids: seatIds,
-        total: selectedSeats.reduce((sum, s) => sum + (s.price ?? 0), 0),
-      } as const;
+      // Single source of truth: use backend `booking` as-is.
+      const res = await lock(body);
+      const lockedBooking = res?.booking ?? null;
 
-      // attempt server lock
-      const res = await lock(body as any);
-      const serverBooking = res?.booking ?? res ?? null;
-      const bookingId = serverBooking?.id ?? res?.id ?? res?.booking_id ?? null;
+      if (!lockedBooking?.id) {
+        // eslint-disable-next-line no-console
+        console.warn("Booking lock returned no booking id", res);
+        return;
+      }
 
-      // persist a merged booking object so we always have displayable data
+      // Keep only one persisted shape for payment/checkout pages.
       try {
-        const persisted = serverBooking ? { ...bookingPreview, ...serverBooking } : bookingPreview;
-        sessionStorage.setItem("epoch:pendingBooking", JSON.stringify(persisted));
-        if (bookingId) {
-          navigate(`/payment/${bookingId}`, { state: { booking: persisted } });
-          return;
-        }
+        sessionStorage.setItem("epoch:pendingBooking", JSON.stringify(lockedBooking));
       } catch {}
 
-      // fallback: navigate to payment without id but with persisted preview in sessionStorage
-      navigate("/payment", { state: { booking: serverBooking ? { ...bookingPreview, ...serverBooking } : bookingPreview } });
+      navigate(`/payment/${lockedBooking.id}`, { state: { booking: lockedBooking } });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn("Booking failed", err);

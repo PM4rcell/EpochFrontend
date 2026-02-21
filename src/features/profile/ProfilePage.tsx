@@ -78,7 +78,7 @@ export function ProfilePage({
             {activeTab === "overview" && <OverviewContent theme={theme} onNavigate={onNavigate} />}
             {activeTab === "tickets" && (
               <section className="py-8">
-                <h2 className="text-slate-300 mb-4">Tickets</h2>
+
                 {(!tickets || tickets.length === 0) ? (
                   <div className="py-20 text-center">
                     <p className="text-slate-500">You have no tickets yet.</p>

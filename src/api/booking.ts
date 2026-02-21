@@ -1,5 +1,5 @@
 import { apiFetch } from "./fetch";
-import type { CreateBookingBody } from "../types";
+import type { CreateBookingBody, LockBookingResponse } from "../types";
 
 /**
  * lockBooking
@@ -7,12 +7,12 @@ import type { CreateBookingBody } from "../types";
  * - Uses the centralized `apiFetch` so auth headers/timeouts are applied.
  * - Returns the parsed response from the server (expected to include booking id).
  */
-export async function lockBooking(body: CreateBookingBody) {
+export async function lockBooking(body: CreateBookingBody): Promise<LockBookingResponse> {
   // Basic debug output to help trace booking attempts in dev console.
   // eslint-disable-next-line no-console
   console.debug("lockBooking ->", body);
 
-  return apiFetch<any>("/api/bookings/lock", {
+  return apiFetch<LockBookingResponse>("/api/bookings/lock", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

@@ -69,6 +69,36 @@ export interface CreateBookingBody {
   };
 }
 
+export interface LockBookingScreening {
+  movie_title: string;
+  movie_poster: string;
+  date: string;
+  time: string;
+  auditorium: string;
+  screeningType: string;
+}
+
+export interface LockBookingTicket {
+  ticket_type: string;
+  price: number;
+  row: string;
+  seat_number: number;
+}
+
+export interface LockBookingBooking {
+  id: number;
+  barcode: string;
+  status: string;
+  total: number;
+  created_at: string;
+  screening: LockBookingScreening;
+  tickets: LockBookingTicket[];
+}
+
+export interface LockBookingResponse {
+  booking: LockBookingBooking;
+}
+
 // Comment Types
 
 export interface CommentPayload {

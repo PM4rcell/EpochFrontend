@@ -17,10 +17,10 @@ interface OrderSummaryProps {
   time: string;
   format: string;
   screeningType?: string;
+  ticketType?: string;
   venue?: string;
   seats: SeatInfo[];
-  fees?: number;
-  taxes?: number;
+  total?: number;
   onBack?: () => void;
   onPay: () => void;
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -34,8 +34,10 @@ export function OrderSummary({
   time,
   format,
   screeningType,
+  ticketType,
   venue,
   seats,
+  total,
   onBack,
   onPay,
   theme = "default",
@@ -75,49 +77,9 @@ export function OrderSummary({
   };
 
   const colors = getThemeColors();
-  
-  const getScreeningLabelFromSession = (): string | undefined => {
-    try {
-      const raw =
-        sessionStorage.getItem("epoch:pendingBooking") ?? sessionStorage.getItem("screening") ?? sessionStorage.getItem("pendingBooking");
-      if (!raw) return undefined;
-      const parsed = JSON.parse(raw);
-      // payload may be the full booking (with `screening` property) or the screening object itself
-      const screeningObj = parsed?.screening ?? parsed;
-      const name =
-        screeningObj?.screening_type?.name ?? screeningObj?.screeningType?.name ?? parsed?.screening_type?.name;
-      if (typeof name === "string" && name.length > 0) return name;
-      return undefined;
-    } catch {
-      return undefined;
-    }
-  };
-
-  const screeningLabel = getScreeningLabelFromSession() ?? (screeningType ?? format);
-
+  const screeningLabel = screeningType ?? format;
   const subtotal = seats.reduce((sum, seat) => sum + seat.price, 0);
-  const sessionScreeningName = getScreeningLabelFromSession();
-
-  const getPriceMultiplierFromSession = (): number => {
-    try {
-      const raw =
-        sessionStorage.getItem("epoch:pendingBooking") ??
-        sessionStorage.getItem("screening") ??
-        sessionStorage.getItem("pendingBooking");
-      if (!raw) return 1;
-      const parsed = JSON.parse(raw);
-      const screeningObj = parsed?.screening ?? parsed;
-      const rawMultiplier =
-        screeningObj?.screening_type?.priceMultiplier ?? screeningObj?.screening_type?.price_multiplier ?? parsed?.screening_type?.priceMultiplier;
-      const n = Number(rawMultiplier);
-      return isFinite(n) && n > 0 ? n : 1;
-    } catch {
-      return 1;
-    }
-  };
-
-  const multiplier = getPriceMultiplierFromSession();
-  const total = subtotal * multiplier;
+  const finalTotal = typeof total === "number" ? total : subtotal;
 
   return (
     <motion.div
@@ -162,14 +124,14 @@ export function OrderSummary({
 
       {/* Seats */}
       <div className="space-y-2 border-t border-slate-700/50 pt-4">
-        <p className="text-slate-400 text-sm mb-3">Selected Seats</p>
+        <p className="text-slate-400 text-sm mb-3">Selected Seats ({ticketType ?? "Standard"} ticket)</p>
         {seats.map((seat) => (
           <div
             key={seat.id ?? `${seat.row}-${seat.number}`}
             className="flex items-center justify-between text-sm"
           >
             <span className="text-slate-400">
-              Row {seat.row}, Seat {seat.number}
+              Row {seat.row}, Seat {seat.number} 
             </span>
             <span className="text-slate-300">${seat.price.toFixed(2)}</span>
           </div>
@@ -182,19 +144,13 @@ export function OrderSummary({
           <span className="text-slate-400">Seats total</span>
           <span className="text-slate-300">${subtotal.toFixed(2)}</span>
         </div>
-          {sessionScreeningName && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">{sessionScreeningName} Format</span>
-              <span className="text-slate-300">X {multiplier.toFixed(2)}</span>
-            </div>
-          )}
       </div>
 
       {/* Total */}
       <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
         <span className="text-white">Total</span>
         <span className={`text-2xl ${colors.accent}`}>
-          ${total.toFixed(2)}
+          ${finalTotal.toFixed(2)}
         </span>
       </div>
 
