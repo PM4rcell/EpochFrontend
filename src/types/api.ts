@@ -13,6 +13,10 @@ export interface Movie {
   release_date: string; // ISO date string (YYYY-MM-DD)
   runtime_min: number;
   is_featured: boolean;
+  poster?: {
+    text?: string;
+    url?: string;
+  } | null;
   slug: string;
   trailer_link: string;
   created_at?: string;

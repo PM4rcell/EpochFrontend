@@ -12,6 +12,7 @@ import { TicketCard } from "./TicketCard";
 import { WatchlistItem } from "./WatchlistItem";
 import useTickets from "../../hooks/useTickets";
 import useWatchlist from "../../hooks/useWatchlist";
+import fallbackImg from "../../assets/img/fallback-image.png";
 
 interface ProfilePageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -141,16 +142,16 @@ export function ProfilePage({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {watchlistItems.map((item) => (
                       <WatchlistItem
-                        key={`${item.id}-${item.movieId}`}
-                        movieId={item.movieId}
-                        title={`Movie #${item.movieId}`}
-                        rating={0}
-                        length="Unknown runtime"
-                        releaseYear={0}
-                        posterUrl="https://images.unsplash.com/photo-1639306406821-c45e6cd384e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=600"
+                        key={`${item.id}-${item.movie_id}`}
+                        movieId={item.movie_id}
+                        title={`${item.movie?.title ?? "Unknown Title"}`}
+                        rating={item.movie?.vote_avg ?? 0}
+                        length={`${item.movie?.runtime_min ?? "Unknown runtime"} min`}
+                        releaseYear={Number(item.movie?.release_date?.split("-")[0] ?? 0)}
+                        posterUrl={item.movie?.poster?.url ?? fallbackImg}
                         theme={theme}
                         // Navigate directly to movie details from watchlist card.
-                        onBookNow={() => navigate(`/movies/${item.movieId}`)}
+                        onBookNow={() => navigate(`/movies/${item.movie_id}`)}
                       />
                     ))}
                   </div>

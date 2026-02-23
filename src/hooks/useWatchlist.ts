@@ -1,39 +1,40 @@
 import { useCallback, useEffect, useState } from "react";
+import type { Movie } from "../types";
 
 export type WatchlistEntry = {
   id: number;
-  movieId: number;
+  user_id: number;
+  movie_id: number;
+  movie: Movie;
 };
 
 type StoredWatchlistObject = {
-  id?: number;
-  movie_id?: number;
-  movieId?: number;
+  id: number;
+  user_id: number;
+  movie_id: number;
+  movie: Movie;
 };
 
-// Reads persisted watchlist and normalizes entries to { id, movieId }.
+// Reads persisted watchlist and normalizes entries to { id, movieId, movie }.
 const parseWatchlist = (): WatchlistEntry[] => {
   try {
     if (typeof window === "undefined") return [];
     const raw = localStorage.getItem("epoch_user");
     if (!raw) return [];
 
-    const stored = JSON.parse(raw) as { data?: { watchlist?: unknown } };
+    const stored = JSON.parse(raw) as { data?: { watchlist?: StoredWatchlistObject[] } };
     const list = stored?.data?.watchlist;
     if (!Array.isArray(list)) return [];
 
     return list
-      .map((item: unknown, index: number) => {
-        if (typeof item === "number") {
-          return { id: index, movieId: item };
-        }
-
+      .map((item: StoredWatchlistObject, index: number) => {
         if (typeof item === "object" && item !== null) {
           const asRecord = item as StoredWatchlistObject;
-          const movieId = Number(asRecord.movie_id ?? asRecord.movieId ?? asRecord.id ?? 0);
+          const movieId = Number(asRecord.movie_id ?? asRecord.id ?? 0);
           const id = Number(asRecord.id ?? index);
+          const userId = Number(asRecord.user_id ?? 0);
           if (!Number.isFinite(movieId) || movieId <= 0) return null;
-          return { id, movieId };
+          return { id, movie_id: movieId, user_id: userId, movie: asRecord.movie };
         }
 
         return null;
@@ -55,13 +56,6 @@ export default function useWatchlist() {
   useEffect(() => {
     refreshWatchlist();
 
-    // Sync across tabs/windows when epoch_user changes.
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === "epoch_user") refreshWatchlist();
-    };
-
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
   }, [refreshWatchlist]);
 
   return { watchlistItems, refreshWatchlist } as const;
