@@ -67,7 +67,7 @@ export function EraPage() {
     year: m.release_date ? new Date(m.release_date).getFullYear() : NaN,
     rating: typeof m.vote_avg === "number" ? m.vote_avg : 0,
     runtime: m.runtime_min ? `${m.runtime_min} min` : "",
-    poster: (m as any).poster || (m as any).poster_path || "",
+    poster: (m as any).poster?.url || (m as any).poster || (m as any).poster_path || "",
   }));
 
   // Prefer an explicitly featured movie on the current page; fall back to first item
@@ -172,7 +172,7 @@ export function EraPage() {
 
             <motion.div whileHover={{ scale: 1.02 }} className="relative rounded-lg overflow-hidden group cursor-pointer">
               <div className="relative h-96">
-                <ImageWithFallback src={(featured && ((featured as any).poster || (featured as any).poster_path)) || ""} alt={(featured && (featured.title || "")) || ""} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <ImageWithFallback src={(featured && ((featured as any).poster?.url || (featured as any).poster || (featured as any).poster_path)) || ""} alt={(featured && (featured.title || "")) || ""} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
               </div>
 

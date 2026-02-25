@@ -222,7 +222,6 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
           {/* Back button and quality badge */}
             <div className="flex items-start justify-between mb-8">
             <BackButton onBack={onBack} theme={theme} />
-            <MetaChip label={m?.age_rating || m?.quality || ""} variant="quality" theme={theme} />
           </div>
 
           {/* Title and Play Button */}
