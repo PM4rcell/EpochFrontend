@@ -17,7 +17,7 @@ function normalizeBookingsToTickets(bookings: any[] = []) {
     seatArray.forEach((s: any, idx: number) => {
       // Determine movie title/poster from available fields.
       const movieTitle = movie.title || movie.name || screening.movie_title || b.movie_title || "Unknown";
-      const posterUrl = movie.poster || movie.poster_url || screening.movie_poster || "";
+      const posterUrl = movie.poster?.url || movie.poster_url || screening.movie_poster || "";
       const date = screening.date || screening.start_date || b.date || "";
       const time = screening.time || screening.start_time || b.time || "";
       const format = screening.screeningType || "";

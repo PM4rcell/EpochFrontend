@@ -1,4 +1,4 @@
-import { useState, type SetStateAction } from "react";
+import { useEffect, useState, type SetStateAction } from "react";
 import useSettings from "../../hooks/useSettings";
 import { motion } from "motion/react";
 import { User, Mail, Image as ImageIcon, X } from "lucide-react";
@@ -17,30 +17,44 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
   const [isChangingEmail, setIsChangingEmail] = useState(false);
   const [isChangingPicture, setIsChangingPicture] = useState(false);
 
-  const { settings, setField, saveChanges, isDirty, saving, error } = useSettings();
+  const { settings, setField, setAvatarFromFile, resetAvatar, saveChanges, isDirty, saving, error } = useSettings();
 
   const storedUserRaw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
-  let storedPosterUrl: string | null = null;
+  let storedAvatarUrl: string | null = null;
   try {
     if (storedUserRaw) {
       const su = JSON.parse(storedUserRaw);
-      storedPosterUrl = su?.data?.poster?.url || su?.data?.poster_url || su?.poster?.url || su?.poster || null;
+      storedAvatarUrl =
+        su?.data?.poster?.url ||
+        su?.data?.avatar_url ||
+        su?.data?.avatar ||
+        su?.poster?.url ||
+        su?.avatar_url ||
+        su?.avatar ||
+        null;
     }
   } catch {
-    storedPosterUrl = null;
+    storedAvatarUrl = null;
   }
 
   const [username, setUsername] = useState(settings.username ?? "Alex Carter");
   const [email, setEmail] = useState(settings.email ?? "alex.carter@email.com");
   const [profilePicture, setProfilePicture] = useState<string>(
-    typeof settings.avatar === "string" ? settings.avatar : (storedPosterUrl ?? DEFAULT_PROFILE_PICTURE)
+    typeof settings.avatar === "string" ? settings.avatar : (storedAvatarUrl ?? DEFAULT_PROFILE_PICTURE)
   );
 
   const [newUsername, setNewUsername] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
-  const [newPictureUrl, setNewPictureUrl] = useState("");
+  const [newPictureFile, setNewPictureFile] = useState<File | null>(null);
+  const [newPictureFilePreview, setNewPictureFilePreview] = useState<string | null>(null);
   const isDefaultProfilePicture = profilePicture === DEFAULT_PROFILE_PICTURE;
+
+  useEffect(() => {
+    return () => {
+      if (newPictureFilePreview) URL.revokeObjectURL(newPictureFilePreview);
+    };
+  }, [newPictureFilePreview]);
 
   const getThemeColors = () => {
     switch (theme) {
@@ -115,18 +129,23 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
   };
 
   const handlePictureChange = () => {
-    if (newPictureUrl.trim()) {
-      setProfilePicture(newPictureUrl);
-      setField("avatar", newPictureUrl);
-      setNewPictureUrl("");
+    if (newPictureFile) {
+      setAvatarFromFile(newPictureFile);
+      if (newPictureFilePreview) setProfilePicture(newPictureFilePreview);
+      setNewPictureFile(null);
       setIsChangingPicture(false);
+      return;
     }
   };
 
   const handlePictureReset = () => {
     setProfilePicture(DEFAULT_PROFILE_PICTURE);
-    setField("avatar", DEFAULT_PROFILE_PICTURE);
-    setNewPictureUrl("");
+    resetAvatar(null);
+    setNewPictureFile(null);
+    if (newPictureFilePreview) {
+      URL.revokeObjectURL(newPictureFilePreview);
+      setNewPictureFilePreview(null);
+    }
     setIsChangingPicture(false);
   };
 
@@ -342,23 +361,27 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="new-picture" className="text-slate-300 mb-2 block">
-                    New picture URL
+                  <Label htmlFor="new-picture-file" className="text-slate-300 mb-2 block">
+                    Upload image file
                   </Label>
                   <Input
-                    id="new-picture"
-                    type="url"
-                    value={newPictureUrl}
-                    onChange={(e: { target: { value: SetStateAction<string>; }; }) => setNewPictureUrl(e.target.value)}
-                    placeholder="Enter image URL"
-                    className="bg-black/40 border-slate-700 text-white placeholder:text-slate-500 focus:border-slate-500"
+                    id="new-picture-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+                      setNewPictureFile(file);
+                      if (newPictureFilePreview) URL.revokeObjectURL(newPictureFilePreview);
+                      setNewPictureFilePreview(file ? URL.createObjectURL(file) : null);
+                    }}
+                    className="bg-black/40 border-slate-700 text-white file:bg-slate-800 file:text-slate-200 file:border-0 file:rounded-md file:px-3 file:py-1"
                   />
                 </div>
-                {newPictureUrl && (
+                {newPictureFilePreview && (
                   <div>
                     <p className="text-slate-400 text-sm mb-2">Preview</p>
                     <Avatar className="w-16 h-16">
-                      <AvatarImage src={newPictureUrl} alt="Preview" />
+                      <AvatarImage src={newPictureFilePreview} alt="Preview" />
                       <AvatarFallback className="bg-slate-800 text-slate-300">
                         {username.split(" ").map((n) => n[0]).join("")}
                       </AvatarFallback>
@@ -378,7 +401,11 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
                     <Button
                       onClick={() => {
                         setIsChangingPicture(false);
-                        setNewPictureUrl("");
+                        setNewPictureFile(null);
+                        if (newPictureFilePreview) {
+                          URL.revokeObjectURL(newPictureFilePreview);
+                          setNewPictureFilePreview(null);
+                        }
                       }}
                       variant="outline"
                       className="bg-black/40 border-slate-700 text-slate-300 hover:bg-slate-800/60 transition-all duration-250"
@@ -398,7 +425,10 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
           {error && <p className="text-red-400 mb-2">Failed to save changes.</p>}
           <Button
             onClick={async () => {
-              await saveChanges();
+              const result = await saveChanges();
+              if (result?.ok && typeof window !== "undefined") {
+                window.location.reload();
+              }
             }}
             disabled={!isDirty || saving}
             className={`${colors.accent} ${colors.buttonBg} ${colors.buttonHover} ${colors.buttonBorder} w-full px-5 py-3 rounded-lg font-semibold shadow-lg transition-transform duration-150 ${!isDirty ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}

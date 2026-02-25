@@ -22,7 +22,14 @@ export function readStoredUser(): Settings {
     return {
       username: me?.data?.username ?? me?.username ?? null,
       email: me?.data?.email ?? me?.email ?? null,
-      avatar: me?.data?.avatar_url ?? me?.data?.avatar ?? me?.avatar ?? null,
+      avatar:
+        me?.data?.poster?.url ??
+        me?.data?.avatar_url ??
+        me?.data?.avatar ??
+        me?.poster?.url ??
+        me?.avatar_url ??
+        me?.avatar ??
+        null,
     };
   } catch {
     return {};
@@ -50,6 +57,16 @@ export default function useSettings() {
     });
   }, []);
 
+  const setAvatarFromFile = useCallback((file: File | null | undefined) => {
+    if (!file) return false;
+    setField("avatar", file);
+    return true;
+  }, [setField]);
+
+  const resetAvatar = useCallback((_fallback: string | null = null) => {
+    setField("avatar", null);
+  }, [setField]);
+
   // saveChanges: send only dirty fields to the backend. Uses updateMe which
   // will send FormData when a File is included.
   const saveChanges = useCallback(async () => {
@@ -61,8 +78,8 @@ export default function useSettings() {
       if (dirty.has("username") && typeof settings.username !== "undefined") payload.username = settings.username ?? undefined;
       if (dirty.has("email") && typeof settings.email !== "undefined") payload.email = settings.email ?? undefined;
       if (dirty.has("avatar")) {
-        if (settings.avatar instanceof File) payload.poster = settings.avatar;
-        else if (typeof settings.avatar === "string") payload.external_url = settings.avatar;
+        if (settings.avatar instanceof File) payload.avatar = settings.avatar;
+        else if (settings.avatar === null) payload.avatar = null;
       }
 
       const res = await updateMe(payload);
@@ -75,9 +92,16 @@ export default function useSettings() {
         if (typeof payload.username !== "undefined") me.data.username = payload.username;
         if (typeof payload.email !== "undefined") me.data.email = payload.email;
         // If server returned avatar URL, prefer that
-        const avatarUrl = res?.data?.avatar_url ?? res?.avatar_url ?? res?.avatar;
+        const avatarUrl =
+          res?.data?.avatar_url ??
+          res?.avatar_url ??
+          res?.avatar ??
+          res?.data?.poster?.url ??
+          res?.poster?.url ??
+          null;
         if (avatarUrl) me.data.avatar_url = avatarUrl;
-        else if (typeof settings.avatar === "string") me.data.avatar_url = settings.avatar;
+        else if (dirty.has("avatar") && settings.avatar === null) me.data.avatar_url = null;
+        else if (dirty.has("avatar") && typeof settings.avatar === "string") me.data.avatar_url = settings.avatar;
         localStorage.setItem("epoch_user", JSON.stringify(me));
       } catch { /* Ignore localStorage errors */ }
 
@@ -110,5 +134,17 @@ export default function useSettings() {
     }
   }, []);
 
-  return { settings, setField, dirty, isDirty: dirty.size > 0, saveChanges, saving, error, save, refresh } as const;
+  return {
+    settings,
+    setField,
+    setAvatarFromFile,
+    resetAvatar,
+    dirty,
+    isDirty: dirty.size > 0,
+    saveChanges,
+    saving,
+    error,
+    save,
+    refresh,
+  } as const;
 }

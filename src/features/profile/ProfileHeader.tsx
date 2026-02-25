@@ -60,29 +60,27 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
 
   const navigate = useNavigate();
 
-  // Prefer explicit `avatar` prop, otherwise try to read a poster URL from persisted user
-  let storedPosterUrl: string | null = null;
+  // Prefer explicit `avatar` prop, otherwise try to read an avatar URL from persisted user
+  let storedAvatarUrl: string | null = null;
   try {
     if (typeof window !== "undefined") {
       const raw = localStorage.getItem("epoch_user");
       if (raw) {
         const su = JSON.parse(raw);
-        storedPosterUrl =
+        storedAvatarUrl =
+          su?.data?.poster?.url ||
           su?.data?.avatar_url ||
           su?.data?.avatar ||
+          su?.poster?.url ||
           su?.avatar_url ||
           su?.avatar ||
-          su?.data?.poster?.url ||
-          su?.data?.poster_url ||
-          su?.poster?.url ||
-          su?.poster ||
           null;
       }
     }
   } catch {
-    storedPosterUrl = null;
+    storedAvatarUrl = null;
   }
-  const avatarSrc = [avatar, storedPosterUrl].find(
+  const avatarSrc = [avatar, storedAvatarUrl].find(
     (value): value is string => typeof value === "string" && value.trim().length > 0
   ) ?? DEFAULT_PROFILE_PICTURE;
 

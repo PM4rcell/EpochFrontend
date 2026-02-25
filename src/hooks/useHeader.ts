@@ -18,7 +18,7 @@ export default function useHeader(initial?: HeaderState) {
       const me = JSON.parse(raw);
       const title = me?.data?.username || "Profile";
       const subtitle = me?.data?.email || undefined;
-      const avatar = me?.data?.avatar_url || null;
+      const avatar = me?.data?.poster?.url || me?.data?.avatar_url || me?.data?.avatar || null;
       const userId = me?.data?.id ?? null;
       return { title, subtitle, avatar, userId };
     } catch {
