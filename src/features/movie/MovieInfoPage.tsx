@@ -319,6 +319,9 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                       }
 
                       setWatchlistAdded(true);
+                      if (typeof window !== "undefined") {
+                        window.location.reload();
+                      }
                     } catch (err) {
                       // eslint-disable-next-line no-console
                       console.error("Failed to update watchlist", err);

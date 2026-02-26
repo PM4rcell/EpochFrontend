@@ -78,6 +78,7 @@ export interface LockBookingScreening {
   movie_poster: string;
   date: string;
   time: string;
+  movie?: Movie;
   auditorium: string;
   screeningType: string;
 }

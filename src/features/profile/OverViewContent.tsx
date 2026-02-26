@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { StatCard } from "./StatCard";
 import { NextShowCard } from "./NextShowCard";
-import { RecentActivityCard } from "./RecentActivityCard";
 import { useTickets } from "../../hooks/useTickets";
 import useUpcomingShow from "../../hooks/useUpcomingShow";
 import useWatchlist from "../../hooks/useWatchlist";
@@ -61,27 +60,6 @@ export function OverviewContent({
     },
   ];
 
-  const recentActivities = [
-    {
-      type: "booking" as const,
-      title: "Booked 2 tickets",
-      movie: "Dune: Part Two",
-      date: "2 days ago",
-    },
-    {
-      type: "watchlist" as const,
-      title: "Added to watchlist",
-      movie: "The Grand Budapest Hotel",
-      date: "3 days ago",
-    },
-    {
-      type: "review" as const,
-      title: "Rated 5 stars",
-      movie: "Inception",
-      date: "1 week ago",
-    },
-  ];
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -127,29 +105,6 @@ export function OverviewContent({
         ) : (
           <p className="text-slate-400">You have no upcoming bookings</p>
         )}
-      </section>
-
-      {/* Recent Activity */}
-      <section>
-        <h2 className="text-slate-300 mb-4">Recent Activity</h2>
-        <div className="space-y-3">
-          {recentActivities.map((activity, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{
-                duration: 0.3,
-                delay: 0.4 + index * 0.1,
-              }}
-            >
-              <RecentActivityCard
-                activity={activity}
-                theme={theme}
-              />
-            </motion.div>
-          ))}
-        </div>
       </section>
     </motion.div>
   );
