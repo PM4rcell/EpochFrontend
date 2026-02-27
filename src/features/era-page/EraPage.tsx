@@ -72,6 +72,7 @@ export function EraPage() {
 
   // Prefer an explicitly featured movie on the current page; fall back to first item
   const featured = (pageItems || []).find((m: any) => m.is_featured === 1 || m.is_featured === true) || (pageItems && pageItems.length > 0 ? pageItems[0] : null);
+  const featuredMovieId = featured?.id;
 
   const meta = eraMeta[currentEra] ?? eraMeta.modern;
 
@@ -170,7 +171,15 @@ export function EraPage() {
               <h2 className="text-white">Highlight of the Week</h2>
             </div>
 
-            <motion.div whileHover={{ scale: 1.02 }} className="relative rounded-lg overflow-hidden group cursor-pointer">
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              onClick={() => {
+                if (featuredMovieId !== undefined && featuredMovieId !== null) {
+                  navigateToMovie(featuredMovieId);
+                }
+              }}
+              className={`relative rounded-lg overflow-hidden group ${featuredMovieId !== undefined && featuredMovieId !== null ? "cursor-pointer" : "cursor-default"}`}
+            >
               <div className="relative h-96">
                 <ImageWithFallback src={(featured && ((featured as any).poster?.url || (featured as any).poster || (featured as any).poster_path)) || ""} alt={(featured && (featured.title || "")) || ""} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />

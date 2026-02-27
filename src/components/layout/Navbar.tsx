@@ -144,28 +144,41 @@ export function Navbar({
       transition={{ duration: 0.3 }}
       className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10"
     >
-      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-        {/* LOGO */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            // Navigate first, then clear era in context. Clearing after
-            // navigation avoids races where other page effects re-set the era.
-            navigate("/", { replace: true });
-            setEra(null);
-          }}
-          className="flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400/50 rounded"
-        >
-          <span className="tracking-[0.2em] bg-linear-to-r from-amber-600 via-amber-400 to-slate-400 bg-clip-text text-transparent">
-            EPOCH
-          </span>
-        </motion.button>
+      <div className="container mx-auto px-6 py-4 flex items-center justify-between relative">
+        <div className="flex items-center gap-3 z-10">
+          {/* LOGO */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              // Navigate first, then clear era in context. Clearing after
+              // navigation avoids races where other page effects re-set the era.
+              navigate("/", { replace: true });
+              setEra(null);
+            }}
+            className="flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400/50 rounded"
+          >
+            <span className="tracking-[0.2em] bg-linear-to-r from-amber-600 via-amber-400 to-slate-400 bg-clip-text text-transparent">
+              EPOCH
+            </span>
+          </motion.button>
 
-        {/* Debug: show current era from context for testing (moved to right side) */}
+          {/* Mobile: hamburger menu */}
+          <div className="md:hidden flex items-center">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label="Toggle menu"
+              className={`p-2 rounded ${colors.hover} ${colors.glow} text-slate-300`}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </motion.button>
+          </div>
+        </div>
 
         {/* NAV ITEMS (desktop) */}
-        <motion.div className="hidden md:flex flex-1 justify-center items-center gap-8">
+        <motion.div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
           {visibleNavItems.map(item => {
             // Determine active state from URL so the nav reflects the
             // current route (works whether an era is selected or not).
@@ -207,21 +220,8 @@ export function Navbar({
           })}
         </motion.div>
 
-        {/* Mobile: hamburger menu */}
-        <div className="md:hidden flex items-center">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Toggle menu"
-            className={`p-2 rounded ${colors.hover} ${colors.glow} text-slate-300`}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </motion.button>
-        </div>
-
         {/* Search + Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ml-auto z-10">
           {/* Debug: show current era from context for testing */}
           <div className="flex items-center text-sm text-slate-300 mr-4">
             <span className="opacity-60 mr-2">Era:</span>
