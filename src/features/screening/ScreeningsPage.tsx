@@ -231,7 +231,7 @@ export function ScreeningsPage({
                       runtime={`${m.runtime_min} min`}
                       genre={""}
                       rating={m.vote_avg || 0}
-                      poster={m.poster || ""}
+                      poster={m.poster?.url || ""}
                       formats={formats}
                       theme={theme}
                       delay={idx * 0.08}

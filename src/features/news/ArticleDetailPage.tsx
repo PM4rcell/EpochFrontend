@@ -211,7 +211,7 @@ export function ArticleDetailPage({
             className="relative aspect-2/1 rounded-2xl overflow-hidden mb-8 border border-slate-800/50 shadow-[0_0_30px_rgba(245,158,11,0.1)]"
           >
             <ImageWithFallback
-              src={article.image || undefined}
+              src={article.poster?.url || undefined}
               alt={article.title}
               className="w-full h-full object-cover"
             />

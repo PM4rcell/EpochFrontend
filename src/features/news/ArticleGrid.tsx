@@ -11,7 +11,9 @@ interface Article {
   id: string;
   title: string;
   excerpt: string;
-  image: string;
+  poster?: {
+      url: string;
+    };
   tag: string;
   date: string;
   readTime: string;

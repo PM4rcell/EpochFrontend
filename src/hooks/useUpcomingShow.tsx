@@ -60,7 +60,7 @@ function mapToUpcomingShow(booking: StoredBooking): UpcomingShow {
 
 	return {
 		title: booking?.screening?.movie_title ?? FALLBACK_SHOW.title,
-		poster: booking?.screening?.movie?.poster?.url ?? FALLBACK_SHOW.poster,
+		poster: booking?.screening?.movie_poster ?? FALLBACK_SHOW.poster,
 		date: booking?.screening?.start_date ?? booking?.screening?.date ?? FALLBACK_SHOW.date,
 		time: booking?.screening?.time ?? FALLBACK_SHOW.time,
 		theater: booking?.screening?.auditorium ?? FALLBACK_SHOW.theater,

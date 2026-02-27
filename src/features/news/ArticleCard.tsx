@@ -9,7 +9,9 @@ interface ArticleCardProps {
     id: string;
     title: string;
     excerpt: string;
-    image: string;
+    poster?: {
+      url: string;
+    };
     tag: string;
     date: string;
     readTime: string;
@@ -66,7 +68,7 @@ export function ArticleCard({ article, onClick }: ArticleCardProps) {
       {/* Image */}
       <div className="relative aspect-4/3 overflow-hidden">
         <ImageWithFallback
-          src={article.image}
+          src={article.poster?.url}
           alt={article.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />

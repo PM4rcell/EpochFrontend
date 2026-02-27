@@ -6,7 +6,9 @@ export interface ArticleDetail {
   id: string;
   title: string;
   excerpt: string;
-  image: string | null;
+  poster?: {
+    url: string;
+  };
   tag: string;
   date: string;
   readTime: string;
@@ -21,14 +23,14 @@ function mapNewsItemToDetail(item: NewsItem | null): ArticleDetail | null {
   const id = String(item.id ?? "");
   const title = item.title ?? "Untitled";
   const excerpt = String(item.excerp ?? item.body ?? "");
-  const image = String(item.poster ?? item.image ?? item.cover ?? item.thumbnail ?? item.external_link ?? PLACEHOLDER_IMAGE);
+  const poster = { url: String(item.poster?.url ?? item.image ?? item.cover ?? item.thumbnail ?? item.external_link ?? PLACEHOLDER_IMAGE) };
   const tag = String(item.category ?? item.tag ?? "News");
   const date = String(item.date ?? item.published_at ?? item.created_at ?? "");
   const readTime = item.read_time_min ? `${item.read_time_min} min` : item.read_time ? `${item.read_time} min` : "3 min";
   const author = String((item.author && (item.author as any).name) ?? item.author ?? "" );
   const body = String(item.body ?? "");
 
-  return { id, title, excerpt, image, tag, date, readTime, author, body };
+  return { id, title, excerpt, poster, tag, date, readTime, author, body };
 }
 
 export function useArticle(articleId?: string | null) {

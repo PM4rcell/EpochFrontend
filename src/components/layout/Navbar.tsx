@@ -164,7 +164,7 @@ export function Navbar({
           </motion.button>
 
           {/* Mobile: hamburger menu */}
-          <div className="md:hidden flex items-center">
+          <div className="lg:hidden flex items-center">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -178,7 +178,7 @@ export function Navbar({
         </div>
 
         {/* NAV ITEMS (desktop) */}
-        <motion.div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
+        <motion.div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
           {visibleNavItems.map(item => {
             // Determine active state from URL so the nav reflects the
             // current route (works whether an era is selected or not).
@@ -223,7 +223,7 @@ export function Navbar({
         {/* Search + Profile */}
         <div className="flex items-center gap-3 ml-auto z-10">
           {/* Debug: show current era from context for testing */}
-          <div className="flex items-center text-sm text-slate-300 mr-4">
+          <div className="hidden xl:flex items-center text-sm text-slate-300 mr-4">
             <span className="opacity-60 mr-2">Era:</span>
             <span className="font-medium">{era ?? "none"}</span>
           </div>
@@ -346,7 +346,7 @@ export function Navbar({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.18 }}
-          className="md:hidden fixed top-16 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-white/10"
+          className="lg:hidden fixed top-16 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-white/10"
         >
           <div className="px-6 py-4">
             <div className="flex flex-col gap-3">

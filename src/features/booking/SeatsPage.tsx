@@ -200,7 +200,7 @@ export function SeatsPage({
       <div className="relative h-40 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/80 to-black z-10" />
         <img
-          src={backdrop || ""}
+          src={backdrop?.url || ""}
           alt={title}
           className="w-full h-full object-cover"
         />
@@ -238,7 +238,7 @@ export function SeatsPage({
               </div>
             ) : (
               <PosterSummary
-                posterUrl={poster ?? ""}
+                posterUrl={poster?.url ?? ""}
                 movieTitle={title}
                 selectedSeats={selectedSeats}
                 onRemoveSeat={handleRemoveSeat}

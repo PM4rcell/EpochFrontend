@@ -7,7 +7,9 @@ export interface Article {
   id: string;
   title: string;
   excerpt: string;
-  image: string;
+  poster?: {
+    url: string;
+  };
   tag: string;
   date: string;
   readTime: string;
@@ -23,7 +25,7 @@ function mapNewsItemToArticle(item: NewsItem): Article {
   const id = String(item.id ?? item.external_id ?? item.title ?? Math.random());
   const title = item.title || "Untitled";
   const excerpt = String(item.excerp ?? item.body ?? item.summary ?? "");
-  const image = String(item.image ?? item.cover ?? item.thumbnail ?? item.external_link ?? PLACEHOLDER_IMAGE);
+  const poster = { url: String(item.poster?.url ?? item.cover ?? item.thumbnail ?? item.external_link ?? PLACEHOLDER_IMAGE) };
   const rawTag = String(item.tag ?? item.category ?? "");
   const tag = rawTag || "News";
   const date = String(item.date ?? item.published_at ?? item.created_at ?? "");
@@ -42,7 +44,7 @@ function mapNewsItemToArticle(item: NewsItem): Article {
 
   const category = normalizeCategory(rawTag);
 
-  return { id, title, excerpt, image, tag, date, readTime, category };
+  return { id, title, excerpt, poster, tag, date, readTime, category };
 }
 
 /**
