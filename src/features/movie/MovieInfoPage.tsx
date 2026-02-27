@@ -435,6 +435,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                     date={review.created_at || review.date || ""}
                     text={review.text || review.body || ""}
                     theme={theme}
+                    avatar={review.user?.poster?.url || undefined}
                   />
                 ))}
               </div>
