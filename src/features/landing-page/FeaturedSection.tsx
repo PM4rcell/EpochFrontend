@@ -11,7 +11,9 @@ interface FeaturedCard {
   type: "news" | "prize" | "event";
   title: string;
   description: string;
-  image: string;
+  poster?: {
+    url: string;
+  };
   icon: typeof Newspaper;
 }
 
@@ -31,7 +33,7 @@ export function FeaturedSection() {
   }, [allArticles]);
 
   const cardsToShow: FeaturedCard[] = randomArticles.length > 0
-    ? randomArticles.map((a) => ({ id: a.id, type: "news", title: a.title, description: a.excerpt, image: a.image, icon: Newspaper }))
+    ? randomArticles.map((a) => ({ id: a.id, type: "news", title: a.title, description: a.excerpt, poster: a.poster, icon: Newspaper }))
     : [];
 
   return (
@@ -104,7 +106,7 @@ export function FeaturedSection() {
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
                   <ImageWithFallback
-                    src={card.image}
+                    src={card.poster?.url || undefined}
                     alt={card.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
