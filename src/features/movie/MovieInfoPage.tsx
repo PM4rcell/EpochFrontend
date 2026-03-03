@@ -26,6 +26,7 @@ import { useEra } from "../../context/EraContext";
 
 
 
+
 export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onNavigate?: (route: string) => void }) {
   const { movieId } = useParams<{ movieId?: string }>();
   const navigate = useNavigate();
@@ -58,15 +59,36 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
       }
     };
 
+    const getLocalAvatarUrl = () => {
+      try {
+        if (typeof window === "undefined") return undefined;
+        const raw = localStorage.getItem("epoch_user");
+        if (!raw) return undefined;
+        const me = JSON.parse(raw);
+        return (
+          me?.data?.poster?.url ??
+          me?.data?.avatar_url ??
+          me?.data?.avatar ??
+          me?.poster?.url ??
+          me?.avatar_url ??
+          me?.avatar ??
+          undefined
+        );
+      } catch {
+        return undefined;
+      }
+    };
+
     const newReview = {
       username: getLocalUsername(),
       rating,
       date: "Just now",
       text,
+      avatar: getLocalAvatarUrl(),
     };
 
     // Optimistic update
-    setReviews([newReview, ...reviews]);
+    setReviews((prev) => [newReview, ...prev]);
 
     try {
       const id = m?.id ?? movieId ?? null;
@@ -435,7 +457,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                     date={review.created_at || review.date || ""}
                     text={review.text || review.body || ""}
                     theme={theme}
-                    avatar={review.user?.poster?.url || undefined}
+                    avatar={review.user?.poster?.url || review.user?.avatar_url || review.user?.avatar || review.avatar || undefined}
                   />
                 ))}
               </div>

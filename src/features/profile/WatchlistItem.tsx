@@ -1,8 +1,10 @@
 import { motion } from "motion/react";
 import { Star, Clock, Calendar, X } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import { useRemoveWatchlistItem } from "../../hooks/useRemoveWatchlistItem";
 
 interface WatchlistItemProps {
+  watchlistItemId: number;
   movieId: number;
   title: string;
   rating: number;
@@ -15,6 +17,7 @@ interface WatchlistItemProps {
 }
 
 export function WatchlistItem({
+  watchlistItemId,
   movieId,
   title,
   rating,
@@ -22,7 +25,6 @@ export function WatchlistItem({
   releaseYear,
   posterUrl,
   theme = "default",
-  onRemove,
   onBookNow,
 }: WatchlistItemProps) {
   const getThemeColors = () => {
@@ -67,6 +69,7 @@ export function WatchlistItem({
   };
 
   const colors = getThemeColors();
+  const removeItem = useRemoveWatchlistItem();
 
   return (
     <motion.div
@@ -78,12 +81,15 @@ export function WatchlistItem({
     >
       {/* Remove button */}
       <motion.div
-        initial={{ opacity: 0 }}
+        initial={{ opacity: 1 }}
         whileHover={{ opacity: 1 }}
         className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-250"
       >
         <Button
-          onClick={onRemove}
+          onClick={async () => {
+            await removeItem(watchlistItemId);
+            window.location.reload();
+          }}
           size="sm"
           variant="ghost"
           className="h-8 w-8 p-0 bg-black/80 hover:bg-red-500/20 border border-slate-700 hover:border-red-500/50 rounded-lg"

@@ -104,6 +104,32 @@ export interface LockBookingResponse {
   booking: LockBookingBooking;
 }
 
+// Ticket Types
+
+export interface Ticket {
+  id: string;
+  movieTitle: string;
+  posterUrl: string;
+  row: string;
+  seat: number;
+  date: string;
+  time: string;
+  format: string;
+  venue: string;
+  barcode: string;
+  ticketType: string | null;
+  bookingStatus: string | null;
+}
+
+// Watchlist Types
+
+export interface WatchlistEntry {
+  id: number;
+  user_id: number;
+  movie_id: number;
+  movie: Movie;
+}
+
 // Comment Types
 
 export interface CommentPayload {

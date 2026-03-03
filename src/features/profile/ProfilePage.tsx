@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { motion } from "motion/react";
 import { BackButton } from "../../components/ui/back-button";
 import { Navbar } from "../../components/layout/Navbar";
@@ -8,11 +8,10 @@ import useHeader from "../../hooks/useHeader";
 import { ProfileTabs } from "./ProfleTabs";
 import { OverviewContent } from "./OverViewContent";
 import { SettingsContent } from "./SettingsContent";
-import { TicketCard } from "./TicketCard";
-import { WatchlistItem } from "./WatchlistItem";
+import { TicketsContent } from "./TicketsContent";
+import { WatchlistContent } from "./WatchlistContent";
 import useTickets from "../../hooks/useTickets";
 import useWatchlist from "../../hooks/useWatchlist";
-import fallbackImg from "../../assets/img/fallback-image.png";
 
 interface ProfilePageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -29,7 +28,6 @@ export function ProfilePage({
   onNavigate,
 }: ProfilePageProps) {
   const location = useLocation();
-  const navigate = useNavigate();
   const initialTabFromState = (location.state as any)?.tab as ProfileTab | undefined;
   const searchParams = new URLSearchParams(location.search);
   const initialTabFromQuery = (searchParams.get("tab") as ProfileTab | null) || undefined;
@@ -100,64 +98,8 @@ export function ProfilePage({
           {/* Tab Content */}
           <div className="pb-16">
             {activeTab === "overview" && <OverviewContent theme={theme} onNavigate={handleOverviewNavigate} />}
-            {activeTab === "tickets" && (
-              <section className="py-8">
-
-                {(!tickets || tickets.length === 0) ? (
-                  <div className="py-20 text-center">
-                    <p className="text-slate-500">You have no tickets yet.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {tickets.map((t) => (
-                      <TicketCard
-                        key={t.id}
-                        movieTitle={t.movieTitle}
-                        posterUrl={t.posterUrl}
-                        row={t.row}
-                        seat={t.seat}
-                        date={t.date}
-                        time={t.time}
-                        format={t.format}
-                        venue={t.venue}
-                        barcode={t.barcode}
-                        ticketType={t.ticketType}
-                        bookingStatus={t.bookingStatus}
-                        theme={theme}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
-            {activeTab === "watchlist" && (
-              <section className="py-8">
-
-                {watchlistItems.length === 0 ? (
-                  <div className="py-20 text-center">
-                    <p className="text-slate-500">Your saved movies will appear here</p>
-                  </div>
-                ) : (
-                  // Temporary fallback cards until API returns expanded movie data.
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {watchlistItems.map((item) => (
-                      <WatchlistItem
-                        key={`${item.id}-${item.movie_id}`}
-                        movieId={item.movie_id}
-                        title={`${item.movie?.title ?? "Unknown Title"}`}
-                        rating={item.movie?.vote_avg ?? 0}
-                        length={`${item.movie?.runtime_min ?? "Unknown runtime"} min`}
-                        releaseYear={Number(item.movie?.release_date?.split("-")[0] ?? 0)}
-                        posterUrl={item.movie?.poster?.url ?? fallbackImg}
-                        theme={theme}
-                        // Navigate directly to movie details from watchlist card.
-                        onBookNow={() => navigate(`/movies/${item.movie_id}`)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
+            {activeTab === "tickets" && <TicketsContent tickets={tickets} theme={theme} />}
+            {activeTab === "watchlist" && <WatchlistContent watchlistItems={watchlistItems} theme={theme} />}
             {activeTab === "settings" && (
               <section className="py-8">
                 <SettingsContent theme={theme} />

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import type { ProfileTab } from "./ProfilePage";
 
@@ -9,17 +8,6 @@ interface ProfileTabsProps {
 }
 
 export function ProfileTabs({ theme = "default", activeTab, onTabChange }: ProfileTabsProps) {
-  const [isSticky, setIsSticky] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsSticky(window.scrollY > 200);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
@@ -75,14 +63,10 @@ export function ProfileTabs({ theme = "default", activeTab, onTabChange }: Profi
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3, delay: 0.2 }}
-      className={`${
-        isSticky
-          ? "fixed top-18.25 left-0 right-0 z-40 bg-black/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
-          : "relative"
-      } transition-all duration-250 border-b border-slate-800/50`}
+      className="sticky top-18.25 z-40 bg-black/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] transition-all duration-250 border-b border-slate-800/50"
     >
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
-        <div className="flex gap-1 sm:gap-2 overflow-x-auto no-scrollbar -mb-px py-1">
+        <div className="flex flex-wrap gap-1 sm:gap-2 -mb-px py-1">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
 
