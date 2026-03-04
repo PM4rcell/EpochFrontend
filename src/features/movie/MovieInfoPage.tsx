@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Play, X, Star, Bookmark } from "lucide-react";
+import { motion } from "motion/react";
+import { Star, Bookmark } from "lucide-react";
 import { updateMe } from "../../api/user";
 import { Navbar } from "../../components/layout/Navbar";
 import { BackButton } from "../../components/ui/back-button.tsx";
@@ -34,7 +34,6 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const { movie: movieData, loading, error } = useMovie<any>(movieId ?? null);
   const { setEra } = useEra();
 
-  const [showTrailer, setShowTrailer] = useState(false);
   const [isLoggedIn] = useState(true); // Simulate logged-in state
   const [reviews, setReviews] = useState<any[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -121,15 +120,6 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
   // Derive theme from the movie's era; this will re-run when `m` updates
   const theme = m ? resolveEraKey(m.era) : "modern";
-
-  const getThemeColors = () => {
-    return {
-      playButton: "bg-[var(--theme-button-bg)] hover:bg-[var(--theme-button-hover)] border-[color:var(--theme-border)]",
-      playGlow: "hover:shadow-[0_0_40px_var(--theme-glow)]",
-    };
-  };
-
-  const colors = getThemeColors();
 
   const uniqueGenres = Array.from(
     new Map(
@@ -252,30 +242,12 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-white mb-8"
+              className="text-white mb-8 text-4xl md:text-5xl lg:text-6xl font-bold"
             >
               {m?.title}
             </motion.h1>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.4 }}
-              className="mb-8"
-            >
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowTrailer(true)}
-                className={`
-                  w-20 h-20 rounded-full border-2 flex items-center justify-center
-                  ${colors.playButton} ${colors.playGlow}
-                  transition-all duration-200
-                `}
-              >
-                <Play className="w-8 h-8 text-black fill-black ml-1" />
-              </motion.button>
-            </motion.div>
+
 
             {/* Meta Information */}
             <motion.div
@@ -611,57 +583,6 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
       </div>
 
       <Footer theme={theme} />
-
-      {/* Trailer Modal */}
-      <AnimatePresence>
-        {showTrailer && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 backdrop-blur-lg"
-            onClick={() => setShowTrailer(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.65, 0, 0.35, 1] }}
-              className="relative w-full max-w-4xl mx-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close button */}
-              <button
-                onClick={() => setShowTrailer(false)}
-                className="absolute -top-12 right-0 text-white hover:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400/50 rounded p-2"
-              >
-                <X className="w-8 h-8" />
-              </button>
-
-              {/* Video placeholder */}
-              <div className="aspect-video bg-black rounded-lg overflow-hidden border border-slate-700/50">
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <Play className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                    <p className="text-slate-400">Trailer would play here</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-4 mt-6">
-                <Button className={`flex-1 ${colors.playButton}`}>
-                  Watch Trailer
-                </Button>
-                <Button variant="outline" className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-700/20">
-                  Add to Watchlist
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

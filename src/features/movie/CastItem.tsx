@@ -4,11 +4,13 @@ import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithF
 interface CastItemProps {
   name: string;
   character: string;
-  image: string;
+  poster: {
+    url: string;
+  };
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
-export function CastItem({ name, character, image, theme = "default" }: CastItemProps) {
+export function CastItem({ name, character, poster, theme = "default" }: CastItemProps) {
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
@@ -52,7 +54,7 @@ export function CastItem({ name, character, image, theme = "default" }: CastItem
         transition-all duration-200
       `}>
         <ImageWithFallback
-          src={image}
+          src={poster?.url}
           alt={name}
           className="w-full h-full object-cover"
         />
