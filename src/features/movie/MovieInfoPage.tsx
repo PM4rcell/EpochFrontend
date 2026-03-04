@@ -237,7 +237,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
           </div>
 
           {/* Title and Play Button */}
-          <div className="flex-1 flex flex-col justify-center max-w-4xl">
+          <div className="flex-1 flex flex-col justify-center">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -506,7 +506,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                 {(m?.gallery || []).map((image: any, index: number) => (
                   <GalleryThumb
                     key={index}
-                    image={image.url || image.path || image}
+                    image={{ url: image.url || image.path || image }}
                     alt={image.alt || image.title || m?.title}
                     theme={theme}
                   />

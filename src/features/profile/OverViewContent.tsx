@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import {
   Ticket,
-  Award,
+  Heart,
   Bookmark,
   Star,
 } from "lucide-react";
@@ -9,7 +9,7 @@ import { StatCard } from "./StatCard";
 import { NextShowCard } from "./NextShowCard";
 import { useTickets } from "../../hooks/useTickets";
 import useUpcomingShow from "../../hooks/useUpcomingShow";
-import useWatchlist from "../../hooks/useWatchlist";
+import useWatchlist, { type WatchlistEntry } from "../../hooks/useWatchlist";
 
 interface OverviewContentProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -33,6 +33,35 @@ export function OverviewContent({
     commentCount = 0;
   }
 
+  // Calculate favorite era from watchlist
+  const getFavoriteEra = (items: WatchlistEntry[]): string => {
+    if (items.length === 0) return "N/A";
+    
+    const eraCounts: Record<string, number> = {};
+    
+    items.forEach((item) => {
+      const eraId = item.movie?.era_id;
+      let eraName = "Modern";
+      
+      if (eraId === 1) eraName = "90s";
+      else if (eraId === 2) eraName = "2000s";
+      else if (eraId === 3) eraName = "Modern";
+      
+      eraCounts[eraName] = (eraCounts[eraName] || 0) + 1;
+    });
+    
+    const entries = Object.entries(eraCounts);
+    if (entries.length === 0) return "N/A";
+    
+    const favorite = entries.reduce((a, b) => 
+      a[1] > b[1] ? a : b
+    );
+    
+    return favorite[0];
+  };
+
+  const favoriteEra = getFavoriteEra(watchlistItems);
+
   const stats = [
     {
       icon: Ticket,
@@ -41,10 +70,10 @@ export function OverviewContent({
       description: "",
     },
     {
-      icon: Award,
-      label: "Badges Earned",
-      value: "7",
-      description: "2 until next tier",
+      icon: Heart,
+      label: "Favorite Era",
+      value: favoriteEra,
+      description: "",
     },
     {
       icon: Bookmark,

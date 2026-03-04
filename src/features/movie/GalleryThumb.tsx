@@ -2,7 +2,9 @@ import { motion } from "motion/react";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 
 interface GalleryThumbProps {
-  image: string;
+  image : {
+    url: string;
+  };  
   alt: string;
   onClick?: () => void;
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -53,7 +55,7 @@ export function GalleryThumb({ image, alt, onClick, theme = "default" }: Gallery
       `}
     >
       <ImageWithFallback
-        src={image}
+        src={image?.url}
         alt={alt}
         className="w-full h-full object-cover"
       />

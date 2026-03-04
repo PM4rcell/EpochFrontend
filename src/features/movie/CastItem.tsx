@@ -3,14 +3,14 @@ import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithF
 
 interface CastItemProps {
   name: string;
-  character: string;
+  role: string;
   poster: {
     url: string;
   };
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
-export function CastItem({ name, character, poster, theme = "default" }: CastItemProps) {
+export function CastItem({ name, role, poster, theme = "default" }: CastItemProps) {
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
@@ -61,8 +61,9 @@ export function CastItem({ name, character, poster, theme = "default" }: CastIte
       </div>
       <h4 className={`text-slate-200 text-sm mb-1 transition-colors duration-200 ${colors.text}`}>
         {name}
+        {role}
       </h4>
-      <p className="text-slate-500 text-xs">{character}</p>
+      <p className="text-slate-500 text-xs">{role}</p>
     </motion.div>
   );
 }
