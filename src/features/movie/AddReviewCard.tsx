@@ -8,6 +8,7 @@ interface AddReviewCardProps {
   onCancel?: () => void;
   theme?: "90s" | "2000s" | "modern" | "default";
   isSubmitting?: boolean;
+  showLoginPrompt?: boolean;
 }
 
 export function AddReviewCard({ 
@@ -15,6 +16,7 @@ export function AddReviewCard({
   onCancel, 
   theme = "default", 
   isSubmitting = false,
+  showLoginPrompt = false,
 }: AddReviewCardProps) {
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
@@ -127,7 +129,7 @@ export function AddReviewCard({
         <div className="flex gap-3">
           <Button
             type="submit"
-            disabled={!isLoggedIn || rating === 0 || !text.trim() || isSubmitting}
+            disabled={showLoginPrompt || rating === 0 || !text.trim() || isSubmitting}
             className={`
               ${colors.button} ${colors.buttonGlow}
               transition-all duration-200
@@ -146,7 +148,7 @@ export function AddReviewCard({
               Cancel
             </Button>
           )}
-          {!isLoggedIn && (
+          {showLoginPrompt && (
             <p className="text-red-500 text-sm mt-2">Please log in to leave a review</p>
           )}
         </div>

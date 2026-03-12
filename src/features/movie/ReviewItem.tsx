@@ -1,5 +1,7 @@
 import { motion } from "motion/react";
 import { StarRating } from "./StarRating.tsx";
+import { Trash } from "lucide-react";
+import { useDeleteComment } from "../../hooks/useDeleteComment";
 
 interface ReviewItemProps {
   username: string;
@@ -8,6 +10,9 @@ interface ReviewItemProps {
   date: string;
   text: string;
   theme?: "90s" | "2000s" | "modern" | "default";
+  userId?: string | number;
+  commentId?: string | number;
+  movie_id?: string | number;
 }
 
 export function ReviewItem({ 
@@ -16,8 +21,22 @@ export function ReviewItem({
   rating, 
   date, 
   text, 
-  theme = "default" 
+  theme = "default",
+  userId,
+  commentId,
+  movie_id,
+
 }: ReviewItemProps) {
+  // Minimal: get current user id from localStorage
+  let isOwn = false;
+  try {
+    const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+    if (raw) {
+      const me = JSON.parse(raw);
+      const myId = me?.data?.id ?? me?.id;
+      isOwn = myId && userId && String(myId) === String(userId);
+    }
+  } catch {}
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
@@ -44,6 +63,7 @@ export function ReviewItem({
   };
 
   const colors = getThemeColors();
+  const { remove, loading } = useDeleteComment();
 
   return (
     <motion.div
@@ -74,7 +94,7 @@ export function ReviewItem({
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 relative">
           {/* Username and Rating Row */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
             <div className="flex items-center gap-3">
@@ -86,7 +106,25 @@ export function ReviewItem({
                 theme={theme}
               />
             </div>
-            <span className="text-slate-500 text-sm">{date}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 text-sm">{date}</span>
+              {isOwn && commentId && (
+                <button
+                  title="Delete review"
+                  className="ml-2 cursor-pointer text-red-500 hover:text-red-700 flex items-center disabled:opacity-50"
+                  onClick={async () => {
+                    if (window.confirm("Are you sure you want to delete this review?")) {
+                      await remove(commentId, movie_id!);
+                      window.location.reload();
+                    }
+                  }}
+                  disabled={loading}
+                  type="button"
+                >
+                  <Trash className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Review Text */}

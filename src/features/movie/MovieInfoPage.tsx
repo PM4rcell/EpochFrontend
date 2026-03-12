@@ -15,7 +15,6 @@ import { ReviewItem } from "./ReviewItem.tsx";
 import { AddReviewCard } from "./AddReviewCard";
 import useComment from "../../hooks/useComment";
 import { CTAButton } from "./CTAButton";
-import { Button } from "../../components/ui/button";
 import { useMovie } from "../../hooks/useMovie";
 import { useParams, useNavigate } from "react-router-dom";
 import { Spinner } from "../../components/ui/spinner";
@@ -34,7 +33,10 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
   const { movie: movieData, loading, error } = useMovie<any>(movieId ?? null);
   const { setEra } = useEra();
 
-  const [isLoggedIn] = useState(true); // Simulate logged-in state
+  const [isLoggedIn] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("epoch_user");
+  });
   const [reviews, setReviews] = useState<any[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [watchlistLoading, setWatchlistLoading] = useState(false);
@@ -81,7 +83,6 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
     const newReview = {
       username: getLocalUsername(),
       rating,
-      date: "Just now",
       text,
       avatar: getLocalAvatarUrl(),
     };
@@ -324,7 +325,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                     }
                   }}
                   theme={theme}
-                  disabled={watchlistAdded || watchlistLoading}
+                  disabled={!isLoggedIn || watchlistAdded || watchlistLoading}
                   label={watchlistAdded ? "Added" : "Add to Watchlist"}
                   Icon={Bookmark}
                 />
@@ -411,19 +412,21 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
               </div>
 
               {/* Add Review Form (Logged in users) */}
-              {isLoggedIn && (
-                <AddReviewCard
-                  onSubmit={handleReviewSubmit}
-                  theme={theme}
-                  isSubmitting={commentLoading}
-                />
-              )}
+              <AddReviewCard
+                onSubmit={handleReviewSubmit}
+                theme={theme}
+                isSubmitting={commentLoading}
+                showLoginPrompt={!isLoggedIn}
+              />
 
               {/* Reviews List */}
               <div className="space-y-3">
                 {(showAllReviews ? reviews : reviews.slice(0, 4)).map((review, index) => (
                   <ReviewItem
                     key={index}
+                    movie_id={movieId}
+                    userId={review.user?.id}
+                    commentId={review.id}
                     username={review.user?.username || review.username || review.name || "Guest"}
                     rating={review.rating ?? review.score ?? 0}
                     date={review.created_at || review.date || ""}
@@ -458,40 +461,6 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                 </motion.button>
               )}
 
-              {/* Guest State - Login Prompt */}
-              {!isLoggedIn && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`
-                    bg-black/60 border rounded-xl p-6 text-center
-                    ${theme === "90s" 
-                      ? "border-amber-600/20" 
-                      : theme === "2000s"
-                      ? "border-blue-500/20"
-                      : theme === "modern"
-                      ? "border-slate-400/20"
-                      : "border-amber-600/20"
-                    }
-                  `}
-                >
-                  <p className="text-slate-400 mb-4">Want to share your thoughts?</p>
-                  <Button
-                    className={`
-                      ${theme === "90s" 
-                        ? "bg-amber-600 hover:bg-amber-500 text-black" 
-                        : theme === "2000s"
-                        ? "bg-blue-500 hover:bg-blue-400 text-white"
-                        : theme === "modern"
-                        ? "bg-slate-300 hover:bg-slate-200 text-black"
-                        : "bg-amber-600 hover:bg-amber-500 text-black"
-                      }
-                    `}
-                  >
-                    Log in to leave a review
-                  </Button>
-                </motion.div>
-              )}
             </motion.section>
 
             {/* Gallery */}

@@ -19,4 +19,12 @@ export async function postComment(movieId: number | string, body: CommentPayload
   return data;
 }
 
+export async function deleteComment(comment_id: number | string, movieId: number | string, signal?: AbortSignal): Promise<void> {
+  await apiFetch(`/api/movies/${movieId}/comments`, {
+    method: "DELETE",
+    signal,
+    body: JSON.stringify({ comment_id }),
+  });
+}
+
 export default postComment;
