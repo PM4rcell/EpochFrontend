@@ -12,8 +12,9 @@ import { SeatsPage } from "../features/booking/SeatsPage.tsx";
 import { LoginPage } from "../features/auth/LoginPage.tsx";
 import { RegisterPage } from "../features/auth/RegisterPage.tsx";
 import { PaymentPage } from "../features/booking/PaymentPage.tsx";
-import { TicketPage } from "../features/booking/TicketPage.tsx";
 import CheckoutGuard from "../features/booking/CheckoutGuard";
+import { ResetPasswordPage } from "../features/auth/ResetPasswordPage.tsx";
+import { ForgotPasswordPage } from "../features/auth/ForgotPasswordPage.tsx";
 
 export function AppRoutes() {
   const navigate = useNavigate();
@@ -53,9 +54,6 @@ export function AppRoutes() {
       <Route path="/booking" element={<SeatsPage/>}/>
       <Route path="/booking/:screeningId" element={<SeatsPage/>} />
 
-      {/*Payment page */}
-      <Route path="/payment" element={<PaymentPage />} />
-
       {/* Payment page with booking ID */}
       <Route path="/payment/:bookingId" element={<PaymentPage />} />
 
@@ -66,6 +64,12 @@ export function AppRoutes() {
 
       {/*Register Page */}
       <Route path="/register" element={<RegisterPage onNavigate={handleNavigate} />}/>
+
+      {/*Reset Password Page*/}
+      <Route path="/password-reset/:token" element={<ResetPasswordPage onNavigate={handleNavigate} />} />
+
+      {/*Forgot Password Page*/}
+      <Route path="/forgot-password" element={<ForgotPasswordPage onNavigate={handleNavigate} />} />
     </Routes>
   );
 }
