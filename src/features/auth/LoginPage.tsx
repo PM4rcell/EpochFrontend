@@ -169,7 +169,7 @@ export function LoginPage({ onNavigate }: LoginPageProps) {
               {/* Forgot password link */}
               <div className="flex justify-end mt-2">
                 <motion.button
-                  onClick={() => onNavigate("")}
+                  onClick={() => onNavigate("/forgot-password")}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={`${colors.link} font-medium transition-colors duration-200 focus:outline-none focus:underline text-sm`}
