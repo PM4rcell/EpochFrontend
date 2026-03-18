@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import { motion } from "motion/react";
 import { StarRating } from "./StarRating.tsx";
 import { Button } from "../../components/ui/button";
@@ -73,7 +74,7 @@ export function AddReviewCard({
 
   useEffect(() => {
     try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+      const raw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
       setIsLoggedIn(!!raw);
     } catch {
       setIsLoggedIn(false);
