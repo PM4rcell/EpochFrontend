@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import type { Movie } from "../types";
 
 export type WatchlistEntry = {
@@ -19,7 +20,7 @@ type StoredWatchlistObject = {
 const parseWatchlist = (): WatchlistEntry[] => {
   try {
     if (typeof window === "undefined") return [];
-    const raw = localStorage.getItem("epoch_user");
+    const raw = Cookies.get("epoch_user");
     if (!raw) return [];
 
     const stored = JSON.parse(raw) as { data?: { watchlist?: StoredWatchlistObject[] } };

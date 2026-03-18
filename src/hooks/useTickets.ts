@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 function normalizeBookingsToTickets(bookings: any[] = []) {
   const tickets: Array<any> = [];
@@ -47,7 +48,7 @@ export function useTickets() {
 
   const refresh = useCallback(() => {
     try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+      const raw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
       const storedUser = raw ? JSON.parse(raw) : null;
       const bookings = (storedUser && ((storedUser.data && storedUser.data.bookings) || storedUser.bookings)) || [];
       setTickets(normalizeBookingsToTickets(bookings));

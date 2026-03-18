@@ -7,6 +7,7 @@ import { useToken } from "../../context/TokenContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { DEFAULT_PROFILE_PICTURE } from "../../constants/profile";
+import Cookies from "js-cookie";
 
 type PageType = "home" | "screenings" | "movies" | "news" | "profile" | "era";
 
@@ -87,7 +88,7 @@ export function Navbar({
   let storedAvatar: string | null = null;
   try {
     if (typeof window !== "undefined") {
-      const raw = localStorage.getItem("epoch_user");
+      const raw = Cookies.get("epoch_user");
       if (raw) {
         const parsed = JSON.parse(raw);
         storedAvatar =

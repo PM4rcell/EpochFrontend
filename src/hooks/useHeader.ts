@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 type HeaderState = {
   title?: string;
@@ -13,7 +14,7 @@ export default function useHeader(initial?: HeaderState) {
   const readFromStorage = useCallback((): HeaderState => {
     try {
       if (typeof window === "undefined") return initial || {};
-      const raw = localStorage.getItem("epoch_user");
+      const raw = Cookies.get("epoch_user");
       if (!raw) return initial || {};
       const me = JSON.parse(raw);
       const title = me?.data?.username || "Profile";
@@ -40,7 +41,7 @@ export default function useHeader(initial?: HeaderState) {
   const clearHeader = useCallback(() => {
     setHeader({});
     try {
-      if (typeof window !== "undefined") localStorage.removeItem("epoch_user");
+      if (typeof window !== "undefined") Cookies.remove("epoch_user");
       if (typeof document !== "undefined") document.title = "Epoch";
     } catch {}
   }, []);

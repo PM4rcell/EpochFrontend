@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 import { updateMe } from "../api/user";
 
 type Settings = {
@@ -16,7 +17,7 @@ type EditableSettings = {
 export function readStoredUser(): Settings {
   try {
     if (typeof window === "undefined") return {};
-    const raw = localStorage.getItem("epoch_user");
+    const raw = Cookies.get("epoch_user");
     if (!raw) return {};
     const me = JSON.parse(raw);
     return {
@@ -84,9 +85,9 @@ export default function useSettings() {
 
       const res = await updateMe(payload);
 
-      // Persist to localStorage in the same shape readStoredUser expects.
+      // Persist to cookies in the same shape readStoredUser expects.
       try {
-        const raw = localStorage.getItem("epoch_user");
+        const raw = Cookies.get("epoch_user");
         const me = raw ? JSON.parse(raw) : {};
         me.data = me.data ?? {};
         if (typeof payload.username !== "undefined") me.data.username = payload.username;
@@ -102,8 +103,8 @@ export default function useSettings() {
         if (avatarUrl) me.data.avatar_url = avatarUrl;
         else if (dirty.has("avatar") && settings.avatar === null) me.data.avatar_url = null;
         else if (dirty.has("avatar") && typeof settings.avatar === "string") me.data.avatar_url = settings.avatar;
-        localStorage.setItem("epoch_user", JSON.stringify(me));
-      } catch { /* Ignore localStorage errors */ }
+        Cookies.set("epoch_user", JSON.stringify(me), { expires: 7 });
+      } catch { /* Ignore cookie errors */ }
 
       setDirty(new Set());
       setSaving(false);
@@ -119,14 +120,14 @@ export default function useSettings() {
 
   const save = useCallback((next: Settings) => {
     try {
-      const raw = localStorage.getItem("epoch_user");
+      const raw = Cookies.get("epoch_user");
       const me = raw ? JSON.parse(raw) : {};
       // Ensure `data` exists
       me.data = me.data ?? {};
       if (typeof next.username !== "undefined") me.data.username = next.username;
       if (typeof next.email !== "undefined") me.data.email = next.email;
       if (typeof next.avatar !== "undefined") me.data.avatar_url = next.avatar;
-      localStorage.setItem("epoch_user", JSON.stringify(me));
+      Cookies.set("epoch_user", JSON.stringify(me), { expires: 7 });
       setSettings(readStoredUser());
       return true;
     } catch {

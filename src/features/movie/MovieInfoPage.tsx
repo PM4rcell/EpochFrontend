@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
 import { motion } from "motion/react";
 import { Star, Bookmark } from "lucide-react";
 import { updateMe } from "../../api/user";
@@ -35,7 +36,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
   const [isLoggedIn] = useState(() => {
     if (typeof window === "undefined") return false;
-    return !!localStorage.getItem("epoch_user");
+    return !!Cookies.get("epoch_user");
   });
   const [reviews, setReviews] = useState<any[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -51,7 +52,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
     const getLocalUsername = () => {
       try {
         if (typeof window === "undefined") return "You";
-        const raw = localStorage.getItem("epoch_user");
+        const raw = Cookies.get("epoch_user");
         if (!raw) return "You";
         const me = JSON.parse(raw);
         return me?.data?.username ?? me?.username ?? "You";
@@ -63,7 +64,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
     const getLocalAvatarUrl = () => {
       try {
         if (typeof window === "undefined") return undefined;
-        const raw = localStorage.getItem("epoch_user");
+        const raw = Cookies.get("epoch_user");
         if (!raw) return undefined;
         const me = JSON.parse(raw);
         return (
@@ -170,7 +171,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
     try {
       if (typeof window === "undefined") return;
-      const raw = localStorage.getItem("epoch_user");
+      const raw = Cookies.get("epoch_user");
       if (!raw) {
         setWatchlistAdded(false);
         return;
@@ -293,9 +294,9 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                       // Send body: { watchlist: [movieId] } (array of numbers)
                       await updateMe({ watchlist: [m.id] });
 
-                      // Keep local storage in sync for Profile watchlist tab.
+                      // Keep cookie in sync for Profile watchlist tab.
                       try {
-                        const raw = localStorage.getItem("epoch_user");
+                        const raw = Cookies.get("epoch_user");
                         if (raw) {
                           const stored = JSON.parse(raw);
                           stored.data = stored.data ?? {};
@@ -306,7 +307,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                           if (!alreadyExists) {
                             watchlist.push({ movie_id: movieIdToAdd });
                             stored.data.watchlist = watchlist;
-                            localStorage.setItem("epoch_user", JSON.stringify(stored));
+                            Cookies.set("epoch_user", JSON.stringify(stored), { expires: 7 });
                           }
                         }
                       } catch {

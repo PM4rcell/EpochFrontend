@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { StarRating } from "./StarRating.tsx";
 import { Trash } from "lucide-react";
 import { useDeleteComment } from "../../hooks/useDeleteComment";
+import Cookies from "js-cookie";
 
 interface ReviewItemProps {
   username: string;
@@ -27,10 +28,10 @@ export function ReviewItem({
   movie_id,
 
 }: ReviewItemProps) {
-  // Minimal: get current user id from localStorage
+  // Minimal: get current user id from cookies
   let isOwn = false;
   try {
-    const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+    const raw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
     if (raw) {
       const me = JSON.parse(raw);
       const myId = me?.data?.id ?? me?.id;

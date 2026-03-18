@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import Cookies from "js-cookie";
 import {
   Ticket,
   Heart,
@@ -25,7 +26,7 @@ export function OverviewContent({
   const { nextShow, hasUpcomingBooking } = useUpcomingShow();
   let commentCount = 0;
   try {
-    const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+    const raw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
     const stored = raw ? JSON.parse(raw) : null;
     const comments = stored?.data?.comments ?? stored?.comments ?? [];
     commentCount = Array.isArray(comments) ? comments.length : 0;

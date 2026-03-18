@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import Cookies from "js-cookie";
 import type { LockBookingBooking } from "../types/index";
 
 interface UpcomingShow {
@@ -33,7 +34,7 @@ const FALLBACK_SHOW: UpcomingShow = {
 
 function getStoredBookings(): StoredBooking[] {
 	try {
-		const raw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+		const raw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
 		if (!raw) return [];
 		const parsed = JSON.parse(raw) as {
 			data?: { bookings?: StoredBooking[] };
