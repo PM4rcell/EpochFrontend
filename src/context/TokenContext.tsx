@@ -1,9 +1,11 @@
+
+import Cookies from "js-cookie";
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { apiFetch, setAuthToken } from "../api/fetch";
 import { fetchMe } from "../api/user";
 
-// Key used to persist token to localStorage (optional).
-const STORAGE_KEY = "epoch_token";
+const TOKEN_COOKIE = "epoch_token";
+const USER_COOKIE = "epoch_user";
 
 interface TokenContextValue {
   token: string | null;
@@ -32,7 +34,7 @@ const TokenContext = createContext<TokenContextValue | undefined>(undefined);
 export function TokenProvider({ children }: { children: React.ReactNode }) {
   const [token, setTokenState] = useState<string | null>(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY);
+      return Cookies.get(TOKEN_COOKIE) || null;
     } catch {
       return null;
     }
@@ -40,7 +42,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
 
   const [user, setUser] = useState<any | null>(() => {
     try {
-      const raw = localStorage.getItem("epoch_user");
+      const raw = Cookies.get(USER_COOKIE);
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
@@ -85,35 +87,35 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       // eslint-disable-next-line no-console
       console.warn("Logout request failed", err);
     }
-    // Clear client state and storage explicitly.
+    // Clear client state and cookies explicitly.
     try {
       setAuthToken(null);
     } catch {}
     try {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem("epoch_user");
+      Cookies.remove(TOKEN_COOKIE);
+      Cookies.remove(USER_COOKIE);
     } catch {}
     setTokenState(null);
     setUser(null);
   }, []);
 
-  // Persist token changes to localStorage for session restoration.
+  // Persist token changes to cookies for session restoration.
   useEffect(() => {
     try {
-      if (token) localStorage.setItem(STORAGE_KEY, token);
-      else localStorage.removeItem(STORAGE_KEY);
+      if (token) Cookies.set(TOKEN_COOKIE, token, { expires: 7 }); // expires in 7 days
+      else Cookies.remove(TOKEN_COOKIE);
     } catch {
-      // ignore storage errors
+      // ignore cookie errors
     }
   }, [token]);
 
-  // Persist user to localStorage for quick restoration.
+  // Persist user to cookies for quick restoration.
   useEffect(() => {
     try {
-      if (user) localStorage.setItem("epoch_user", JSON.stringify(user));
-      else localStorage.removeItem("epoch_user");
+      if (user) Cookies.set(USER_COOKIE, JSON.stringify(user), { expires: 7 });
+      else Cookies.remove(USER_COOKIE);
     } catch {
-      // ignore storage errors
+      // ignore cookie errors
     }
   }, [user]);
 

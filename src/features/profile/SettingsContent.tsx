@@ -7,6 +7,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { DEFAULT_PROFILE_PICTURE } from "../../constants/profile";
+import Cookies from "js-cookie";
 
 interface SettingsContentProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -19,8 +20,11 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
 
   const { settings, setField, setAvatarFromFile, resetAvatar, saveChanges, isDirty, saving, error } = useSettings();
 
-  const storedUserRaw = typeof window !== "undefined" ? localStorage.getItem("epoch_user") : null;
+  // Use js-cookie for fallback user data
+  const storedUserRaw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
   let storedAvatarUrl: string | null = null;
+  let storedUsername: string | null = null;
+  let storedEmail: string | null = null;
   try {
     if (storedUserRaw) {
       const su = JSON.parse(storedUserRaw);
@@ -32,13 +36,21 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
         su?.avatar_url ||
         su?.avatar ||
         null;
+      storedUsername = su?.data?.username || su?.username || null;
+      storedEmail = su?.data?.email || su?.email || null;
     }
   } catch {
     storedAvatarUrl = null;
+    storedUsername = null;
+    storedEmail = null;
   }
 
-  const [username, setUsername] = useState(settings.username ?? "Alex Carter");
-  const [email, setEmail] = useState(settings.email ?? "alex.carter@email.com");
+  const [username, setUsername] = useState(
+    settings.username ?? storedUsername ?? "Alex Carter"
+  );
+  const [email, setEmail] = useState(
+    settings.email ?? storedEmail ?? "alex.carter@email.com"
+  );
   const [profilePicture, setProfilePicture] = useState<string>(
     typeof settings.avatar === "string" ? settings.avatar : (storedAvatarUrl ?? DEFAULT_PROFILE_PICTURE)
   );

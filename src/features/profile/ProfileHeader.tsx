@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "../../components/ui/avatar";
 import { ImageWithFallback } from "../../components/ImageWithFallback/ImageWithFallback";
 import { useNavigate } from "react-router-dom";
 import { DEFAULT_PROFILE_PICTURE } from "../../constants/profile";
+import Cookies from "js-cookie";
 
 interface ProfileHeaderProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -60,11 +61,13 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
 
   const navigate = useNavigate();
 
-  // Prefer explicit `avatar` prop, otherwise try to read an avatar URL from persisted user
+  // Prefer explicit `avatar` prop, otherwise try to read an avatar URL from persisted user (cookie)
   let storedAvatarUrl: string | null = null;
+  let storedUsername: string | null = null;
+  let storedUserId: string | number | null = null;
   try {
     if (typeof window !== "undefined") {
-      const raw = localStorage.getItem("epoch_user");
+      const raw = Cookies.get("epoch_user");
       if (raw) {
         const su = JSON.parse(raw);
         storedAvatarUrl =
@@ -75,10 +78,14 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
           su?.avatar_url ||
           su?.avatar ||
           null;
+        storedUsername = su?.data?.username || su?.username || null;
+        storedUserId = su?.data?.id || su?.id || null;
       }
     }
   } catch {
     storedAvatarUrl = null;
+    storedUsername = null;
+    storedUserId = null;
   }
   const avatarSrc = [avatar, storedAvatarUrl].find(
     (value): value is string => typeof value === "string" && value.trim().length > 0
@@ -114,12 +121,12 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
           {/* User info */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-              <h1 className="text-white truncate">{title || "Profile"}</h1>
+              <h1 className="text-white truncate">{title ?? storedUsername ?? "Profile"}</h1>
             </div>
             {subtitle ? <p className="text-slate-400">{subtitle}</p> : null}
-            {userId ? (
+            {(userId ?? storedUserId) ? (
               <p className="text-slate-500 text-sm mt-1">
-                User ID: <span className="text-slate-300">{userId}</span>
+                User ID: <span className="text-slate-300">{userId ?? storedUserId}</span>
               </p>
             ) : null}
           </div>
