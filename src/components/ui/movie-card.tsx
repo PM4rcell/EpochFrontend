@@ -1,6 +1,5 @@
 import { motion } from "motion/react";
-import { Star, Clock, Play } from "lucide-react";
-import { Button } from "./button";
+import { Star, Clock } from "lucide-react";
 import { ImageWithFallback } from "../ImageWithFallback/ImageWithFallback";
 
 interface MovieCardProps {
@@ -21,7 +20,6 @@ export function MovieCard({ title, year, rating, runtime, poster, theme, onClick
           accent: "text-amber-500",
           border: "border-amber-500/30",
           glow: "hover:shadow-[0_8px_30px_rgb(245,158,11,0.3)]",
-          buttonBg: "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/50",
         };
       case "2000s":
         return {
@@ -83,15 +81,6 @@ export function MovieCard({ title, year, rating, runtime, poster, theme, onClick
           <Clock className="w-4 h-4" />
           <span>{runtime}</span>
         </div>
-
-        {/* Button */}
-        <Button
-          size="sm"
-          className={`w-full ${colors.buttonBg} border ${colors.accent} transition-all duration-200`}
-        >
-          <Play className="w-4 h-4 mr-2" />
-          Watch Trailer
-        </Button>
       </div>
     </motion.div>
   );
