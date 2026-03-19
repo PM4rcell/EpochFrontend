@@ -17,7 +17,7 @@ type EditableSettings = {
 export function readStoredUser(): Settings {
   try {
     if (typeof window === "undefined") return {};
-    const raw = Cookies.get("epoch_user");
+    const raw = Cookies.get("epoch_user_profile");
     if (!raw) return {};
     const me = JSON.parse(raw);
     return {
@@ -87,7 +87,7 @@ export default function useSettings() {
 
       // Persist to cookies in the same shape readStoredUser expects.
       try {
-        const raw = Cookies.get("epoch_user");
+        const raw = Cookies.get("epoch_user_profile");
         const me = raw ? JSON.parse(raw) : {};
         me.data = me.data ?? {};
         if (typeof payload.username !== "undefined") me.data.username = payload.username;
@@ -103,7 +103,7 @@ export default function useSettings() {
         if (avatarUrl) me.data.avatar_url = avatarUrl;
         else if (dirty.has("avatar") && settings.avatar === null) me.data.avatar_url = null;
         else if (dirty.has("avatar") && typeof settings.avatar === "string") me.data.avatar_url = settings.avatar;
-        Cookies.set("epoch_user", JSON.stringify(me), { expires: 7 });
+        Cookies.set("epoch_user_profile", JSON.stringify(me), { expires: 7 });
       } catch { /* Ignore cookie errors */ }
 
       setDirty(new Set());
@@ -120,14 +120,14 @@ export default function useSettings() {
 
   const save = useCallback((next: Settings) => {
     try {
-      const raw = Cookies.get("epoch_user");
+      const raw = Cookies.get("epoch_user_profile");
       const me = raw ? JSON.parse(raw) : {};
       // Ensure `data` exists
       me.data = me.data ?? {};
       if (typeof next.username !== "undefined") me.data.username = next.username;
       if (typeof next.email !== "undefined") me.data.email = next.email;
       if (typeof next.avatar !== "undefined") me.data.avatar_url = next.avatar;
-      Cookies.set("epoch_user", JSON.stringify(me), { expires: 7 });
+      Cookies.set("epoch_user_profile", JSON.stringify(me), { expires: 7 });
       setSettings(readStoredUser());
       return true;
     } catch {

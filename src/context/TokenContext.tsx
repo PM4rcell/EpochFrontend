@@ -1,11 +1,10 @@
 
 import Cookies from "js-cookie";
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { apiFetch, setAuthToken } from "../api/fetch";
+import { apiFetch } from "../api/fetch";
 import { fetchMe } from "../api/user";
 
-const TOKEN_COOKIE = "epoch_token";
-const USER_COOKIE = "epoch_user";
+const USER_COOKIE = "epoch_user_profile";
 
 interface TokenContextValue {
   token: string | null;
@@ -32,13 +31,7 @@ const TokenContext = createContext<TokenContextValue | undefined>(undefined);
  *   const { token, setToken } = useToken();
  */
 export function TokenProvider({ children }: { children: React.ReactNode }) {
-  const [token, setTokenState] = useState<string | null>(() => {
-    try {
-      return Cookies.get(TOKEN_COOKIE) || null;
-    } catch {
-      return null;
-    }
-  });
+  const [token, setTokenState] = useState<string | null>(null);
 
   const [user, setUser] = useState<any | null>(() => {
     try {
@@ -49,34 +42,32 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     }
   });
 
-  // Update module-level fetch token whenever it changes.
-  useEffect(() => {
-    setAuthToken(token);
-  }, [token]);
+  const hasCachedUser = Boolean(user);
 
-  // When token changes, attempt to fetch the current user's profile
-  // from the API. This handles cases where the token is not a JWT
-  // (e.g. Laravel "1|..." tokens) so we can still display a username.
   useEffect(() => {
+    if (!hasCachedUser) {
+      setTokenState(null);
+      return;
+    }
+
     let mounted = true;
     async function fetchUser() {
-      if (!token) {
-        if (mounted) setUser(null);
-        return;
-      }
       try {
-        // Ensure the fetch module has the auth token set (setAuthToken ran in previous effect).
         const me = await fetchMe();
-        if (mounted) setUser(me || null);
+        if (!mounted) return;
+        setUser(me || null);
+        setTokenState(me ? "session" : null);
       } catch (err) {
-        if (mounted) setUser(null);
+        if (!mounted) return;
+        setUser(null);
+        setTokenState(null);
       }
     }
     fetchUser();
     return () => {
       mounted = false;
     };
-  }, [token]);
+  }, [hasCachedUser]);
 
   // Logout helper: attempt server logout, then always clear client state.
   const logout = useCallback(async () => {
@@ -89,25 +80,11 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     }
     // Clear client state and cookies explicitly.
     try {
-      setAuthToken(null);
-    } catch {}
-    try {
-      Cookies.remove(TOKEN_COOKIE);
       Cookies.remove(USER_COOKIE);
     } catch {}
     setTokenState(null);
     setUser(null);
   }, []);
-
-  // Persist token changes to cookies for session restoration.
-  useEffect(() => {
-    try {
-      if (token) Cookies.set(TOKEN_COOKIE, token, { expires: 7 }); // expires in 7 days
-      else Cookies.remove(TOKEN_COOKIE);
-    } catch {
-      // ignore cookie errors
-    }
-  }, [token]);
 
   // Persist user to cookies for quick restoration.
   useEffect(() => {

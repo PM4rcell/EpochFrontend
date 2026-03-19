@@ -16,7 +16,7 @@ export function useCheckout() {
     try {
       const res = await checkoutBooking(bookingId);
       setData(res);
-      // Refresh the current user's profile so `epoch_user` is updated in localStorage.
+      // Refresh the current user's cached profile after checkout succeeds.
       try {
         const me = await fetchMe();
         if (me) setUser(me);

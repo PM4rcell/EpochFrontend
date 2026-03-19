@@ -2,8 +2,21 @@ import { apiFetch } from "./fetch";
 
 // Fetch current authenticated user's profile from the backend.
 export async function fetchMe() {
-  // apiFetch will include auth header when set via setAuthToken
-  return apiFetch("/api/user/me");
+  try {
+    // apiFetch will include cookies automatically
+    const user = await apiFetch("/api/user/me", {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+    return user;
+  } catch (err) {
+    // If 401 Unauthorized, treat as logged out
+    if ((err as any).status === 401) {
+      return null;
+    }
+    throw err;
+  }
 }
 
 // Payload accepted by updateMe. `avatar` may be a File for upload.

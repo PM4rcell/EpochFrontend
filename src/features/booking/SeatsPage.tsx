@@ -44,7 +44,7 @@ export function SeatsPage({
   >([]);
   const [ticketTypeId, setTicketTypeId] = useState<number>(1);
 
-  const { token } = useToken();
+  const { user } = useToken();
   const { era } = useEra();
   const appliedTheme = era ?? theme;
 
@@ -188,7 +188,7 @@ export function SeatsPage({
         activePage="screenings"
       />
 
-      {!token && (
+      {!user && (
         <div className="container mx-auto px-6 py-4">
           <div className="bg-red-600/6 border border-red-600/20 text-red-300 rounded-md px-4 py-2 text-sm">
             Please log in to book a ticket
@@ -247,7 +247,7 @@ export function SeatsPage({
                 ticketType={ticketTypeId}
                 onTicketTypeChange={setTicketTypeId}
                 isReserving={bookingLoading}
-                canProceed={Boolean(token)}
+                canProceed={Boolean(user)}
                 theme={appliedTheme}
               />
             )}
@@ -338,8 +338,8 @@ export function SeatsPage({
           </span>
         </div>
         <button
-          onClick={() => { if (!token) return; handleProceed(); }}
-          disabled={!token || selectedSeats.length === 0 || bookingLoading}
+          onClick={() => { if (!user) return; handleProceed(); }}
+          disabled={!user || selectedSeats.length === 0 || bookingLoading}
           className={`
             w-full py-3 rounded-lg transition-all duration-200
             ${
@@ -357,7 +357,7 @@ export function SeatsPage({
         >
           {bookingLoading ? "Processing..." : "Next"}
         </button>
-        {!token && (
+        {!user && (
           <p className="text-red-500 text-xs mt-2">Please log in to book a ticket</p>
         )}
       </div>

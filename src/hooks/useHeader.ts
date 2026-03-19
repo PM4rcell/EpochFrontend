@@ -8,13 +8,13 @@ type HeaderState = {
   userId?: string | number | null;
 };
 
-// useHeader: reads the persisted `epoch_user` from localStorage and
+// useHeader: reads the persisted `epoch_user_profile` cookie and
 // exposes header state plus helpers. It does NOT perform network fetches.
 export default function useHeader(initial?: HeaderState) {
   const readFromStorage = useCallback((): HeaderState => {
     try {
       if (typeof window === "undefined") return initial || {};
-      const raw = Cookies.get("epoch_user");
+      const raw = Cookies.get("epoch_user_profile");
       if (!raw) return initial || {};
       const me = JSON.parse(raw);
       const title = me?.data?.username || "Profile";
@@ -41,7 +41,7 @@ export default function useHeader(initial?: HeaderState) {
   const clearHeader = useCallback(() => {
     setHeader({});
     try {
-      if (typeof window !== "undefined") Cookies.remove("epoch_user");
+      if (typeof window !== "undefined") Cookies.remove("epoch_user_profile");
       if (typeof document !== "undefined") document.title = "Epoch";
     } catch {}
   }, []);

@@ -74,7 +74,7 @@ export function AddReviewCard({
 
   useEffect(() => {
     try {
-      const raw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
+      const raw = typeof window !== "undefined" ? Cookies.get("epoch_user_profile") : null;
       setIsLoggedIn(!!raw);
     } catch {
       setIsLoggedIn(false);

@@ -64,31 +64,14 @@ export function Navbar({
     }
   })();
 
-  // Read token and user from context. Prefer explicit `user` (fetched from `/api/me`).
-  const { token, user, logout } = useToken();
+  const { user, logout } = useToken();
   const [logoutLoading, setLogoutLoading] = useState(false);
-  const getUsernameFromToken = (t?: string | null) => {
-    try {
-      if (!t) return null;
-      const parts = t.split(".");
-      if (parts.length < 2) return null;
-      // base64url -> base64
-      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-      const json = atob(base64);
-      // handle UTF-8 payloads
-      const payload = JSON.parse(decodeURIComponent(json));
-      return payload.username || payload.name || payload.user_name || null;
-    } catch {
-      return null;
-    }
-  };
-  const usernameFromToken = getUsernameFromToken(token);
-  const username = user?.data?.username || usernameFromToken || null;
+  const username = user?.data?.username || null;
 
   let storedAvatar: string | null = null;
   try {
     if (typeof window !== "undefined") {
-      const raw = Cookies.get("epoch_user");
+      const raw = Cookies.get("epoch_user_profile");
       if (raw) {
         const parsed = JSON.parse(raw);
         storedAvatar =
@@ -237,7 +220,7 @@ export function Navbar({
             <Search className="w-5 h-5" />
           </motion.button>
 
-          {token ? (
+          {user ? (
             <div className="flex items-center gap-3">
               <motion.div
                 whileHover={{ scale: 1.03 }}

@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 // Simple centralized fetch helper used across the frontend API layer.
 // Purpose:
 // - Provide a single place to configure the API base URL (via `VITE_API_BASE`).
@@ -9,19 +11,7 @@
 // Default timeout for requests (ms).
 const DEFAULT_TIMEOUT = 10000; // 10s
 
-// Module-level auth token used to automatically attach an Authorization header
-// to outgoing API requests. Call `setAuthToken()` from your React auth/token
-// context after login/logout so `apiFetch` will include the bearer token.
-let authToken: string | null = null;
-
-/**
- * setAuthToken
- * - Set or clear the token used by `apiFetch` for Authorization headers.
- * - Pass `null` to clear the token (e.g. on logout).
- */
-export function setAuthToken(token: string | null) {
-  authToken = token;
-}
+export function setAuthToken(_token: string | null) {}
 
 // Base URL for API requests. Prefer using `VITE_API_BASE` in your env.
 // If not provided the helper falls back to localhost for local dev.
@@ -31,6 +21,24 @@ const API_BASE = (import.meta && (import.meta as any).env && (import.meta as any
 export interface ApiFetchOptions extends RequestInit {
   // How long to wait before aborting the request (ms).
   timeoutMs?: number;
+}
+
+function requiresCsrf(method: string) {
+  return !["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());
+}
+
+async function ensureCsrfCookie() {
+  if (typeof window === "undefined") return;
+  if (Cookies.get("XSRF-TOKEN")) return;
+
+  await fetch(`${API_BASE}/sanctum/csrf-cookie`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+  });
 }
 
 /**
@@ -71,25 +79,27 @@ export async function apiFetch<T = any>(path: string, options: ApiFetchOptions =
 
   // Build URL: accept absolute URLs or join with the API_BASE.
   const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  const method = (rest.method ?? (body ? "POST" : "GET")).toUpperCase();
 
-  // Attach auth header automatically when an `authToken` is set via
-  // `setAuthToken(token)` in your application (see TokenContext below).
-  const authHeader = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+  if (requiresCsrf(method) && !url.endsWith("/sanctum/csrf-cookie")) {
+    await ensureCsrfCookie();
+  }
 
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+  const csrfToken = Cookies.get("XSRF-TOKEN");
 
   const init: RequestInit = {
-    // Default to POST when a body is present, otherwise GET.
-    method: rest.method ?? (body ? "POST" : "GET"),
+    method,
     headers: ({
-      // Let the browser set Content-Type for FormData (including boundary).
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...(requiresCsrf(method) && csrfToken ? { "X-XSRF-TOKEN": decodeURIComponent(csrfToken) } : {}),
       ...(userHeaders as Record<string, string> | undefined),
-      ...authHeader,
     } as HeadersInit),
-    // Stringify object bodies unless caller provided a FormData (files/uploads).
     body: body && typeof body === "object" && !isFormData ? JSON.stringify(body) : (body as any) ?? undefined,
     signal: controller.signal,
+    credentials: "include", // Ensure cookies (including HttpOnly) are sent
     ...rest,
   };
 

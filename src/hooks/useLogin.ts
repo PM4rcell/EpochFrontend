@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { loginUser } from "../api/login";
 import { useToken } from "../context/TokenContext";
 import { useEra } from "../context/EraContext";
+import { fetchMe } from "../api/user";
 
 interface LoginForm {
   email: string;
@@ -11,7 +12,7 @@ interface LoginForm {
 export function useLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>(null);
-  const { setToken } = useToken();
+  const { setToken, setUser } = useToken();
   const { setEra } = useEra();
 
   const login = useCallback(async (form: LoginForm) => {
@@ -19,16 +20,16 @@ export function useLogin() {
     setError(null);
     try {
       const res = await loginUser({ email: form.email, password: form.password });
-      // Common token shapes: { token } or { access_token }
-      const token = (res && (res.token || (res as any).access_token)) || (res && (res.data && res.data.token));
-      if (token) {
-        setToken(token);
-        // Clear any selected era when a user signs in
-        try {
-          setEra(null);
-        } catch (e) {
-          // ignore if era can't be cleared for any reason
-        }
+      const me = await fetchMe();
+      if (!me) {
+        throw new Error("Login succeeded but no authenticated session was established.");
+      }
+      setUser(me);
+      setToken("session");
+      try {
+        setEra(null);
+      } catch (e) {
+        // ignore if era can't be cleared for any reason
       }
       setLoading(false);
       return res;
@@ -37,7 +38,7 @@ export function useLogin() {
       setLoading(false);
       throw err;
     }
-  }, [setToken]);
+  }, [setEra, setToken, setUser]);
 
   return { login, loading, error } as const;
 }

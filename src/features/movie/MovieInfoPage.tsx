@@ -36,7 +36,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
   const [isLoggedIn] = useState(() => {
     if (typeof window === "undefined") return false;
-    return !!Cookies.get("epoch_user");
+    return !!Cookies.get("epoch_user_profile");
   });
   const [reviews, setReviews] = useState<any[]>([]);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -52,7 +52,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
     const getLocalUsername = () => {
       try {
         if (typeof window === "undefined") return "You";
-        const raw = Cookies.get("epoch_user");
+        const raw = Cookies.get("epoch_user_profile");
         if (!raw) return "You";
         const me = JSON.parse(raw);
         return me?.data?.username ?? me?.username ?? "You";
@@ -64,7 +64,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
     const getLocalAvatarUrl = () => {
       try {
         if (typeof window === "undefined") return undefined;
-        const raw = Cookies.get("epoch_user");
+        const raw = Cookies.get("epoch_user_profile");
         if (!raw) return undefined;
         const me = JSON.parse(raw);
         return (
@@ -171,7 +171,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
     try {
       if (typeof window === "undefined") return;
-      const raw = Cookies.get("epoch_user");
+      const raw = Cookies.get("epoch_user_profile");
       if (!raw) {
         setWatchlistAdded(false);
         return;
@@ -296,7 +296,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
 
                       // Keep cookie in sync for Profile watchlist tab.
                       try {
-                        const raw = Cookies.get("epoch_user");
+                        const raw = Cookies.get("epoch_user_profile");
                         if (raw) {
                           const stored = JSON.parse(raw);
                           stored.data = stored.data ?? {};
@@ -307,7 +307,7 @@ export function MovieInfoPage({ onBack, onNavigate }: { onBack?: () => void; onN
                           if (!alreadyExists) {
                             watchlist.push({ movie_id: movieIdToAdd });
                             stored.data.watchlist = watchlist;
-                            Cookies.set("epoch_user", JSON.stringify(stored), { expires: 7 });
+                            Cookies.set("epoch_user_profile", JSON.stringify(stored), { expires: 7 });
                           }
                         }
                       } catch {

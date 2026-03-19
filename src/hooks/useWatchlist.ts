@@ -20,7 +20,7 @@ type StoredWatchlistObject = {
 const parseWatchlist = (): WatchlistEntry[] => {
   try {
     if (typeof window === "undefined") return [];
-    const raw = Cookies.get("epoch_user");
+    const raw = Cookies.get("epoch_user_profile");
     if (!raw) return [];
 
     const stored = JSON.parse(raw) as { data?: { watchlist?: StoredWatchlistObject[] } };

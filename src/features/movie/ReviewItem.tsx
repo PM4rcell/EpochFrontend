@@ -31,7 +31,7 @@ export function ReviewItem({
   // Minimal: get current user id from cookies
   let isOwn = false;
   try {
-    const raw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
+    const raw = typeof window !== "undefined" ? Cookies.get("epoch_user_profile") : null;
     if (raw) {
       const me = JSON.parse(raw);
       const myId = me?.data?.id ?? me?.id;

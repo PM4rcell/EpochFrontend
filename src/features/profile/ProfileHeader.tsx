@@ -67,7 +67,7 @@ export function ProfileHeader({ theme = "default", title, subtitle, avatar, user
   let storedUserId: string | number | null = null;
   try {
     if (typeof window !== "undefined") {
-      const raw = Cookies.get("epoch_user");
+      const raw = Cookies.get("epoch_user_profile");
       if (raw) {
         const su = JSON.parse(raw);
         storedAvatarUrl =

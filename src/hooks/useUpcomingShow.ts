@@ -34,7 +34,7 @@ const FALLBACK_SHOW: UpcomingShow = {
 
 function getStoredBookings(): StoredBooking[] {
 	try {
-		const raw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
+		const raw = typeof window !== "undefined" ? Cookies.get("epoch_user_profile") : null;
 		if (!raw) return [];
 		const parsed = JSON.parse(raw) as {
 			data?: { bookings?: StoredBooking[] };

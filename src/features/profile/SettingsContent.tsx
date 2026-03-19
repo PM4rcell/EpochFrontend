@@ -21,7 +21,7 @@ export function SettingsContent({ theme = "default" }: SettingsContentProps) {
   const { settings, setField, setAvatarFromFile, resetAvatar, saveChanges, isDirty, saving, error } = useSettings();
 
   // Use js-cookie for fallback user data
-  const storedUserRaw = typeof window !== "undefined" ? Cookies.get("epoch_user") : null;
+  const storedUserRaw = typeof window !== "undefined" ? Cookies.get("epoch_user_profile") : null;
   let storedAvatarUrl: string | null = null;
   let storedUsername: string | null = null;
   let storedEmail: string | null = null;
