@@ -1,5 +1,3 @@
-import Cookies from "js-cookie";
-
 // Simple centralized fetch helper used across the frontend API layer.
 // Purpose:
 // - Provide a single place to configure the API base URL (via `VITE_API_BASE`).
@@ -21,24 +19,6 @@ const API_BASE = (import.meta && (import.meta as any).env && (import.meta as any
 export interface ApiFetchOptions extends RequestInit {
   // How long to wait before aborting the request (ms).
   timeoutMs?: number;
-}
-
-function requiresCsrf(method: string) {
-  return !["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());
-}
-
-async function ensureCsrfCookie() {
-  if (typeof window === "undefined") return;
-  if (Cookies.get("XSRF-TOKEN")) return;
-
-  await fetch(`${API_BASE}/sanctum/csrf-cookie`, {
-    method: "GET",
-    credentials: "include",
-    headers: {
-      Accept: "application/json",
-      "X-Requested-With": "XMLHttpRequest",
-    },
-  });
 }
 
 /**
@@ -81,12 +61,7 @@ export async function apiFetch<T = any>(path: string, options: ApiFetchOptions =
   const url = path.startsWith("http") ? path : `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
   const method = (rest.method ?? (body ? "POST" : "GET")).toUpperCase();
 
-  if (requiresCsrf(method) && !url.endsWith("/sanctum/csrf-cookie")) {
-    await ensureCsrfCookie();
-  }
-
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
-  const csrfToken = Cookies.get("XSRF-TOKEN");
 
   const init: RequestInit = {
     method,
@@ -94,7 +69,6 @@ export async function apiFetch<T = any>(path: string, options: ApiFetchOptions =
       Accept: "application/json",
       "X-Requested-With": "XMLHttpRequest",
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...(requiresCsrf(method) && csrfToken ? { "X-XSRF-TOKEN": decodeURIComponent(csrfToken) } : {}),
       ...(userHeaders as Record<string, string> | undefined),
     } as HeadersInit),
     body: body && typeof body === "object" && !isFormData ? JSON.stringify(body) : (body as any) ?? undefined,

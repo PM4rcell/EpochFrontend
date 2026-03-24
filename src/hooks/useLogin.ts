@@ -20,10 +20,17 @@ export function useLogin() {
     setError(null);
     try {
       const res = await loginUser({ email: form.email, password: form.password });
-      const me = await fetchMe();
+      const loginUserData = (res as any)?.user ?? (res as any)?.data?.user ?? null;
+      let me = loginUserData;
+
       if (!me) {
-        throw new Error("Login succeeded but no authenticated session was established.");
+        me = await fetchMe();
       }
+
+      if (!me) {
+        throw new Error("Login succeeded but user data could not be loaded.");
+      }
+
       setUser(me);
       setToken("session");
       try {
