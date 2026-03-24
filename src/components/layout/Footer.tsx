@@ -34,10 +34,10 @@ export function Footer({ theme = "default" }: FooterProps) {
   const colors = getThemeColors();
 
   const links = [
-    { label: "Legal", href: "#" },
-    { label: "Contact", href: "#" },
-    { label: "About", href: "#" },
-    { label: "Privacy", href: "#" },
+    { label: "Legal", href: "/docs/The-Epoch-Project-Legal.docx" },
+    { label: "Contact", href: "/docs/The-Epoch-Project-Contact.docx" },
+    { label: "About", href: "/docs/The-Epoch-Project-About.docx" },
+    { label: "Privacy", href: "/docs/The-Epoch-Project-Privacy.docx" },
   ];
 
   const socials = [
@@ -60,6 +60,8 @@ export function Footer({ theme = "default" }: FooterProps) {
               <motion.a
                 key={link.label}
                 href={link.href}
+                target="_blank"
+                rel="noreferrer"
                 className={`text-slate-400 ${colors.linkHover} transition-all duration-200`}
                 whileHover={{ scale: 1.05 }}
               >
