@@ -3,7 +3,6 @@ import { CreditCard, Lock } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label";
-import { Checkbox } from "../../components/ui/checkbox";
 import { useVerifyPaymentForm } from "../../hooks/useVerifyPaymentForm";
 
 interface PaymentFormProps {
@@ -198,18 +197,6 @@ export function PaymentForm({
               <p className="text-red-400 text-sm mt-1">{errors.zip}</p>
             )}
           </div>
-        </div>
-
-        {/* Save card checkbox */}
-        <div className="flex items-center gap-2 pt-2">
-          <Checkbox
-            id="saveCard"
-            checked={formData.saveCard}
-            onCheckedChange={(checked) => handleChange("saveCard", checked as boolean)}
-          />
-          <Label htmlFor="saveCard" className="text-slate-400 cursor-pointer">
-            Save card for future purchases
-          </Label>
         </div>
       </div>
 

@@ -10,7 +10,6 @@ export interface PaymentFormData {
   email: string;
   country: string;
   zip: string;
-  saveCard: boolean;
 }
 
 interface UseVerifyPaymentFormOptions {
@@ -74,7 +73,6 @@ export function useVerifyPaymentForm({ showEmailField = false, onPay }: UseVerif
     email: "",
     country: "",
     zip: "",
-    saveCard: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
@@ -141,13 +139,13 @@ export function useVerifyPaymentForm({ showEmailField = false, onPay }: UseVerif
 
   const isFormValid = Object.keys(getValidationErrors()).length === 0;
 
-  const handleChange = (field: keyof PaymentFormData, value: string | boolean) => {
-    const nextValue = typeof value === "string" ? getFormattedValue(field, value) : value;
+  const handleChange = (field: keyof PaymentFormData, value: string) => {
+    const nextValue = getFormattedValue(field, value);
     const nextFormData = { ...formData, [field]: nextValue };
 
     setFormData(nextFormData);
 
-    if (typeof nextValue === "string" && touchedFields[field]) {
+    if (touchedFields[field]) {
       setErrors({
         ...errors,
         [field]: validateField(field as PaymentField, nextValue),
