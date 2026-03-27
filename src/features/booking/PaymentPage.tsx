@@ -5,6 +5,7 @@ dayjs.extend(customParseFormat);
 import { motion } from "motion/react";
 import { Navbar } from "../../components/layout/Navbar";
 import { BookingStepper } from "./BookingStepper";
+import { PaymentForm } from "./PaymentForm";
 import { OrderSummary } from "./OrderSummary";
 import { useEra } from "../../context/EraContext";
 import { useLocation, useParams } from "react-router-dom";
@@ -146,8 +147,20 @@ export function PaymentPage({
 
       {/* Main Content - Extra bottom padding on mobile */}
       <div className="container mx-auto px-6 py-8 pb-32 lg:pb-8">
-        <div className="flex justify-center">
-          <div className="w-full max-w-md">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+          <motion.div
+            initial={{ opacity: 0, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <PaymentForm
+              theme={appliedTheme}
+              onPay={handlePayment}
+              isProcessing={isProcessing}
+            />
+          </motion.div>
+
+          <div className="w-full max-w-md lg:max-w-none lg:justify-self-end">
             <motion.div
               initial={{ opacity: 0, x: 0 }}
               animate={{ opacity: 1, x: 0 }}
@@ -165,9 +178,7 @@ export function PaymentPage({
                 seats={selectedSeats ?? []}
                 total={total}
                 onBack={onBack}
-                onPay={handlePayment}
                 theme={appliedTheme}
-                isProcessing={isProcessing}
               />
             </motion.div>
           </div>
