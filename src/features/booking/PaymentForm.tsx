@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { motion } from "motion/react";
 import { CreditCard, Lock } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label";
 import { Checkbox } from "../../components/ui/checkbox";
+import { useVerifyPaymentForm } from "../../hooks/useVerifyPaymentForm";
 
 interface PaymentFormProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -19,33 +19,16 @@ export function PaymentForm({
   onPay,
   isProcessing = false,
 }: PaymentFormProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    cardNumber: "",
-    expiry: "",
-    cvc: "",
-    email: "",
-    country: "",
-    zip: "",
-    saveCard: false,
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
   const colors = {
     accent: "text-[var(--theme-accent)]",
     border: "focus:border-[var(--theme-button-bg)] focus-visible:ring-[color:var(--theme-glow)]",
     button: "bg-[var(--theme-button-bg)] hover:bg-[var(--theme-button-hover)] text-black",
     glow: "hover:shadow-[0_8px_24px_var(--theme-glow)]",
   };
-
-  const handleChange = (field: string, value: string | boolean) => {
-    setFormData({ ...formData, [field]: value });
-    // Clear error when user types
-    if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
-    }
-  };
+  const { formData, errors, isFormValid, handleChange, handleBlur, handlePayClick } = useVerifyPaymentForm({
+    showEmailField,
+    onPay,
+  });
 
   return (
     <motion.div
@@ -69,9 +52,13 @@ export function PaymentForm({
             </Label>
             <Input
               id="email"
+              name="email"
               type="email"
+              autoComplete="email"
               value={formData.email}
               onChange={(e) => handleChange("email", e.target.value)}
+              onBlur={() => handleBlur("email")}
+              aria-invalid={!!errors.email}
               className={`bg-slate-900/50 border-slate-700 text-slate-200 ${colors.border}`}
               placeholder="your@email.com"
             />
@@ -88,8 +75,12 @@ export function PaymentForm({
           </Label>
           <Input
             id="name"
+            name="cc-name"
+            autoComplete="cc-name"
             value={formData.name}
             onChange={(e) => handleChange("name", e.target.value)}
+            onBlur={() => handleBlur("name")}
+            aria-invalid={!!errors.name}
             className={`bg-slate-900/50 border-slate-700 text-slate-200 ${colors.border}`}
             placeholder="John Doe"
           />
@@ -105,8 +96,13 @@ export function PaymentForm({
           </Label>
           <Input
             id="cardNumber"
+            name="cc-number"
+            autoComplete="cc-number"
+            inputMode="numeric"
             value={formData.cardNumber}
             onChange={(e) => handleChange("cardNumber", e.target.value)}
+            onBlur={() => handleBlur("cardNumber")}
+            aria-invalid={!!errors.cardNumber}
             className={`bg-slate-900/50 border-slate-700 text-slate-200 ${colors.border}`}
             placeholder="1234 5678 9012 3456"
             maxLength={19}
@@ -124,8 +120,13 @@ export function PaymentForm({
             </Label>
             <Input
               id="expiry"
+              name="cc-exp"
+              autoComplete="cc-exp"
+              inputMode="numeric"
               value={formData.expiry}
               onChange={(e) => handleChange("expiry", e.target.value)}
+              onBlur={() => handleBlur("expiry")}
+              aria-invalid={!!errors.expiry}
               className={`bg-slate-900/50 border-slate-700 text-slate-200 ${colors.border}`}
               placeholder="MM/YY"
               maxLength={5}
@@ -140,8 +141,13 @@ export function PaymentForm({
             </Label>
             <Input
               id="cvc"
+              name="cc-csc"
+              autoComplete="cc-csc"
+              inputMode="numeric"
               value={formData.cvc}
               onChange={(e) => handleChange("cvc", e.target.value)}
+              onBlur={() => handleBlur("cvc")}
+              aria-invalid={!!errors.cvc}
               className={`bg-slate-900/50 border-slate-700 text-slate-200 ${colors.border}`}
               placeholder="123"
               maxLength={4}
@@ -160,11 +166,18 @@ export function PaymentForm({
             </Label>
             <Input
               id="country"
+              name="country"
+              autoComplete="country-name"
               value={formData.country}
               onChange={(e) => handleChange("country", e.target.value)}
+              onBlur={() => handleBlur("country")}
+              aria-invalid={!!errors.country}
               className={`bg-slate-900/50 border-slate-700 text-slate-200 ${colors.border}`}
               placeholder="United States"
             />
+            {errors.country && (
+              <p className="text-red-400 text-sm mt-1">{errors.country}</p>
+            )}
           </div>
           <div>
             <Label htmlFor="zip" className="text-slate-400">
@@ -172,11 +185,18 @@ export function PaymentForm({
             </Label>
             <Input
               id="zip"
+              name="postal-code"
+              autoComplete="postal-code"
               value={formData.zip}
               onChange={(e) => handleChange("zip", e.target.value)}
+              onBlur={() => handleBlur("zip")}
+              aria-invalid={!!errors.zip}
               className={`bg-slate-900/50 border-slate-700 text-slate-200 ${colors.border}`}
               placeholder="12345"
             />
+            {errors.zip && (
+              <p className="text-red-400 text-sm mt-1">{errors.zip}</p>
+            )}
           </div>
         </div>
 
@@ -196,8 +216,8 @@ export function PaymentForm({
       {onPay && (
         <div className="pt-2">
           <Button
-            onClick={onPay}
-            disabled={isProcessing}
+            onClick={handlePayClick}
+            disabled={isProcessing || !isFormValid}
             className={`
               w-full ${colors.button} ${colors.glow}
               transition-all duration-200
