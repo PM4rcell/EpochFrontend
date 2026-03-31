@@ -5,6 +5,7 @@ import { BookingStepper } from "./BookingStepper";
 import { Button } from "../../components/ui/button";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useEra } from "../../context/EraContext";
+import type { LockBookingBooking } from "../../types";
 
 interface TicketsPageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -19,8 +20,18 @@ export function TicketPage({ theme = "default", onDone }: TicketsPageProps) {
   const params = useParams() as { bookingId?: string };
   const navigate = useNavigate();
 
+  let booking: LockBookingBooking | null = (location.state as { booking?: LockBookingBooking } | null)?.booking ?? null;
+  if (!booking) {
+    try {
+      const raw = typeof window !== "undefined" ? sessionStorage.getItem("epoch:pendingBooking") : null;
+      booking = raw ? (JSON.parse(raw) as LockBookingBooking) : null;
+    } catch {
+      booking = null;
+    }
+  }
+
   // Resolve bookingId from navigation state, route param, or sessionStorage
-  let bookingId: string | null = (location.state as any)?.booking?.id ?? params.bookingId ?? null;
+  let bookingId: string | null = booking?.id != null ? String(booking.id) : (params.bookingId ?? null);
   if (!bookingId) {
     try {
       const raw = typeof window !== "undefined" ? sessionStorage.getItem("epoch:pendingBooking") : null;
@@ -28,10 +39,15 @@ export function TicketPage({ theme = "default", onDone }: TicketsPageProps) {
       bookingId = stored?.id ?? stored?.booking_id ?? null;
     } catch {}
   }
-  const movieData = {
-    title: "The Eternal Voyage",
-    backdrop: "https://images.unsplash.com/photo-1639306406821-c45e6cd384e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
-  };
+  const movieData = booking
+    ? {
+        title: booking.screening?.movie_title ?? "Booking Successful!",
+        backdrop: booking.screening?.movie_poster ?? "https://images.unsplash.com/photo-1639306406821-c45e6cd384e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
+      }
+    : {
+        title: "Booking Successful!",
+        backdrop: "https://images.unsplash.com/photo-1639306406821-c45e6cd384e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920",
+      };
 
   const getThemeColors = () => {
     return {

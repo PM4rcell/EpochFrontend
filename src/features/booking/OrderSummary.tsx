@@ -22,9 +22,7 @@ interface OrderSummaryProps {
   seats: SeatInfo[];
   total?: number;
   onBack?: () => void;
-  onPay: () => void;
   theme?: "90s" | "2000s" | "modern" | "default";
-  isProcessing?: boolean;
 }
 
 export function OrderSummary({
@@ -39,14 +37,10 @@ export function OrderSummary({
   seats,
   total,
   onBack,
-  onPay,
   theme = "default",
-  isProcessing = false,
 }: OrderSummaryProps) {
   const getThemeColors = () => {
     return {
-      button: "bg-[var(--theme-button-bg)] hover:bg-[var(--theme-button-hover)] text-black",
-      glow: "hover:shadow-[0_8px_24px_var(--theme-glow)]",
       accent: "text-[var(--theme-accent)]",
       border: "border-[color:var(--theme-border)]",
     };
@@ -132,30 +126,8 @@ export function OrderSummary({
       </div>
 
       {/* Actions */}
-      <div className="space-y-3 pt-2">
-        <Button
-          onClick={onPay}
-          disabled={isProcessing}
-          className={`
-            w-full ${colors.button} ${colors.glow}
-            transition-all duration-200
-            disabled:opacity-50 disabled:cursor-not-allowed
-          `}
-        >
-          {isProcessing ? (
-            <span className="flex items-center gap-2">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-4 h-4 border-2 border-black border-t-transparent rounded-full"
-              />
-              Processing...
-            </span>
-          ) : (
-            "Pay Now"
-          )}
-        </Button>
-        {onBack && (
+      {onBack && (
+        <div className="pt-2">
           <Button
             onClick={onBack}
             variant="ghost"
@@ -164,8 +136,8 @@ export function OrderSummary({
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Seats
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </motion.div>
   );
 }
