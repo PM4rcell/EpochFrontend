@@ -61,7 +61,6 @@ export function CastItem({ name, role, poster, theme = "default" }: CastItemProp
       </div>
       <h4 className={`text-slate-200 text-sm mb-1 transition-colors duration-200 ${colors.text}`}>
         {name}
-        {role}
       </h4>
       <p className="text-slate-500 text-xs">{role}</p>
     </motion.div>
