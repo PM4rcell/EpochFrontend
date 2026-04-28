@@ -7,7 +7,7 @@ interface RatingBadgeProps {
   theme?: "90s" | "2000s" | "modern" | "default";
 }
 
-export function RatingBadge({ rating, maxRating = 10, theme = "default" }: RatingBadgeProps) {
+export function RatingBadge({ rating, maxRating = 5, theme = "default" }: RatingBadgeProps) {
   const getThemeColors = () => {
     switch (theme) {
       case "90s":
