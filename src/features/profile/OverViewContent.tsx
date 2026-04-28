@@ -34,19 +34,22 @@ export function OverviewContent({
     commentCount = 0;
   }
 
-  // Calculate favorite era from watchlist
+  // Calculate favorite era from watchlist based on release_date
   const getFavoriteEra = (items: WatchlistEntry[]): string => {
     if (items.length === 0) return "N/A";
     
     const eraCounts: Record<string, number> = {};
     
     items.forEach((item) => {
-      const eraId = item.movie?.era_id;
-      let eraName = "Modern";
+      const releaseDate = item.movie?.release_date;
+      if (!releaseDate) return;
       
-      if (eraId === 1) eraName = "90s";
-      else if (eraId === 2) eraName = "2000s";
-      else if (eraId === 3) eraName = "Modern";
+      const year = parseInt(releaseDate.split("-")[0], 10);
+      let eraName: string;
+      
+      if (year >= 1990 && year < 2000) eraName = "90s";
+      else if (year >= 2000 && year < 2010) eraName = "2000s";
+      else eraName = "Modern";
       
       eraCounts[eraName] = (eraCounts[eraName] || 0) + 1;
     });
