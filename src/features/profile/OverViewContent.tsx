@@ -48,7 +48,7 @@ export function OverviewContent({
       let eraName: string;
       
       if (year >= 1990 && year < 2000) eraName = "90s";
-      else if (year >= 2000 && year < 2010) eraName = "2000s";
+      else if (year >= 2000 && year < 2014) eraName = "2000s";
       else eraName = "Modern";
       
       eraCounts[eraName] = (eraCounts[eraName] || 0) + 1;
