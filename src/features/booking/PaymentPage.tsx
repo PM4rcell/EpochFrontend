@@ -11,7 +11,8 @@ import { useEra } from "../../context/EraContext";
 import { useLocation, useParams } from "react-router-dom";
 import { useCheckout } from "../../hooks/useCheckout";
 import { useNavigate } from "react-router-dom";
-import type { LockBookingBooking } from "../../types";
+import type { LockBookingBooking, CheckoutBookingBody } from "../../types";
+import type { PaymentFormData } from "../../hooks/useVerifyPaymentForm";
 
 interface PaymentPageProps {
   theme?: "90s" | "2000s" | "modern" | "default";
@@ -95,7 +96,7 @@ export function PaymentPage({
   const subtotal = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
   const total = Number(booking?.total ?? 0) > 0 ? Number(booking?.total ?? 0) : subtotal;
 
-  const handlePayment = async () => {
+  const handlePayment = async (paymentData: PaymentFormData) => {
     // Determine bookingId to checkout
     const bookingId = params.bookingId ?? booking?.id ?? null;
     if (!bookingId) {
@@ -106,7 +107,19 @@ export function PaymentPage({
 
     try {
       setIsProcessing(true);
-      await checkout(bookingId);
+      
+      // Convert payment form data to checkout body format
+      const checkoutData: CheckoutBookingBody = {
+        email: paymentData.email,
+        name: paymentData.name,
+        card_number: paymentData.cardNumber.replace(/\s/g, ""), // Remove formatting spaces
+        expiry: paymentData.expiry,
+        cvc: paymentData.cvc,
+        country: paymentData.country,
+        zip: paymentData.zip,
+      };
+      
+      await checkout(bookingId, checkoutData);
       // navigate to checkout/ticket page; pass booking via state if available
       navigate(`/checkout/${bookingId}`, { state: { booking } });
     } catch (err) {
@@ -183,48 +196,6 @@ export function PaymentPage({
             </motion.div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile sticky CTA - Fixed height, safe area */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 h-22 bg-black/90 backdrop-blur-md border-t border-white/10 p-4 z-50 pointer-events-auto overflow-hidden">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-slate-400 text-sm">Total</span>
-          <span
-            className={`
-            ${
-              appliedTheme === "90s"
-                ? "text-amber-500"
-                : appliedTheme === "2000s"
-                ? "text-blue-400"
-                : appliedTheme === "modern"
-                ? "text-slate-300"
-                : "text-amber-500"
-            }
-          `}
-          >
-            ${total.toFixed(2)}
-          </span>
-        </div>
-        <button
-          onClick={handlePayment}
-          disabled={isProcessing}
-            className={`
-            w-full py-3 rounded-lg transition-all duration-200
-            ${
-              appliedTheme === "90s"
-                ? "bg-amber-600 hover:bg-amber-500"
-                : appliedTheme === "2000s"
-                ? "bg-blue-500 hover:bg-blue-400"
-                : appliedTheme === "modern"
-                ? "bg-slate-300 hover:bg-slate-200"
-                : "bg-amber-600 hover:bg-amber-500"
-            }
-            text-black
-            disabled:opacity-50 disabled:cursor-not-allowed
-          `}
-        >
-          {isProcessing ? "Processing..." : "Pay Now"}
-        </button>
       </div>
     </div>
   );

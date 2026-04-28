@@ -104,6 +104,16 @@ export interface LockBookingResponse {
   booking: LockBookingBooking;
 }
 
+export interface CheckoutBookingBody {
+  email: string;
+  name: string;
+  card_number: string;
+  expiry: string;
+  cvc: string;
+  country: string;
+  zip: string;
+}
+
 // Ticket Types
 
 export interface Ticket {

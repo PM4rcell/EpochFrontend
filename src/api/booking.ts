@@ -1,5 +1,5 @@
 import { apiFetch } from "./fetch";
-import type { CreateBookingBody, LockBookingResponse } from "../types";
+import type { CreateBookingBody, LockBookingResponse, CheckoutBookingBody } from "../types";
 
 /**
  * lockBooking
@@ -22,11 +22,13 @@ export async function lockBooking(body: CreateBookingBody): Promise<LockBookingR
 /**
  * checkoutBooking
  * - Finalize/checkout a previously created booking on the server.
- * - Calls POST /api/bookings/{id}/checkout. No body required.
+ * - Calls POST /api/bookings/{id}/checkout with payment/validation data.
  * - `apiFetch` will include the current auth token when set via `setAuthToken()`.
  */
-export async function checkoutBooking(bookingId: string | number) {
+export async function checkoutBooking(bookingId: string | number, data: CheckoutBookingBody) {
   return apiFetch<any>(`/api/bookings/${bookingId}/checkout`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
 }

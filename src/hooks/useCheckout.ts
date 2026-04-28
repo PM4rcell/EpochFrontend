@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { checkoutBooking } from "../api/booking";
 import { useToken } from "../context/TokenContext";
 import { fetchMe } from "../api/user";
+import type { CheckoutBookingBody } from "../types";
 
 export function useCheckout() {
   const [loading, setLoading] = useState(false);
@@ -9,12 +10,12 @@ export function useCheckout() {
   const [data, setData] = useState<any | null>(null);
   const { setUser } = useToken();
 
-  const checkout = useCallback(async (bookingId: string | number) => {
+  const checkout = useCallback(async (bookingId: string | number, checkoutData: CheckoutBookingBody) => {
     setLoading(true);
     setError(null);
     setData(null);
     try {
-      const res = await checkoutBooking(bookingId);
+      const res = await checkoutBooking(bookingId, checkoutData);
       setData(res);
       // Refresh the current user's cached profile after checkout succeeds.
       try {

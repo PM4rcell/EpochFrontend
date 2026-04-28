@@ -14,7 +14,7 @@ export interface PaymentFormData {
 
 interface UseVerifyPaymentFormOptions {
   showEmailField?: boolean;
-  onPay?: () => void;
+  onPay?: (formData: PaymentFormData) => void;
 }
 
 const formatCardNumber = (value: string) => {
@@ -179,7 +179,7 @@ export function useVerifyPaymentForm({ showEmailField = false, onPay }: UseVerif
       return;
     }
 
-    onPay?.();
+    onPay?.(formData);
   };
 
   return {

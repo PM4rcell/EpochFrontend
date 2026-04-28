@@ -3,12 +3,12 @@ import { CreditCard, Lock } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label";
-import { useVerifyPaymentForm } from "../../hooks/useVerifyPaymentForm";
+import { useVerifyPaymentForm, type PaymentFormData } from "../../hooks/useVerifyPaymentForm";
 
 interface PaymentFormProps {
   theme?: "90s" | "2000s" | "modern" | "default";
   showEmailField?: boolean;
-  onPay?: () => void;
+  onPay?: (formData: PaymentFormData) => void;
   isProcessing?: boolean;
 }
 
