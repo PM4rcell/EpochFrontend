@@ -128,7 +128,7 @@ export function WatchlistItem({
                 <span className={`text-sm ${colors.accent}`}>
                   {rating > 0 ? rating.toFixed(1) : "N/A"}
                 </span>
-                <span className="text-slate-500 text-sm">/ 10</span>
+                <span className="text-slate-500 text-sm">/ 5</span>
               </div>
 
               {/* Length */}
